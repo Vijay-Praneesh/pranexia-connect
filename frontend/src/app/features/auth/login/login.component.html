@@ -1,0 +1,50 @@
+<div class="login-card card border-0 shadow-sm">
+  <div class="card-body p-4 p-sm-5">
+    <div class="mb-4">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <h1 class="h3 mt-3 mb-2">Sign in to Pranexia Connect</h1>
+      <p class="text-body-secondary mb-0">Access your customer engagement workspace.</p>
+    </div>
+
+    @if (errorMessage) {
+      <app-error-state title="Sign in failed" [message]="errorMessage" />
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="mb-3">
+        <label class="form-label" for="email">Email address</label>
+        <input id="email" class="form-control" [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid"
+          type="email" formControlName="email" autocomplete="username" inputmode="email" autofocus />
+        @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+          <div class="invalid-feedback">Email address is required.</div>
+        } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
+          <div class="invalid-feedback">Enter a valid email address.</div>
+        }
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-group has-validation">
+          <input id="password" class="form-control" [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid"
+            [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password" />
+          <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword">
+            <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword" aria-hidden="true"></i>
+          </button>
+          @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+            <div class="invalid-feedback">Password is required.</div>
+          }
+        </div>
+      </div>
+
+      <button class="btn btn-primary w-100" type="submit" [disabled]="submitting">
+        @if (submitting) {
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          Signing in…
+        } @else {
+          Sign in
+        }
+      </button>
+    </form>
+  </div>
+</div>

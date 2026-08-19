@@ -5,6 +5,14 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-auth-layout',
   standalone: true,
   imports: [RouterOutlet],
-  template: `<main class="container py-4"><router-outlet /></main>`,
+  template: `<main class="auth-shell container py-4 py-md-5"><router-outlet /></main>`,
+  styles: [`
+    .auth-shell {
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+  `],
 })
 export class AuthLayoutComponent {}
