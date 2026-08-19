@@ -1,0 +1,19 @@
+.metric-panel {
+  display: flex;
+  min-height: 6rem;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1rem;
+  border: 1px solid var(--pc-border);
+  border-radius: var(--pc-radius);
+  background: var(--pc-surface-subtle);
+}
+
+.metric-panel span { color: var(--pc-text-muted); font-size: .875rem; }
+.metric-panel strong { font-size: 1.5rem; }
+.progress { height: .55rem; }
+.status-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem 1.5rem; }
+.spin { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 575.98px) { .status-grid { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }

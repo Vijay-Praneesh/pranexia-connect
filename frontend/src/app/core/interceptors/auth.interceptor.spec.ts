@@ -17,6 +17,8 @@ describe('authInterceptor', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
+    auth.handleUnauthorized.calls.reset();
+    feedback.show.calls.reset();
     auth.getToken.and.returnValue('jwt-token');
     TestBed.configureTestingModule({
       providers: [

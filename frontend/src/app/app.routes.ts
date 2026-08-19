@@ -19,7 +19,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard-placeholder.component').then((c) => c.DashboardPlaceholderComponent),
+        loadComponent: () => import('./features/dashboard/dashboard.component').then((c) => c.DashboardComponent),
       },
       {
         path: 'customers',

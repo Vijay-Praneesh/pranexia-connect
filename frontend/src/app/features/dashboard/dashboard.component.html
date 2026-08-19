@@ -1,0 +1,83 @@
+<section aria-labelledby="dashboard-title">
+  <div class="d-flex flex-column flex-sm-row align-items-sm-start justify-content-between gap-3 mb-4">
+    <div>
+      <h1 id="dashboard-title" class="h3 mb-1">Dashboard</h1>
+      @if (auth.currentUser$ | async; as user) {
+        <p class="text-body-secondary mb-0">Welcome, {{ user.firstName }} · {{ user.company.companyName }}</p>
+      }
+    </div>
+    <button class="btn btn-outline-primary btn-sm align-self-start" type="button" (click)="refresh()" [disabled]="loading || refreshing">
+      <i class="bi bi-arrow-clockwise me-1" [class.spin]="refreshing" aria-hidden="true"></i>
+      {{ refreshing ? 'Refreshing…' : 'Refresh' }}
+    </button>
+  </div>
+
+  @if (loading && !summary) {
+    <app-loading-state message="Loading dashboard…" />
+  } @else if (errorMessage && !summary) {
+    <app-error-state title="Dashboard unavailable" [message]="errorMessage" [retryable]="true" (retry)="refresh()" />
+  } @else if (summary && isEmpty) {
+    <app-empty-state title="No campaign activity yet" message="Dashboard statistics will appear after campaigns and recipients are created." />
+  } @else if (summary) {
+    @if (errorMessage) {
+      <div class="alert alert-warning d-flex align-items-center justify-content-between gap-3" role="alert">
+        <span>{{ errorMessage }} The last dashboard data is still displayed.</span>
+        <button class="btn btn-sm btn-outline-dark" type="button" (click)="refresh()">Retry</button>
+      </div>
+    }
+
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-sm-6 col-xl-3"><app-kpi-card label="Total campaigns" [value]="summary.campaigns.total" icon="bi-megaphone" /></div>
+      <div class="col-12 col-sm-6 col-xl-3"><app-kpi-card label="Total recipients" [value]="summary.messages.totalRecipients" icon="bi-people" tone="info" /></div>
+      <div class="col-12 col-sm-6 col-xl-3"><app-kpi-card label="Messages sent" [value]="summary.messages.sent" icon="bi-send-check" tone="primary" /></div>
+      <div class="col-12 col-sm-6 col-xl-3"><app-kpi-card label="Messages failed" [value]="summary.messages.failed" icon="bi-exclamation-triangle" tone="danger" /></div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12 col-xl-7">
+        <article class="card border-0 shadow-sm h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 mb-4">Message performance</h2>
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-md-4"><div class="metric-panel"><span>Delivery rate</span><strong>{{ summary.performance.deliveryRate / 100 | percent:'1.0-0' }}</strong></div></div>
+              <div class="col-12 col-md-4"><div class="metric-panel"><span>Read rate</span><strong>{{ summary.performance.readRate / 100 | percent:'1.0-0' }}</strong></div></div>
+              <div class="col-12 col-md-4"><div class="metric-panel"><span>Failure rate</span><strong>{{ summary.performance.failureRate / 100 | percent:'1.0-0' }}</strong></div></div>
+            </div>
+
+            @for (metric of [
+              { label: 'Sent', value: summary.messages.sent, rate: summary.messages.totalRecipients ? summary.messages.sent / summary.messages.totalRecipients : 0, tone: 'primary' },
+              { label: 'Delivered', value: summary.messages.delivered, rate: summary.performance.deliveryRate / 100, tone: 'success' },
+              { label: 'Read', value: summary.messages.read, rate: summary.performance.readRate / 100, tone: 'info' },
+              { label: 'Failed', value: summary.messages.failed, rate: summary.performance.failureRate / 100, tone: 'danger' }
+            ]; track metric.label) {
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1"><span>{{ metric.label }}</span><span>{{ metric.value }}</span></div>
+                <div class="progress" role="progressbar" [attr.aria-label]="metric.label" [attr.aria-valuenow]="metric.rate * 100" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar bg-{{ metric.tone }}" [style.width.%]="metric.rate * 100"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+      </div>
+
+      <div class="col-12 col-xl-5">
+        <article class="card border-0 shadow-sm h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 mb-3">Campaign status</h2>
+            <app-distribution-chart [labels]="campaignLabels" [values]="campaignValues" [colors]="campaignColors" ariaLabel="Campaign status distribution" />
+            <div class="status-grid mt-3">
+              @for (item of [
+                { status: 'DRAFT', count: summary.campaigns.draft }, { status: 'SCHEDULED', count: summary.campaigns.scheduled },
+                { status: 'RUNNING', count: summary.campaigns.running }, { status: 'COMPLETED', count: summary.campaigns.completed },
+                { status: 'FAILED', count: summary.campaigns.failed }, { status: 'CANCELLED', count: summary.campaigns.cancelled }
+              ]; track item.status) {
+                <div class="d-flex align-items-center justify-content-between gap-2"><app-status-badge [status]="item.status" /><strong>{{ item.count }}</strong></div>
+              }
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  }
+</section>
