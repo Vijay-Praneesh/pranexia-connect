@@ -1,0 +1,7 @@
+.sort-button { padding: 0; border: 0; background: none; color: inherit; font-weight: inherit; }
+.selection { width: 2.5rem; }
+.bulk-bar { padding: .75rem 1rem; border: 1px solid var(--pc-border); border-radius: var(--pc-radius); background: var(--pc-surface); }
+.modal-layer { position: fixed; z-index: 1050; inset: 0; display: grid; place-items: center; overflow-y: auto; padding: 1rem; background: rgb(15 23 42 / 55%); }
+.modal-card { width: min(100%, 44rem); max-height: calc(100vh - 2rem); overflow-y: auto; }
+th { white-space: nowrap; }
+@media (max-width: 575.98px) { .modal-layer { padding: 0; place-items: end stretch; } .modal-card { width: 100%; max-height: 94vh; border-radius: .75rem .75rem 0 0; } }

@@ -1,0 +1,110 @@
+<section aria-labelledby="customers-title">
+  <div class="d-flex flex-column flex-lg-row align-items-lg-start justify-content-between gap-3 mb-4">
+    <div><h1 id="customers-title" class="h3 mb-1">Customers</h1><p class="text-body-secondary mb-0">{{ totalRecords }} customer{{ totalRecords === 1 ? '' : 's' }}</p></div>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="importOpen = true"><i class="bi bi-upload me-1"></i>Import</button>
+      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="exportCustomers()" [disabled]="actionLoading"><i class="bi bi-download me-1"></i>Export</button>
+      <button class="btn btn-primary btn-sm" type="button" (click)="openCreate()"><i class="bi bi-person-plus me-1"></i>Add customer</button>
+    </div>
+  </div>
+
+  @if (successMessage) { <div class="alert alert-success" role="status">{{ successMessage }}</div> }
+  @if (errorMessage && customers.length) { <div class="alert alert-warning" role="alert">{{ errorMessage }}</div> }
+
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <form [formGroup]="searchForm" role="search">
+        <label class="visually-hidden" for="customer-search">Search customers</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+          <input id="customer-search" class="form-control" type="search" formControlName="q" placeholder="Search name, mobile, email, or country" autocomplete="off" />
+        </div>
+      </form>
+    </div>
+  </div>
+
+  @if (selected.size) {
+    <div class="bulk-bar d-flex flex-wrap align-items-center gap-2 mb-3" role="region" aria-label="Bulk actions">
+      <strong class="me-auto">{{ selected.size }} selected</strong>
+      <button class="btn btn-outline-success btn-sm" type="button" (click)="bulkStatus('ACTIVE')">Mark active</button>
+      <button class="btn btn-outline-warning btn-sm" type="button" (click)="bulkStatus('BLOCKED')">Mark blocked</button>
+      <button class="btn btn-outline-danger btn-sm" type="button" (click)="bulkDelete()">Delete</button>
+    </div>
+  }
+
+  @if (loading && !customers.length) {
+    <app-loading-state message="Loading customers…" />
+  } @else if (errorMessage && !customers.length) {
+    <app-error-state title="Customers unavailable" [message]="errorMessage" [retryable]="true" (retry)="load()" />
+  } @else if (!customers.length) {
+    <app-empty-state [title]="q ? 'No customers match your search' : 'No customers found'" [message]="q ? 'Try a different search term.' : 'Add your first customer or import an Excel file.'">
+      @if (!q) { <button class="btn btn-primary btn-sm" type="button" (click)="openCreate()">Add customer</button> }
+    </app-empty-state>
+  } @else {
+    <div class="card border-0 shadow-sm overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead><tr>
+            <th class="selection"><input class="form-check-input" type="checkbox" aria-label="Select all customers" [checked]="selected.size === customers.length" (change)="toggleAll($any($event.target).checked)" /></th>
+            <th><button class="sort-button" (click)="sort('firstName')">Name</button></th>
+            <th><button class="sort-button" (click)="sort('mobile')">Mobile</button></th>
+            <th><button class="sort-button" (click)="sort('email')">Email</button></th>
+            <th>Country</th><th><button class="sort-button" (click)="sort('status')">Status</button></th>
+            <th><button class="sort-button" (click)="sort('createdAt')">Created</button></th><th class="text-end">Actions</th>
+          </tr></thead>
+          <tbody>
+            @for (customer of customers; track customer.id) {
+              <tr>
+                <td><input class="form-check-input" type="checkbox" [checked]="selected.has(customer.id)" [attr.aria-label]="'Select ' + customer.firstName" (change)="toggle(customer.id, $any($event.target).checked)" /></td>
+                <td><button class="btn btn-link p-0 text-start text-decoration-none" type="button" (click)="showDetail(customer.id)"><strong>{{ customer.firstName }} {{ customer.lastName }}</strong></button></td>
+                <td>{{ customer.mobile }}</td><td>{{ customer.email || '—' }}</td><td>{{ customer.country }}</td>
+                <td><app-status-badge [status]="customer.status" /></td><td>{{ customer.createdAt | date:'mediumDate' }}</td>
+                <td class="text-end text-nowrap"><button class="btn btn-sm btn-link" type="button" (click)="openEdit(customer)" [attr.aria-label]="'Edit ' + customer.firstName"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-link text-danger" type="button" (click)="remove(customer)" [attr.aria-label]="'Delete ' + customer.firstName"><i class="bi bi-trash"></i></button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (!q) { <div class="card-footer bg-white d-flex justify-content-between align-items-center gap-3"><small class="text-body-secondary">Page {{ page }} of {{ totalPages || 1 }}</small><app-pagination [page]="page" [totalPages]="totalPages" (pageChange)="changePage($event)" /></div> }
+    </div>
+  }
+</section>
+
+@if (editorOpen) {
+  <div class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="customer-editor-title">
+    <div class="modal-card card shadow-lg">
+      <form [formGroup]="customerForm" (ngSubmit)="save()">
+        <div class="card-header d-flex justify-content-between align-items-center"><h2 id="customer-editor-title" class="h5 mb-0">{{ editing ? 'Edit customer' : 'Add customer' }}</h2><button class="btn-close" type="button" aria-label="Close" (click)="editorOpen = false"></button></div>
+        <div class="card-body"><div class="row g-3">
+          <div class="col-sm-6"><label class="form-label" for="firstName">First name</label><input id="firstName" class="form-control" formControlName="firstName" [class.is-invalid]="customerForm.controls.firstName.touched && customerForm.controls.firstName.invalid" /><div class="invalid-feedback">First name is required.</div></div>
+          <div class="col-sm-6"><label class="form-label" for="lastName">Last name</label><input id="lastName" class="form-control" formControlName="lastName" /></div>
+          <div class="col-sm-6"><label class="form-label" for="mobile">Mobile</label><input id="mobile" class="form-control" formControlName="mobile" inputmode="tel" [class.is-invalid]="customerForm.controls.mobile.touched && customerForm.controls.mobile.invalid" /><div class="invalid-feedback">Mobile is required.</div></div>
+          <div class="col-sm-6"><label class="form-label" for="email">Email</label><input id="email" class="form-control" type="email" formControlName="email" [class.is-invalid]="customerForm.controls.email.touched && customerForm.controls.email.invalid" /><div class="invalid-feedback">Enter a valid email.</div></div>
+          <div class="col-sm-6"><label class="form-label" for="country">Country</label><input id="country" class="form-control" formControlName="country" /></div>
+          <div class="col-sm-6"><label class="form-label" for="status">Status</label><select id="status" class="form-select" formControlName="status"><option value="ACTIVE">Active</option><option value="BLOCKED">Blocked</option></select></div>
+          <div class="col-12"><label class="form-label" for="tags">Tags</label><input id="tags" class="form-control" formControlName="tags" placeholder="Comma-separated tags" /></div>
+          <div class="col-12"><label class="form-label" for="notes">Notes</label><textarea id="notes" class="form-control" rows="3" formControlName="notes"></textarea></div>
+        </div></div>
+        <div class="card-footer d-flex justify-content-end gap-2"><button class="btn btn-outline-secondary" type="button" (click)="editorOpen = false">Cancel</button><button class="btn btn-primary" type="submit" [disabled]="actionLoading">{{ actionLoading ? 'Saving…' : 'Save customer' }}</button></div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (importOpen) {
+  <div class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="import-title"><div class="modal-card card shadow-lg">
+    <div class="card-header d-flex justify-content-between"><h2 id="import-title" class="h5 mb-0">Import customers</h2><button class="btn-close" type="button" aria-label="Close" (click)="importOpen = false"></button></div>
+    <div class="card-body"><p class="text-body-secondary">Upload an Excel .xlsx or .xls file, up to 5 MB.</p><input class="form-control mb-3" type="file" accept=".xlsx,.xls" (change)="selectImportFile($event)" />
+      <button class="btn btn-link px-0" type="button" (click)="downloadTemplate()">Download import template</button>
+      @if (importResult) { <div class="alert alert-info mt-3"><strong>{{ importResult.imported }}</strong> imported, <strong>{{ importResult.skipped }}</strong> skipped.@if (importResult.errors.length) { <ul class="mb-0 mt-2">@for (error of importResult.errors; track error.row) { <li>Row {{ error.row }}: {{ error.reason }}</li> }</ul> }</div> }
+    </div>
+    <div class="card-footer d-flex justify-content-end gap-2"><button class="btn btn-outline-secondary" type="button" (click)="importOpen = false">Close</button><button class="btn btn-primary" type="button" [disabled]="!importFile || actionLoading" (click)="importCustomers()">{{ actionLoading ? 'Importing…' : 'Import' }}</button></div>
+  </div></div>
+}
+
+@if (detail) {
+  <div class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="detail-title"><div class="modal-card card shadow-lg">
+    <div class="card-header d-flex justify-content-between"><h2 id="detail-title" class="h5 mb-0">Customer details</h2><button class="btn-close" type="button" aria-label="Close" (click)="detail = null"></button></div>
+    <div class="card-body"><h3 class="h5">{{ detail.firstName }} {{ detail.lastName }}</h3><dl class="row mb-0"><dt class="col-4">Mobile</dt><dd class="col-8">{{ detail.mobile }}</dd><dt class="col-4">Email</dt><dd class="col-8">{{ detail.email || '—' }}</dd><dt class="col-4">Country</dt><dd class="col-8">{{ detail.country }}</dd><dt class="col-4">Status</dt><dd class="col-8"><app-status-badge [status]="detail.status" /></dd><dt class="col-4">Created</dt><dd class="col-8">{{ detail.createdAt | date:'medium' }}</dd><dt class="col-4">Updated</dt><dd class="col-8">{{ detail.updatedAt | date:'medium' }}</dd><dt class="col-4">Notes</dt><dd class="col-8">{{ detail.notes || '—' }}</dd></dl></div>
+  </div></div>
+}

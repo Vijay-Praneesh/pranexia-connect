@@ -23,7 +23,7 @@ export const routes: Routes = [
       },
       {
         path: 'customers',
-        loadComponent: () => import('./features/customers/customers-placeholder.component').then((c) => c.CustomersPlaceholderComponent),
+        loadComponent: () => import('./features/customers/customers.component').then((c) => c.CustomersComponent),
       },
       {
         path: 'templates',
