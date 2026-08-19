@@ -1,1 +1,16 @@
-/* You can add global styles to this file, and also import other style files */
+@use './styles/variables' as variables;
+@use 'bootstrap/scss/bootstrap' with (
+  $body-bg: variables.$body-bg,
+  $body-color: variables.$body-color,
+  $primary: variables.$primary,
+  $border-radius: variables.$border-radius,
+  $border-radius-sm: variables.$border-radius-sm,
+  $font-family-sans-serif: variables.$font-family-sans-serif
+);
+@use './styles/tokens';
+@use './styles/utilities';
+
+html,
+body {
+  min-height: 100%;
+}
