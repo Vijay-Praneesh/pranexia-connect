@@ -45,6 +45,10 @@ export const routes: Routes = [
         path: 'settings',
         loadComponent: () => import('./features/settings/account/account-settings.component').then((c) => c.AccountSettingsComponent),
       },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/notifications/notifications.component').then((c) => c.NotificationsComponent),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: 'login' },

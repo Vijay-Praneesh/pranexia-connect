@@ -1,0 +1,28 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of, Subject, throwError } from 'rxjs';
+import { AuthenticatedUser } from '../../core/models/auth.model';
+import { AuthService } from '../../core/services/auth.service';
+import { CampaignRecipient } from '../campaigns/campaign.model';
+import { Customer } from '../customers/customer.model';
+import { NotificationsComponent } from './notifications.component';
+import { NotificationsService } from './notifications.service';
+
+describe('NotificationsComponent', () => {
+  let fixture: ComponentFixture<NotificationsComponent>; let component: NotificationsComponent; let api: jasmine.SpyObj<NotificationsService>;
+  const customer = { id: 'u1', firstName: 'Asha', lastName: 'Rao', mobile: '123', email: null, country: 'India', tags: null, notes: null, status: 'ACTIVE', createdAt: '', updatedAt: '' } as Customer;
+  const admin = { role: 'COMPANY_ADMIN' } as AuthenticatedUser;
+  const activity = { id: 'r1', campaignId: 'c1', customerId: 'u1', status: 'READ', whatsappMessageId: null, failureReason: null, sentAt: '2026-01-01T00:10:00Z', deliveredAt: '2026-01-01T00:20:00Z', readAt: '2026-01-01T00:30:00Z', createdAt: '', updatedAt: '', campaign: { id: 'c1', templateId: 't1', name: 'Launch', description: null, sendType: 'NOW', scheduledAt: null, status: 'COMPLETED', totalRecipients: 1, sentCount: 1, deliveredCount: 1, readCount: 1, failedCount: 0, progress: 100, startedAt: null, completedAt: null, createdAt: '', updatedAt: '', template: { id: 't1', name: 'Welcome', metaTemplateName: 'welcome', metaTemplateId: null, category: 'UTILITY', language: 'en_US', headerType: 'NONE', headerText: null, body: 'Hi', footer: null, buttons: null, status: 'APPROVED', rejectionReason: null, createdAt: '', updatedAt: '' } } } as CampaignRecipient;
+
+  async function create(user: AuthenticatedUser | null = admin): Promise<void> { api = jasmine.createSpyObj('NotificationsService', ['getCustomers', 'getCustomerActivity']); api.getCustomers.and.returnValue(of({ customers: [customer], pagination: { page: 1, limit: 100, totalRecords: 1, totalPages: 1 } })); api.getCustomerActivity.and.returnValue(of({ customer, history: [activity] })); const auth = jasmine.createSpyObj('AuthService', ['getCurrentUser']); auth.getCurrentUser.and.returnValue(user); await TestBed.configureTestingModule({ imports: [NotificationsComponent], providers: [{ provide: NotificationsService, useValue: api }, { provide: AuthService, useValue: auth }] }).compileComponents(); fixture = TestBed.createComponent(NotificationsComponent); component = fixture.componentInstance; fixture.detectChanges(); }
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('renders the page and truthful unavailable notification state', async () => { await create(); expect(fixture.nativeElement.textContent).toContain('Notifications & activity'); expect(fixture.nativeElement.textContent).toContain('Notifications unavailable'); expect(component.capabilities.unreadCount).toBeFalse(); });
+  it('loads customers and shows selection empty state', async () => { await create(); expect(api.getCustomers).toHaveBeenCalled(); expect(fixture.nativeElement.textContent).toContain('Asha Rao'); expect(fixture.nativeElement.textContent).toContain('Select a customer'); });
+  it('renders real customer campaign activity and status', async () => { await create(); component.selectionForm.controls.customerId.setValue('u1'); fixture.detectChanges(); expect(api.getCustomerActivity).toHaveBeenCalledWith('u1'); expect(fixture.nativeElement.textContent).toContain('Launch'); expect(fixture.nativeElement.textContent).toContain('Welcome'); expect(fixture.nativeElement.textContent).toContain('READ'); });
+  it('shows activity loading state', async () => { await create(); const pending = new Subject<{ customer: Customer; history: CampaignRecipient[] }>(); api.getCustomerActivity.and.returnValue(pending); component.selectionForm.controls.customerId.setValue('u1'); fixture.detectChanges(); expect(fixture.nativeElement.textContent).toContain('Loading customer activity'); });
+  it('shows no-activity empty state', async () => { await create(); api.getCustomerActivity.and.returnValue(of({ customer, history: [] })); component.selectionForm.controls.customerId.setValue('u1'); fixture.detectChanges(); expect(fixture.nativeElement.textContent).toContain('No campaign activity'); });
+  it('shows retryable customer loading errors', async () => { await create(); api.getCustomers.and.returnValue(throwError(() => ({ status: 0 }))); component.customers = []; component.loadCustomers(); fixture.detectChanges(); expect(fixture.nativeElement.textContent).toContain('Activity unavailable'); });
+  it('refreshes the currently selected customer activity', async () => { await create(); component.selectionForm.controls.customerId.setValue('u1'); api.getCustomerActivity.calls.reset(); component.refresh(); expect(api.getCustomerActivity).toHaveBeenCalledWith('u1'); });
+  it('does not call admin-only activity APIs for other roles', async () => { await create({ ...admin, role: 'MANAGER' }); expect(api.getCustomers).not.toHaveBeenCalled(); expect(fixture.nativeElement.textContent).toContain('Activity unavailable for this role'); });
+  it('does not render read controls, filters, pagination, or a fabricated count', async () => { await create(); expect(fixture.nativeElement.querySelector('[aria-label="Mark all as read"]')).toBeNull(); expect(fixture.nativeElement.querySelector('.pagination')).toBeNull(); expect(fixture.nativeElement.textContent).not.toContain('unread notifications'); });
+});

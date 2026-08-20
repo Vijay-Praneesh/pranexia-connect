@@ -1,0 +1,6 @@
+.notifications-page { max-width: 72rem; margin-inline: auto; }
+.activity-list { display: grid; }
+.activity-list li { display: grid; grid-template-columns: 2.5rem 1fr; gap: 1rem; padding-block: 1rem; border-bottom: 1px solid var(--bs-border-color); }
+.activity-list li:last-child { border-bottom: 0; }
+.activity-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; color: var(--bs-primary); background: var(--bs-primary-bg-subtle); }
+.activity-content { min-width: 0; }
