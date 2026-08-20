@@ -31,7 +31,7 @@ export const routes: Routes = [
       },
       {
         path: 'campaigns',
-        loadComponent: () => import('./features/campaigns/campaigns-placeholder.component').then((c) => c.CampaignsPlaceholderComponent),
+        loadComponent: () => import('./features/campaigns/campaigns.component').then((c) => c.CampaignsComponent),
       },
     ],
   },
