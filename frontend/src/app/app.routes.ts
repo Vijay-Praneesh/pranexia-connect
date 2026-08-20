@@ -27,7 +27,7 @@ export const routes: Routes = [
       },
       {
         path: 'templates',
-        loadComponent: () => import('./features/templates/templates-placeholder.component').then((c) => c.TemplatesPlaceholderComponent),
+        loadComponent: () => import('./features/templates/templates.component').then((c) => c.TemplatesComponent),
       },
       {
         path: 'campaigns',
