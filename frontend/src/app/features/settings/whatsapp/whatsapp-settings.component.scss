@@ -1,0 +1,10 @@
+.settings-page { max-width: 68rem; margin-inline: auto; }
+.capability-list > div { display: grid; grid-template-columns: minmax(8rem, 1fr) minmax(10rem, 1.4fr); gap: 1rem; padding-block: .8rem; border-bottom: 1px solid var(--bs-border-color); }
+.capability-list > div:last-child { border-bottom: 0; }
+.capability-list dt { color: var(--bs-secondary-color); font-weight: 500; }
+.capability-list dd { margin: 0; font-weight: 600; }
+.capability-checks { display: grid; gap: 1.1rem; }
+.capability-checks li { display: flex; align-items: flex-start; gap: .75rem; }
+.capability-checks span { display: grid; }
+.capability-checks small { color: var(--bs-secondary-color); }
+@media (max-width: 575.98px) { .capability-list > div { grid-template-columns: 1fr; gap: .25rem; } }
