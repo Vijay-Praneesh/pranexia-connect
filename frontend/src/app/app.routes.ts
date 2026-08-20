@@ -37,6 +37,10 @@ export const routes: Routes = [
         path: 'settings/whatsapp',
         loadComponent: () => import('./features/settings/whatsapp/whatsapp-settings.component').then((c) => c.WhatsAppSettingsComponent),
       },
+      {
+        path: 'reports',
+        loadComponent: () => import('./features/reports/reports.component').then((c) => c.ReportsComponent),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: 'login' },

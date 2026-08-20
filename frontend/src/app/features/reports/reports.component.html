@@ -1,0 +1,39 @@
+<section class="reports-page" aria-labelledby="reports-title">
+  <header class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4"><div><h1 id="reports-title" class="h3 mb-1">Reports</h1><p class="text-body-secondary mb-0">Current campaign delivery and recipient statistics.</p></div><button class="btn btn-outline-secondary btn-sm align-self-start" type="button" (click)="refresh()" [disabled]="campaignsLoading || reportLoading"><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Refresh</button></header>
+
+  <div class="card border-0 shadow-sm mb-4"><div class="card-body"><form [formGroup]="selectionForm" class="row g-3 align-items-end">
+    <div class="col-12 col-md-8"><label class="form-label" for="report-campaign">Campaign</label><select id="report-campaign" class="form-select" formControlName="campaignId"><option value="">Select a campaign</option>@for (campaign of campaigns; track campaign.id) { <option [value]="campaign.id">{{ campaign.name }} · {{ campaign.status }}</option> }</select></div>
+    <div class="col-12 col-md-4"><label class="form-label" for="recipient-status">Recipient status</label><select id="recipient-status" class="form-select" formControlName="status"><option value="">All statuses</option>@for (status of statuses; track status) { <option [value]="status">{{ status }}</option> }</select></div>
+  </form></div></div>
+
+  @if (campaignsLoading) { <app-loading-state message="Loading available campaigns…" /> }
+  @else if (errorMessage && !report) { <app-error-state title="Reports unavailable" [message]="errorMessage" [retryable]="true" (retry)="refresh()" /> }
+  @else if (!campaigns.length) { <app-empty-state title="No campaigns available" message="Reports become available after a campaign is created." /> }
+  @else if (!campaignId) { <app-empty-state title="Select a campaign" message="Choose a campaign to load its current delivery statistics and recipient report." /> }
+  @else if (reportLoading && !report) { <app-loading-state message="Loading campaign report…" /> }
+  @else if (report) {
+    @if (errorMessage) { <div class="alert alert-warning" role="alert">{{ errorMessage }} The last report data remains displayed.</div> }
+    <article class="card border-0 shadow-sm mb-4" aria-labelledby="campaign-report-title"><div class="card-body p-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><h2 id="campaign-report-title" class="h5 mb-1">{{ report.campaignName }}</h2><p class="text-body-secondary mb-0">{{ selectedCampaign?.template?.name || 'Template information unavailable' }}</p></div><app-status-badge [status]="report.status" /></div>
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg"><div class="metric"><span>Total recipients</span><strong>{{ report.totalRecipients }}</strong></div></div>
+        <div class="col-6 col-lg"><div class="metric"><span>Sent</span><strong>{{ report.sentCount }}</strong></div></div>
+        <div class="col-6 col-lg"><div class="metric"><span>Delivered</span><strong>{{ report.deliveredCount }}</strong></div></div>
+        <div class="col-6 col-lg"><div class="metric"><span>Read</span><strong>{{ report.readCount }}</strong></div></div>
+        <div class="col-6 col-lg"><div class="metric"><span>Failed</span><strong>{{ report.failedCount }}</strong></div></div>
+      </div>
+      <h3 class="h6">Performance rates</h3><div class="row g-3" aria-label="Campaign performance rates">
+        <div class="col-12 col-md-4"><div class="rate-row"><div><span>Delivery rate</span><strong>{{ report.deliveryRate }}%</strong></div><div class="progress" role="progressbar" aria-label="Delivery rate" [attr.aria-valuenow]="report.deliveryRate" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-success" [style.width.%]="report.deliveryRate"></div></div></div></div>
+        <div class="col-12 col-md-4"><div class="rate-row"><div><span>Read rate</span><strong>{{ report.readRate }}%</strong></div><div class="progress" role="progressbar" aria-label="Read rate" [attr.aria-valuenow]="report.readRate" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-info" [style.width.%]="report.readRate"></div></div></div></div>
+        <div class="col-12 col-md-4"><div class="rate-row"><div><span>Failure rate</span><strong>{{ report.failureRate }}%</strong></div><div class="progress" role="progressbar" aria-label="Failure rate" [attr.aria-valuenow]="report.failureRate" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-danger" [style.width.%]="report.failureRate"></div></div></div></div>
+      </div>
+      <dl class="row small mt-4 mb-0"><dt class="col-5 col-md-3">Processing progress</dt><dd class="col-7 col-md-3">{{ report.progress }}%</dd><dt class="col-5 col-md-3">Started</dt><dd class="col-7 col-md-3">{{ report.startedAt ? (report.startedAt | date:'medium') : '—' }}</dd><dt class="col-5 col-md-3">Completed</dt><dd class="col-7 col-md-3">{{ report.completedAt ? (report.completedAt | date:'medium') : '—' }}</dd></dl>
+    </div></article>
+
+    <article class="card border-0 shadow-sm" aria-labelledby="recipient-report-title"><div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2"><div><h2 id="recipient-report-title" class="h5 mb-0">Recipient report</h2><small class="text-body-secondary">{{ recipientTotalRecords }} recipient{{ recipientTotalRecords === 1 ? '' : 's' }}</small></div>@if (recipientLoading) { <span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Updating recipients</span></span> }</div>
+      @if (!recipients.length && !recipientLoading) { <app-empty-state [title]="recipientStatus ? 'No recipients match this status' : 'No recipients'" [message]="recipientStatus ? 'Choose another recipient status.' : 'No recipient records are assigned to this campaign.'" /> }
+      @else { <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Customer</th><th>Mobile</th><th>Status</th><th>Sent</th><th>Delivered</th><th>Read</th><th>Failure information</th></tr></thead><tbody>@for (recipient of recipients; track recipient.id) { <tr><td>{{ recipient.customer?.firstName }} {{ recipient.customer?.lastName }}</td><td>{{ recipient.customer?.mobile || '—' }}</td><td><app-status-badge [status]="recipient.status" /></td><td>{{ recipient.sentAt ? (recipient.sentAt | date:'short') : '—' }}</td><td>{{ recipient.deliveredAt ? (recipient.deliveredAt | date:'short') : '—' }}</td><td>{{ recipient.readAt ? (recipient.readAt | date:'short') : '—' }}</td><td class="failure">{{ recipient.failureReason || '—' }}</td></tr> }</tbody></table></div>
+        <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-3"><small class="text-body-secondary">Page {{ recipientPage }} of {{ recipientTotalPages || 1 }}</small><app-pagination [page]="recipientPage" [totalPages]="recipientTotalPages" (pageChange)="changePage($event)" /></div> }
+    </article>
+  }
+</section>

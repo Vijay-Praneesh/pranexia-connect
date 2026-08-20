@@ -15,7 +15,8 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
         @if (auth.currentUser$ | async; as user) {
           <div class="d-flex align-items-center gap-3">
             <span class="d-none d-sm-inline text-body-secondary">{{ user.firstName }} · {{ user.company.companyName }}</span>
-            <a class="btn btn-link btn-sm d-none d-sm-inline-flex" routerLink="/settings/whatsapp"><i class="bi bi-whatsapp me-1" aria-hidden="true"></i>WhatsApp settings</a>
+            <a class="btn btn-link btn-sm d-none d-md-inline-flex" routerLink="/reports"><i class="bi bi-bar-chart me-1" aria-hidden="true"></i>Reports</a>
+            <a class="btn btn-link btn-sm d-none d-lg-inline-flex" routerLink="/settings/whatsapp"><i class="bi bi-whatsapp me-1" aria-hidden="true"></i>WhatsApp settings</a>
             <button class="btn btn-outline-secondary btn-sm" type="button" (click)="auth.logout()">
               <i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Logout
             </button>
