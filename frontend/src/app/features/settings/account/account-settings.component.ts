@@ -28,4 +28,19 @@ export class AccountSettingsComponent {
   }
 
   selectTab(tab: typeof this.activeTab): void { this.activeTab = tab; }
+
+  handleTabKey(event: KeyboardEvent, tab: typeof this.activeTab): void {
+    const tabs: Array<typeof this.activeTab> = ['account', 'company', 'team', 'preferences'];
+    const current = tabs.indexOf(tab);
+    let next = current;
+    if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+    else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = tabs.length - 1;
+    else return;
+
+    event.preventDefault();
+    this.selectTab(tabs[next]);
+    document.getElementById(`${tabs[next]}-tab`)?.focus();
+  }
 }
