@@ -1,0 +1,30 @@
+<section class="settings-page" aria-labelledby="settings-title">
+  <header class="d-flex flex-column flex-sm-row justify-content-between gap-3 mb-4"><div><p class="text-body-secondary small mb-1">Settings</p><h1 id="settings-title" class="h3 mb-1">Company & account</h1><p class="text-body-secondary mb-0">Your current account and company information.</p></div>@if (user?.role === 'COMPANY_ADMIN') { <button class="btn btn-outline-secondary btn-sm align-self-start" type="button" (click)="refresh()" [disabled]="loading"><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Refresh</button> }</header>
+
+  @if (loading && !user) { <app-loading-state message="Loading account settings…" /> }
+  @else if (errorMessage && !user) { <app-error-state title="Settings unavailable" [message]="errorMessage" [retryable]="true" (retry)="refresh()" /> }
+  @else if (!user) { <app-error-state title="Account unavailable" message="No authenticated account information is available." /> }
+  @else {
+    @if (loading) { <div class="alert alert-info" role="status"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Refreshing account information…</div> }
+    @if (errorMessage) { <div class="alert alert-warning" role="alert">{{ errorMessage }} The last authenticated account information remains displayed.</div> }
+    @if (user.role !== 'COMPANY_ADMIN') { <div class="alert alert-info" role="status">Live account refresh is restricted by the backend to company administrators. Information from your authenticated session is shown below.</div> }
+
+    <nav class="settings-nav mb-4" aria-label="Settings sections" role="tablist"><button type="button" role="tab" [attr.aria-selected]="activeTab === 'account'" [class.active]="activeTab === 'account'" (click)="selectTab('account')">Account</button><button type="button" role="tab" [attr.aria-selected]="activeTab === 'company'" [class.active]="activeTab === 'company'" (click)="selectTab('company')">Company</button><button type="button" role="tab" [attr.aria-selected]="activeTab === 'team'" [class.active]="activeTab === 'team'" (click)="selectTab('team')">Team</button><button type="button" role="tab" [attr.aria-selected]="activeTab === 'preferences'" [class.active]="activeTab === 'preferences'" (click)="selectTab('preferences')">Preferences</button></nav>
+
+    @if (activeTab === 'account') {
+      <article class="card border-0 shadow-sm" role="tabpanel" aria-labelledby="account-title"><div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-4"><div><h2 id="account-title" class="h5 mb-1">Account</h2><p class="text-body-secondary mb-0">Read-only user profile</p></div><app-status-badge [status]="user.status" /></div>
+        <dl class="profile-list mb-0"><div><dt>Name</dt><dd>{{ user.firstName }} {{ user.lastName }}</dd></div><div><dt>Email</dt><dd>{{ user.email }}</dd></div><div><dt>Mobile</dt><dd>{{ user.mobile }}</dd></div><div><dt>Role</dt><dd>{{ user.role.replaceAll('_', ' ') }}</dd></div><div><dt>Created</dt><dd>{{ user.createdAt | date:'mediumDate' }}</dd></div><div><dt>Last updated</dt><dd>{{ user.updatedAt | date:'medium' }}</dd></div></dl>
+      </div></article>
+    } @else if (activeTab === 'company') {
+      <article class="card border-0 shadow-sm" role="tabpanel" aria-labelledby="company-title"><div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-4"><div><h2 id="company-title" class="h5 mb-1">Company</h2><p class="text-body-secondary mb-0">Read-only tenant profile</p></div><app-status-badge [status]="user.company.status" /></div>
+        <dl class="profile-list mb-0"><div><dt>Company name</dt><dd>{{ user.company.companyName }}</dd></div><div><dt>Email</dt><dd>{{ user.company.email }}</dd></div><div><dt>Mobile</dt><dd>{{ user.company.mobile }}</dd></div><div><dt>Plan</dt><dd>{{ user.company.plan }}</dd></div><div><dt>Created</dt><dd>{{ user.company.createdAt | date:'mediumDate' }}</dd></div><div><dt>Last updated</dt><dd>{{ user.company.updatedAt | date:'medium' }}</dd></div></dl>
+      </div></article>
+    } @else if (activeTab === 'team') {
+      <article class="card border-0 shadow-sm" role="tabpanel"><div class="card-body p-4"><i class="bi bi-people fs-3 text-secondary" aria-hidden="true"></i><h2 class="h5 mt-3">Team</h2><p class="text-body-secondary mb-0">Team management is not currently available because the backend provides no member listing or management endpoints.</p></div></article>
+    } @else {
+      <article class="card border-0 shadow-sm" role="tabpanel"><div class="card-body p-4"><i class="bi bi-sliders fs-3 text-secondary" aria-hidden="true"></i><h2 class="h5 mt-3">Preferences</h2><p class="text-body-secondary mb-0">Account preferences are not currently available from the backend.</p></div></article>
+    }
+  }
+</section>

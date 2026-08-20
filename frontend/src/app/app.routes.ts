@@ -41,6 +41,10 @@ export const routes: Routes = [
         path: 'reports',
         loadComponent: () => import('./features/reports/reports.component').then((c) => c.ReportsComponent),
       },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/settings/account/account-settings.component').then((c) => c.AccountSettingsComponent),
+      },
     ],
   },
   { path: '', pathMatch: 'full', redirectTo: 'login' },
