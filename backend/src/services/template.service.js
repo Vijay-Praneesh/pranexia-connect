@@ -1,4 +1,5 @@
 const templateRepository = require("../repositories/template.repository");
+const AppError = require("../utils/appError");
 
 class TemplateService {
   async createTemplate(companyId, templateData) {
@@ -8,7 +9,7 @@ class TemplateService {
     );
 
     if (existingTemplate) {
-      throw new Error("Template name already exists");
+      throw new AppError("Template name already exists", 409);
     }
 
     return await templateRepository.create({
@@ -52,7 +53,7 @@ class TemplateService {
     );
 
     if (!template) {
-      throw new Error("Template not found");
+      throw new AppError("Template not found", 404);
     }
 
     return template;
@@ -65,7 +66,7 @@ class TemplateService {
     );
 
     if (!template) {
-      throw new Error("Template not found");
+      throw new AppError("Template not found", 404);
     }
 
     if (
@@ -78,7 +79,7 @@ class TemplateService {
       );
 
       if (existingTemplate) {
-        throw new Error("Template name already exists");
+        throw new AppError("Template name already exists", 409);
       }
     }
 
@@ -101,7 +102,7 @@ class TemplateService {
     );
 
     if (!template) {
-      throw new Error("Template not found");
+      throw new AppError("Template not found", 404);
     }
 
     await templateRepository.delete(companyId, templateId);
@@ -113,7 +114,7 @@ class TemplateService {
 
   async searchTemplates(companyId, keyword) {
     if (!keyword || keyword.trim() === "") {
-      throw new Error("Search keyword is required");
+      throw new AppError("Search keyword is required", 400);
     }
 
     return await templateRepository.search(

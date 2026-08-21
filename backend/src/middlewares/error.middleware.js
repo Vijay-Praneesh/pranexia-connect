@@ -2,16 +2,18 @@ const ApiResponse = require("../helpers/apiResponse");
 const logger = require("../config/logger");
 
 const errorHandler = (err, req, res, next) => {
-  logger.error(err);
-
-  console.log("ERROR NAME:", err.name);
-  console.log("ERROR MESSAGE:", err.message);
-  console.log("ERROR:", err);
+  const statusCode = err.statusCode || 500;
+  // Do not pass driver errors or request data to logs: they can contain credentials or tokens.
+  logger.error(`Request failed with status ${statusCode}`);
+  const message =
+    statusCode >= 500 && process.env.NODE_ENV === "production"
+      ? "Internal Server Error"
+      : err.message || "Internal Server Error";
 
   return ApiResponse.error(
     res,
-    err.message || "Internal Server Error",
-    err.statusCode || 500,
+    message,
+    statusCode,
     err.errors || null
   );
 };

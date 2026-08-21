@@ -6,6 +6,7 @@ const startCampaignScheduler = require("./src/cron/campaign.cron");
 
 const startServer = async () => {
   try {
+    env.validateEnvironment();
     await db.sequelize.authenticate();
     await db.sequelize.sync();
     

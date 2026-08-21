@@ -1,4 +1,5 @@
 const webhookService = require("../services/webhook.service");
+const crypto = require("crypto");
 
 class WebhookController {
   // =====================================================
@@ -35,10 +36,13 @@ class WebhookController {
   // =====================================================
 async receiveWebhook(req, res) {
   try {
-    console.log("========== WEBHOOK EVENT ==========");
-    console.dir(req.body, { depth: null });
-    console.log("===================================");
-
+    const signature = req.get("x-hub-signature-256");
+    const appSecret = process.env.WHATSAPP_APP_SECRET;
+    if (!appSecret || !signature || !req.rawBody) return res.sendStatus(401);
+    const expected = `sha256=${crypto.createHmac("sha256", appSecret).update(req.rawBody).digest("hex")}`;
+    const supplied = Buffer.from(signature);
+    const computed = Buffer.from(expected);
+    if (supplied.length !== computed.length || !crypto.timingSafeEqual(supplied, computed)) return res.sendStatus(401);
     await webhookService.processWebhook(req.body);
 
     return res.sendStatus(200);
@@ -47,7 +51,7 @@ async receiveWebhook(req, res) {
 
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Webhook processing failed",
     });
   }
 }

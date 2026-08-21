@@ -5,10 +5,7 @@ const campaignRepository = require("../repositories/campaign.repository");
 class WebhookService {
   async processWebhook(payload) {
     try {
-      console.log("========== PROCESSING WEBHOOK ==========");
-
       if (!payload.entry || !payload.entry.length) {
-        console.log("No entry found in webhook payload.");
         return;
       }
 
@@ -86,14 +83,10 @@ class WebhookService {
             }
           }
 
-          if (value.messages) {
-            console.log("Incoming WhatsApp Message");
-            console.dir(value.messages, { depth: null });
-          }
+          // Incoming message content is intentionally not logged.
         }
       }
 
-      console.log("========== WEBHOOK PROCESSED ==========");
     } catch (error) {
       console.error("Webhook Service Error:", error.message);
       throw error;

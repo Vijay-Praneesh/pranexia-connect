@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-module.exports = {
+const env = {
   PORT: process.env.PORT || 5000,
 
   NODE_ENV: process.env.NODE_ENV,
@@ -13,4 +13,19 @@ module.exports = {
 
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+  FRONTEND_ORIGINS: process.env.FRONTEND_ORIGINS,
+  WHATSAPP_VERIFY_TOKEN: process.env.WHATSAPP_VERIFY_TOKEN,
+  WHATSAPP_APP_SECRET: process.env.WHATSAPP_APP_SECRET,
+  WHATSAPP_API_VERSION: process.env.WHATSAPP_API_VERSION,
+  WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
+  WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN,
 };
+
+const validateEnvironment = () => {
+  if (env.NODE_ENV !== "production") return;
+  const required = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD", "JWT_SECRET", "FRONTEND_ORIGINS", "WHATSAPP_VERIFY_TOKEN", "WHATSAPP_APP_SECRET", "WHATSAPP_API_VERSION", "WHATSAPP_PHONE_NUMBER_ID", "WHATSAPP_ACCESS_TOKEN"];
+  const missing = required.filter((name) => !env[name]);
+  if (missing.length) throw new Error(`Missing required production environment variable(s): ${missing.join(", ")}`);
+};
+
+module.exports = { ...env, validateEnvironment };

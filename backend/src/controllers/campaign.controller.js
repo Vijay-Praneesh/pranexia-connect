@@ -1,9 +1,12 @@
 const campaignService = require("../services/campaign.service");
 const ApiResponse = require("../helpers/apiResponse");
+const validator = require("../validators/resource.validator");
 
 class CampaignController {
   async create(req, res, next) {
     try {
+      const { error } = validator.campaignCreate(req.body);
+      if (error) return ApiResponse.error(res, error.details[0].message, 400);
       const campaign = await campaignService.createCampaign(
         req.user.companyId,
         req.body
@@ -22,11 +25,6 @@ class CampaignController {
 
   async getAll(req, res, next) {
     try {
-      // TEMPORARY DEBUG
-      console.log("==================================");
-      console.log("JWT USER =>", req.user);
-      console.log("==================================");
-
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
 
@@ -77,6 +75,8 @@ class CampaignController {
 
   async update(req, res, next) {
     try {
+      const { error } = validator.campaignUpdate(req.body);
+      if (error) return ApiResponse.error(res, error.details[0].message, 400);
       const campaign = await campaignService.updateCampaign(
         req.user.companyId,
         req.params.id,

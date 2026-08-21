@@ -64,7 +64,7 @@ class CustomerService {
     );
 
     if (!customer) {
-      throw new Error("Customer not found");
+      throw new AppError("Customer not found", 404);
     }
 
     return customer;
@@ -81,7 +81,7 @@ class CustomerService {
     );
 
     if (!customer) {
-      throw new Error("Customer not found");
+      throw new AppError("Customer not found", 404);
     }
 
     // Check duplicate mobile number
@@ -143,7 +143,7 @@ class CustomerService {
     );
 
     if (!customer) {
-      throw new Error("Customer not found");
+      throw new AppError("Customer not found", 404);
     }
 
     await customerRepository.delete(
@@ -167,7 +167,7 @@ class CustomerService {
     );
 
     if (!customer) {
-      throw new Error("Customer not found");
+      throw new AppError("Customer not found", 404);
     }
 
     // Check if customer is already active
@@ -477,7 +477,7 @@ class CustomerService {
       );
 
     if (!customer) {
-      throw new Error("Customer not found");
+      throw new AppError("Customer not found", 404);
     }
 
     const history =

@@ -113,6 +113,13 @@ async findAll(
     return await this.findById(companyId, id);
   }
 
+  async claimForSending(id, companyId, startedAt) {
+    const [updated] = await Campaign.update({ status: "RUNNING", startedAt, progress: 0 }, {
+      where: { id, companyId, status: { [Op.in]: ["DRAFT", "SCHEDULED"] } },
+    });
+    return updated === 1;
+  }
+
   async updateCounters(id, data) {
   await Campaign.update(data, {
     where: {

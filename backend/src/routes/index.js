@@ -17,9 +17,6 @@ router.use("/templates", templateRoutes);
 router.use("/campaigns", campaignRoutes);
 router.use("/campaign-recipients", campaignRecipientRoutes);
 
-// WhatsApp Webhook
-router.use("/webhook", webhookRoutes);
-
 // Dashboard
 router.use("/dashboard", dashboardRoutes);
 

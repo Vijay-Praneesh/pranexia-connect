@@ -1,19 +1,33 @@
 const campaignRepository = require("../repositories/campaign.repository");
 const campaignRecipientRepository = require("../repositories/campaignRecipient.repository");
+const templateRepository = require("../repositories/template.repository");
 const whatsappService = require("./whatsapp.service");
+const AppError = require("../utils/appError");
 
 class CampaignService {
   // =====================================
   // Create Campaign
   // =====================================
   async createCampaign(companyId, data) {
+    const template = await templateRepository.findById(companyId, data.templateId);
+    if (!template) {
+      throw new AppError("Template not found", 404);
+    }
+
     const existingCampaign = await campaignRepository.findByName(
       companyId,
       data.name
     );
 
     if (existingCampaign) {
-      throw new Error("Campaign name already exists");
+      throw new AppError("Campaign name already exists", 409);
+    }
+
+    if (data.sendType === "SCHEDULED") {
+      if (!data.scheduledAt || new Date(data.scheduledAt) <= new Date()) {
+        throw new AppError("A future scheduledAt is required for scheduled campaigns", 400);
+      }
+      data = { ...data, status: "SCHEDULED" };
     }
 
     return await campaignRepository.create({
@@ -53,7 +67,7 @@ class CampaignService {
     );
 
     if (!campaign) {
-      throw new Error("Campaign not found");
+      throw new AppError("Campaign not found", 404);
     }
 
     return campaign;
@@ -69,7 +83,21 @@ async updateCampaign(companyId, id, data) {
   );
 
   if (!campaign) {
-    throw new Error("Campaign not found");
+    throw new AppError("Campaign not found", 404);
+  }
+
+  if (["RUNNING", "COMPLETED", "FAILED", "CANCELLED"].includes(campaign.status)) {
+    throw new AppError("Campaign cannot be edited in its current state", 409);
+  }
+  if (data.status && !(["DRAFT", "SCHEDULED", "CANCELLED"].includes(data.status))) {
+    throw new AppError("Invalid campaign state transition", 409);
+  }
+
+  if (data.templateId) {
+    const template = await templateRepository.findById(companyId, data.templateId);
+    if (!template) {
+      throw new AppError("Template not found", 404);
+    }
   }
 
   const updateData = {
@@ -80,10 +108,9 @@ async updateCampaign(companyId, id, data) {
   // automatically move it to SCHEDULED status
   if (data.sendType === "SCHEDULED") {
     if (!data.scheduledAt) {
-      throw new Error(
-        "scheduledAt is required for scheduled campaigns"
-      );
+      throw new AppError("scheduledAt is required for scheduled campaigns", 400);
     }
+    if (new Date(data.scheduledAt) <= new Date()) throw new AppError("scheduledAt must be in the future", 400);
 
     updateData.status = "SCHEDULED";
   }
@@ -105,7 +132,7 @@ async updateCampaign(companyId, id, data) {
     );
 
     if (!campaign) {
-      throw new Error("Campaign not found");
+      throw new AppError("Campaign not found", 404);
     }
 
     await campaignRepository.delete(id, companyId);
@@ -138,7 +165,7 @@ async updateCampaign(companyId, id, data) {
     );
 
     if (!campaign) {
-      throw new Error("Campaign not found");
+      throw new AppError("Campaign not found", 404);
     }
 
     // =====================================
@@ -149,39 +176,18 @@ async updateCampaign(companyId, id, data) {
       campaign.status
     );
 
-    if (campaign.status === "RUNNING") {
-      throw new Error("Campaign is already running");
-    }
-
-    if (campaign.status === "COMPLETED") {
-      throw new Error(
-        "Campaign has already been completed"
-      );
-    }
-
-    if (campaign.status === "FAILED") {
-      throw new Error(
-        "Campaign has already failed and cannot be sent"
-      );
-    }
-
-    if (campaign.status === "CANCELLED") {
-      throw new Error(
-        "Campaign has been cancelled and cannot be sent"
-      );
-    }
+    if (!["DRAFT", "SCHEDULED"].includes(campaign.status)) throw new AppError("Campaign cannot be sent in its current state", 409);
+    if (campaign.status === "SCHEDULED" && (!campaign.scheduledAt || new Date(campaign.scheduledAt) > new Date())) throw new AppError("Scheduled campaign is not due yet", 409);
 
     // =====================================
     // Template Validation
     // =====================================
     if (!campaign.template) {
-      throw new Error("Template not found");
+      throw new AppError("Template not found", 404);
     }
 
     if (!campaign.template.metaTemplateName) {
-      throw new Error(
-        "Meta template name is missing"
-      );
+      throw new AppError("Meta template name is missing", 422);
     }
 
     // =====================================
@@ -202,34 +208,8 @@ async updateCampaign(companyId, id, data) {
       "🚀 Marking campaign as STARTED..."
     );
 
-    await campaignRepository.update(
-      campaign.id,
-      companyId,
-      {
-        status: "RUNNING",
-        startedAt,
-        progress: 0,
-      }
-    );
-
-    const startedCampaign =
-      await campaignRepository.findById(
-        companyId,
-        campaign.id
-      );
-
-    console.log(
-      "========== Campaign After START =========="
-    );
-
-    console.dir(
-      startedCampaign.toJSON(),
-      { depth: null }
-    );
-
-    console.log(
-      "=========================================="
-    );
+    const claimed = await campaignRepository.claimForSending(campaign.id, companyId, startedAt);
+    if (!claimed) throw new AppError("Campaign is already being processed or cannot be sent", 409);
 
     // =====================================
     // Get ALL Pending Recipients
@@ -257,15 +237,13 @@ async updateCampaign(companyId, id, data) {
         campaign.id,
         companyId,
         {
-          status: "FAILED",
+          status: campaign.status,
           progress: 100,
           completedAt: new Date(),
         }
       );
 
-      throw new Error(
-        "No pending recipients found"
-      );
+      throw new AppError("No pending recipients found", 422);
     }
 
     // =====================================
@@ -593,9 +571,7 @@ async updateCampaign(companyId, id, data) {
       );
 
     if (!campaign) {
-      throw new Error(
-        "Campaign not found"
-      );
+      throw new AppError("Campaign not found", 404);
     }
 
     // Only scheduled campaigns
@@ -603,9 +579,9 @@ async updateCampaign(companyId, id, data) {
     if (
       campaign.status !== "SCHEDULED"
     ) {
-      throw new Error(
+      throw new AppError(
         `Campaign cannot be cancelled because its current status is ${campaign.status}`
-      );
+      , 409);
     }
 
     const updatedCampaign =
@@ -646,9 +622,7 @@ async updateCampaign(companyId, id, data) {
       );
 
     if (!campaign) {
-      throw new Error(
-        "Campaign not found"
-      );
+      throw new AppError("Campaign not found", 404);
     }
 
     // =====================================

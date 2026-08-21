@@ -3,18 +3,17 @@ const router = express.Router();
 
 const campaignController = require("../controllers/campaign.controller");
 const auth = require("../middlewares/auth.middleware");
+const authorize = require("../middlewares/authorize.middleware");
 
 // All campaign routes require authentication
 router.use(auth);
+router.use(authorize("COMPANY_ADMIN"));
 
 // Search
 router.get("/search", campaignController.search);
 
 // Campaign Report
 router.get("/:id/report", campaignController.getReport);
-
-// Send Campaign
-router.post("/:id/send", campaignController.sendCampaign);
 
 // Send Campaign
 router.post("/:id/send", campaignController.sendCampaign);

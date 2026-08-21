@@ -1,9 +1,12 @@
 const campaignRecipientService = require("../services/campaignRecipient.service");
 const ApiResponse = require("../helpers/apiResponse");
+const validator = require("../validators/resource.validator");
 
 class CampaignRecipientController {
   async assignRecipients(req, res, next) {
     try {
+      const { error } = validator.recipientAssign(req.body);
+      if (error) return ApiResponse.error(res, error.details[0].message, 400);
       const { campaignId, customerIds } = req.body;
 
       const result = await campaignRecipientService.assignRecipients(
@@ -59,6 +62,8 @@ class CampaignRecipientController {
 
   async getById(req, res, next) {
     try {
+      const { error } = validator.recipientUpdate(req.body);
+      if (error) return ApiResponse.error(res, error.details[0].message, 400);
       const recipient =
         await campaignRecipientService.getRecipientById(
           req.user.companyId,

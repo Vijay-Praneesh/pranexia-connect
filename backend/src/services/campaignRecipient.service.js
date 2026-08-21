@@ -1,6 +1,7 @@
 const campaignRecipientRepository = require("../repositories/campaignRecipient.repository");
 const campaignRepository = require("../repositories/campaign.repository");
 const customerRepository = require("../repositories/customer.repository");
+const AppError = require("../utils/appError");
 
 class CampaignRecipientService {
   // =====================================
@@ -13,19 +14,33 @@ class CampaignRecipientService {
     );
 
     if (!campaign) {
-      throw new Error("Campaign not found");
+      throw new AppError("Campaign not found", 404);
     }
 
+    if (!Array.isArray(customerIds) || customerIds.length === 0) {
+      throw new AppError("Customer IDs are required", 400);
+    }
+
+    const uniqueCustomerIds = [...new Set(customerIds)];
+    const assignedCustomerIds = new Set(
+      await campaignRecipientRepository.findAssignedCustomerIds(
+        companyId,
+        campaignId,
+        uniqueCustomerIds
+      )
+    );
     const recipients = [];
 
-    for (const customerId of customerIds) {
+    for (const customerId of uniqueCustomerIds) {
+      if (assignedCustomerIds.has(customerId)) continue;
+
       const customer = await customerRepository.findById(
         companyId,
         customerId
       );
 
       if (!customer) {
-        throw new Error(`Customer not found: ${customerId}`);
+        throw new AppError(`Customer not found: ${customerId}`, 404);
       }
 
       recipients.push({
@@ -36,8 +51,9 @@ class CampaignRecipientService {
       });
     }
 
-    // Create campaign recipients
-    await campaignRecipientRepository.bulkCreate(recipients);
+    if (recipients.length > 0) {
+      await campaignRecipientRepository.bulkCreate(recipients);
+    }
 
     // Sync campaign counters
     const updatedCampaign =
@@ -80,7 +96,7 @@ class CampaignRecipientService {
     );
 
     if (!recipient) {
-      throw new Error("Recipient not found");
+      throw new AppError("Recipient not found", 404);
     }
 
     return recipient;
@@ -96,7 +112,7 @@ async updateRecipient(companyId, id, data) {
   );
 
   if (!recipient) {
-    throw new Error("Recipient not found");
+    throw new AppError("Recipient not found", 404);
   }
 
   const updatedRecipient =
@@ -124,7 +140,7 @@ async updateRecipient(companyId, id, data) {
     );
 
     if (!recipient) {
-      throw new Error("Recipient not found");
+      throw new AppError("Recipient not found", 404);
     }
 
     await campaignRecipientRepository.delete(

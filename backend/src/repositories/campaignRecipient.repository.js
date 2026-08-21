@@ -14,6 +14,21 @@ class CampaignRecipientRepository {
     return await CampaignRecipient.bulkCreate(data);
   }
 
+  async findAssignedCustomerIds(companyId, campaignId, customerIds) {
+    if (!customerIds.length) return [];
+
+    const recipients = await CampaignRecipient.findAll({
+      where: {
+        companyId,
+        campaignId,
+        customerId: { [Op.in]: customerIds },
+      },
+      attributes: ["customerId"],
+    });
+
+    return recipients.map((recipient) => recipient.customerId);
+  }
+
   async findById(companyId, id) {
     return await CampaignRecipient.findOne({
       where: {

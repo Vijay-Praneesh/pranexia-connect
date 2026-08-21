@@ -1,9 +1,12 @@
 const templateService = require("../services/template.service");
 const ApiResponse = require("../helpers/apiResponse");
+const validator = require("../validators/resource.validator");
 
 class TemplateController {
   async create(req, res, next) {
     try {
+      const { error } = validator.templateCreate(req.body);
+      if (error) return ApiResponse.error(res, error.details[0].message, 400);
       const template = await templateService.createTemplate(
         req.user.companyId,
         req.body
@@ -55,12 +58,6 @@ class TemplateController {
 
 async getById(req, res, next) {
   try {
-    console.log("========== TEMPLATE TENANT TEST ==========");
-    console.log("User ID:", req.user.id);
-    console.log("User Company ID:", req.user.companyId);
-    console.log("Requested Template ID:", req.params.id);
-    console.log("==========================================");
-
     const template = await templateService.getTemplateById(
       req.user.companyId,
       req.params.id
@@ -78,6 +75,8 @@ async getById(req, res, next) {
 
   async update(req, res, next) {
     try {
+      const { error } = validator.templateUpdate(req.body);
+      if (error) return ApiResponse.error(res, error.details[0].message, 400);
       const template = await templateService.updateTemplate(
         req.user.companyId,
         req.params.id,
