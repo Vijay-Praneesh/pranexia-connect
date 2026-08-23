@@ -9,14 +9,17 @@ class CampaignService {
   // Create Campaign
   // =====================================
   async createCampaign(companyId, data) {
-    const template = await templateRepository.findById(companyId, data.templateId);
+    const template = await templateRepository.findById(
+      companyId,
+      data.templateId,
+    );
     if (!template) {
       throw new AppError("Template not found", 404);
     }
 
     const existingCampaign = await campaignRepository.findByName(
       companyId,
-      data.name
+      data.name,
     );
 
     if (existingCampaign) {
@@ -25,7 +28,10 @@ class CampaignService {
 
     if (data.sendType === "SCHEDULED") {
       if (!data.scheduledAt || new Date(data.scheduledAt) <= new Date()) {
-        throw new AppError("A future scheduledAt is required for scheduled campaigns", 400);
+        throw new AppError(
+          "A future scheduledAt is required for scheduled campaigns",
+          400,
+        );
       }
       data = { ...data, status: "SCHEDULED" };
     }
@@ -39,21 +45,14 @@ class CampaignService {
   // =====================================
   // Get All Campaigns
   // =====================================
-  async getAllCampaigns(
-    companyId,
-    page,
-    limit,
-    sortBy,
-    order,
-    filters
-  ) {
+  async getAllCampaigns(companyId, page, limit, sortBy, order, filters) {
     return await campaignRepository.findAll(
       companyId,
       page,
       limit,
       sortBy,
       order,
-      filters
+      filters,
     );
   }
 
@@ -61,10 +60,7 @@ class CampaignService {
   // Get Campaign By ID
   // =====================================
   async getCampaignById(companyId, id) {
-    const campaign = await campaignRepository.findById(
-      companyId,
-      id
-    );
+    const campaign = await campaignRepository.findById(companyId, id);
 
     if (!campaign) {
       throw new AppError("Campaign not found", 404);
@@ -73,63 +69,65 @@ class CampaignService {
     return campaign;
   }
 
-// =====================================
-// Update Campaign
-// =====================================
-async updateCampaign(companyId, id, data) {
-  const campaign = await campaignRepository.findById(
-    companyId,
-    id
-  );
+  // =====================================
+  // Update Campaign
+  // =====================================
+  async updateCampaign(companyId, id, data) {
+    const campaign = await campaignRepository.findById(companyId, id);
 
-  if (!campaign) {
-    throw new AppError("Campaign not found", 404);
-  }
-
-  if (["RUNNING", "COMPLETED", "FAILED", "CANCELLED"].includes(campaign.status)) {
-    throw new AppError("Campaign cannot be edited in its current state", 409);
-  }
-  if (data.status && !(["DRAFT", "SCHEDULED", "CANCELLED"].includes(data.status))) {
-    throw new AppError("Invalid campaign state transition", 409);
-  }
-
-  if (data.templateId) {
-    const template = await templateRepository.findById(companyId, data.templateId);
-    if (!template) {
-      throw new AppError("Template not found", 404);
+    if (!campaign) {
+      throw new AppError("Campaign not found", 404);
     }
-  }
 
-  const updateData = {
-    ...data,
-  };
-
-  // When campaign is changed to scheduled,
-  // automatically move it to SCHEDULED status
-  if (data.sendType === "SCHEDULED") {
-    if (!data.scheduledAt) {
-      throw new AppError("scheduledAt is required for scheduled campaigns", 400);
+    if (
+      ["RUNNING", "COMPLETED", "FAILED", "CANCELLED"].includes(campaign.status)
+    ) {
+      throw new AppError("Campaign cannot be edited in its current state", 409);
     }
-    if (new Date(data.scheduledAt) <= new Date()) throw new AppError("scheduledAt must be in the future", 400);
+    if (
+      data.status &&
+      !["DRAFT", "SCHEDULED", "CANCELLED"].includes(data.status)
+    ) {
+      throw new AppError("Invalid campaign state transition", 409);
+    }
 
-    updateData.status = "SCHEDULED";
+    if (data.templateId) {
+      const template = await templateRepository.findById(
+        companyId,
+        data.templateId,
+      );
+      if (!template) {
+        throw new AppError("Template not found", 404);
+      }
+    }
+
+    const updateData = {
+      ...data,
+    };
+
+    // When campaign is changed to scheduled,
+    // automatically move it to SCHEDULED status
+    if (data.sendType === "SCHEDULED") {
+      if (!data.scheduledAt) {
+        throw new AppError(
+          "scheduledAt is required for scheduled campaigns",
+          400,
+        );
+      }
+      if (new Date(data.scheduledAt) <= new Date())
+        throw new AppError("scheduledAt must be in the future", 400);
+
+      updateData.status = "SCHEDULED";
+    }
+
+    return await campaignRepository.update(id, companyId, updateData);
   }
-
-  return await campaignRepository.update(
-    id,
-    companyId,
-    updateData
-  );
-}
 
   // =====================================
   // Delete Campaign
   // =====================================
   async deleteCampaign(companyId, id) {
-    const campaign = await campaignRepository.findById(
-      companyId,
-      id
-    );
+    const campaign = await campaignRepository.findById(companyId, id);
 
     if (!campaign) {
       throw new AppError("Campaign not found", 404);
@@ -145,11 +143,8 @@ async updateCampaign(companyId, id, data) {
   // =====================================
   // Search Campaigns
   // =====================================
-  async searchCampaigns(companyId, keyword) {
-    return await campaignRepository.search(
-      companyId,
-      keyword
-    );
+  async searchCampaigns(companyId, keyword, filters = {}) {
+    return await campaignRepository.search(companyId, keyword, filters);
   }
 
   // =====================================
@@ -159,10 +154,7 @@ async updateCampaign(companyId, id, data) {
     // =====================================
     // Get Campaign
     // =====================================
-    const campaign = await campaignRepository.findById(
-      companyId,
-      campaignId
-    );
+    const campaign = await campaignRepository.findById(companyId, campaignId);
 
     if (!campaign) {
       throw new AppError("Campaign not found", 404);
@@ -171,13 +163,15 @@ async updateCampaign(companyId, id, data) {
     // =====================================
     // Campaign Status Validation
     // =====================================
-    console.log(
-      "🔎 Campaign Status Before Send:",
-      campaign.status
-    );
+    console.log("🔎 Campaign Status Before Send:", campaign.status);
 
-    if (!["DRAFT", "SCHEDULED"].includes(campaign.status)) throw new AppError("Campaign cannot be sent in its current state", 409);
-    if (campaign.status === "SCHEDULED" && (!campaign.scheduledAt || new Date(campaign.scheduledAt) > new Date())) throw new AppError("Scheduled campaign is not due yet", 409);
+    if (!["DRAFT", "SCHEDULED"].includes(campaign.status))
+      throw new AppError("Campaign cannot be sent in its current state", 409);
+    if (
+      campaign.status === "SCHEDULED" &&
+      (!campaign.scheduledAt || new Date(campaign.scheduledAt) > new Date())
+    )
+      throw new AppError("Scheduled campaign is not due yet", 409);
 
     // =====================================
     // Template Validation
@@ -193,39 +187,42 @@ async updateCampaign(companyId, id, data) {
     // =====================================
     // Store Original Campaign Counts
     // =====================================
-    const initialSentCount =
-      campaign.sentCount || 0;
+    const initialSentCount = campaign.sentCount || 0;
 
-    const initialFailedCount =
-      campaign.failedCount || 0;
+    const initialFailedCount = campaign.failedCount || 0;
 
     // =====================================
     // Mark Campaign as Started
     // =====================================
     const startedAt = new Date();
 
-    console.log(
-      "🚀 Marking campaign as STARTED..."
-    );
+    console.log("🚀 Marking campaign as STARTED...");
 
-    const claimed = await campaignRepository.claimForSending(campaign.id, companyId, startedAt);
-    if (!claimed) throw new AppError("Campaign is already being processed or cannot be sent", 409);
+    const claimed = await campaignRepository.claimForSending(
+      campaign.id,
+      companyId,
+      startedAt,
+    );
+    if (!claimed)
+      throw new AppError(
+        "Campaign is already being processed or cannot be sent",
+        409,
+      );
 
     // =====================================
     // Get ALL Pending Recipients
     // =====================================
-    const result =
-      await campaignRecipientRepository.findAll(
-        companyId,
-        1,
-        100000,
-        "created_at",
-        "ASC",
-        {
-          campaignId,
-          status: "PENDING",
-        }
-      );
+    const result = await campaignRecipientRepository.findAll(
+      companyId,
+      1,
+      100000,
+      "created_at",
+      "ASC",
+      {
+        campaignId,
+        status: "PENDING",
+      },
+    );
 
     const recipients = result.recipients;
 
@@ -233,15 +230,11 @@ async updateCampaign(companyId, id, data) {
     // No Pending Recipients
     // =====================================
     if (!recipients.length) {
-      await campaignRepository.update(
-        campaign.id,
-        companyId,
-        {
-          status: campaign.status,
-          progress: 100,
-          completedAt: new Date(),
-        }
-      );
+      await campaignRepository.update(campaign.id, companyId, {
+        status: campaign.status,
+        progress: 100,
+        completedAt: new Date(),
+      });
 
       throw new AppError("No pending recipients found", 422);
     }
@@ -251,13 +244,9 @@ async updateCampaign(companyId, id, data) {
     // =====================================
     const totalRecipients = recipients.length;
 
-    await campaignRepository.update(
-      campaign.id,
-      companyId,
-      {
-        totalRecipients,
-      }
-    );
+    await campaignRepository.update(campaign.id, companyId, {
+      totalRecipients,
+    });
 
     let sentCount = 0;
     let failedCount = 0;
@@ -275,93 +264,61 @@ async updateCampaign(companyId, id, data) {
         // Validate Customer
         // ---------------------------------
         if (!recipient.customer) {
-          throw new Error(
-            "Customer not found"
-          );
+          throw new Error("Customer not found");
         }
 
         if (!recipient.customer.mobile) {
-          throw new Error(
-            "Customer mobile number not found"
-          );
+          throw new Error("Customer mobile number not found");
         }
 
-        console.log(
-          "================================="
-        );
+        console.log("=================================");
 
-        console.log(
-          "Sending To :",
-          recipient.customer.mobile
-        );
+        console.log("Sending To :", recipient.customer.mobile);
 
-        console.log(
-          "Template   :",
-          campaign.template.metaTemplateName
-        );
+        console.log("Template   :", campaign.template.metaTemplateName);
 
-        console.log(
-          "================================="
-        );
+        console.log("=================================");
 
         // ---------------------------------
         // Send WhatsApp Template
         // ---------------------------------
-        const response =
-          await whatsappService.sendTemplateMessage(
-            {
-              to: recipient.customer.mobile,
-              templateName:
-                campaign.template
-                  .metaTemplateName,
-              languageCode:
-                campaign.template.language ||
-                "en_US",
-              components: [],
-            }
-          );
+        const response = await whatsappService.sendTemplateMessage({
+          to: recipient.customer.mobile,
+          templateName: campaign.template.metaTemplateName,
+          languageCode: campaign.template.language || "en_US",
+          components: [],
+        });
 
         // ---------------------------------
         // Get WhatsApp Message ID
         // ---------------------------------
-        const whatsappMessageId =
-          response?.messages?.[0]?.id;
+        const whatsappMessageId = response?.messages?.[0]?.id;
 
         if (!whatsappMessageId) {
-          throw new Error(
-            "WhatsApp message ID not returned"
-          );
+          throw new Error("WhatsApp message ID not returned");
         }
 
         // ---------------------------------
         // Update Recipient - SENT
         // ---------------------------------
-        await campaignRecipientRepository.update(
-          recipient.id,
-          companyId,
-          {
-            status: "SENT",
-            sentAt: new Date(),
-            whatsappMessageId,
-          }
-        );
+        await campaignRecipientRepository.update(recipient.id, companyId, {
+          status: "SENT",
+          sentAt: new Date(),
+          whatsappMessageId,
+        });
 
         sentCount++;
         processedCount++;
 
         successRecipients.push({
-          customerId:
-            recipient.customer.id,
+          customerId: recipient.customer.id,
 
-          mobile:
-            recipient.customer.mobile,
+          mobile: recipient.customer.mobile,
 
           whatsappMessageId,
         });
 
-        console.log(
-          `✅ Sent to ${recipient.customer.mobile}`
-        );
+        console.log(`✅ Sent to ${recipient.customer.mobile}`);
       } catch (error) {
         // ---------------------------------
         // Recipient Failed
@@ -369,71 +326,45 @@ async updateCampaign(companyId, id, data) {
         failedCount++;
         processedCount++;
 
-        await campaignRecipientRepository.update(
-          recipient.id,
-          companyId,
-          {
-            status: "FAILED",
-            failureReason: error.message,
-          }
-        );
+        await campaignRecipientRepository.update(recipient.id, companyId, {
+          status: "FAILED",
+          failureReason: error.message,
+        });
 
         failedRecipients.push({
-          customerId:
-            recipient.customer?.id || null,
+          customerId: recipient.customer?.id || null,
 
-          mobile:
-            recipient.customer?.mobile || null,
+          mobile: recipient.customer?.mobile || null,
 
           reason: error.message,
         });
 
-        console.log(
-          `❌ Failed : ${error.message}`
-        );
+        console.log(`❌ Failed : ${error.message}`);
       }
 
       // =====================================
       // Calculate Live Progress
       // =====================================
-      const progress = Math.round(
-        (processedCount /
-          totalRecipients) *
-          100
-      );
+      const progress = Math.round((processedCount / totalRecipients) * 100);
 
       // =====================================
       // Update Live Campaign Statistics
       // =====================================
-      await campaignRepository.update(
-        campaign.id,
-        companyId,
-        {
-          sentCount:
-            initialSentCount +
-            sentCount,
+      await campaignRepository.update(campaign.id, companyId, {
+        sentCount: initialSentCount + sentCount,
 
-          failedCount:
-            initialFailedCount +
-            failedCount,
+        failedCount: initialFailedCount + failedCount,
 
-          progress,
+        progress,
 
-          status: "RUNNING",
-        }
-      );
+        status: "RUNNING",
+      });
 
-      console.log(
-        `📊 Campaign Progress: ${progress}%`
-      );
+      console.log(`📊 Campaign Progress: ${progress}%`);
 
-      console.log(
-        `📤 Sent: ${sentCount}`
-      );
+      console.log(`📤 Sent: ${sentCount}`);
 
-      console.log(
-        `❌ Failed: ${failedCount}`
-      );
+      console.log(`❌ Failed: ${failedCount}`);
     }
 
     // =====================================
@@ -441,10 +372,7 @@ async updateCampaign(companyId, id, data) {
     // =====================================
     let finalStatus;
 
-    if (
-      sentCount === 0 &&
-      failedCount > 0
-    ) {
+    if (sentCount === 0 && failedCount > 0) {
       // All recipients failed
       finalStatus = "FAILED";
     } else {
@@ -457,70 +385,38 @@ async updateCampaign(companyId, id, data) {
     // =====================================
     // Final Campaign Update
     // =====================================
-    await campaignRepository.update(
-      campaign.id,
-      companyId,
-      {
-        sentCount:
-          initialSentCount +
-          sentCount,
+    await campaignRepository.update(campaign.id, companyId, {
+      sentCount: initialSentCount + sentCount,
 
-        failedCount:
-          initialFailedCount +
-          failedCount,
+      failedCount: initialFailedCount + failedCount,
 
-        progress: 100,
+      progress: 100,
 
-        status: finalStatus,
+      status: finalStatus,
 
-        completedAt,
-      }
-    );
+      completedAt,
+    });
 
     // =====================================
     // Final Logs
     // =====================================
-    console.log(
-      "=========================================="
-    );
+    console.log("==========================================");
 
-    console.log(
-      "🏁 Campaign Processing Completed"
-    );
+    console.log("🏁 Campaign Processing Completed");
 
-    console.log(
-      "Campaign ID :",
-      campaign.id
-    );
+    console.log("Campaign ID :", campaign.id);
 
-    console.log(
-      "Total       :",
-      totalRecipients
-    );
+    console.log("Total       :", totalRecipients);
 
-    console.log(
-      "Sent        :",
-      sentCount
-    );
+    console.log("Sent        :", sentCount);
 
-    console.log(
-      "Failed      :",
-      failedCount
-    );
+    console.log("Failed      :", failedCount);
 
-    console.log(
-      "Progress    :",
-      100
-    );
+    console.log("Progress    :", 100);
 
-    console.log(
-      "Status      :",
-      finalStatus
-    );
+    console.log("Status      :", finalStatus);
 
-    console.log(
-      "=========================================="
-    );
+    console.log("==========================================");
 
     // =====================================
     // Return Response
@@ -532,8 +428,8 @@ async updateCampaign(companyId, id, data) {
         finalStatus === "FAILED"
           ? "Campaign failed. All recipients failed."
           : failedCount > 0
-          ? "Campaign completed with some failed recipients."
-          : "Campaign completed successfully.",
+            ? "Campaign completed with some failed recipients."
+            : "Campaign completed successfully.",
 
       campaignId: campaign.id,
 
@@ -560,15 +456,8 @@ async updateCampaign(companyId, id, data) {
   // =====================================
   // Cancel Campaign
   // =====================================
-  async cancelCampaign(
-    companyId,
-    campaignId
-  ) {
-    const campaign =
-      await campaignRepository.findById(
-        companyId,
-        campaignId
-      );
+  async cancelCampaign(companyId, campaignId) {
+    const campaign = await campaignRepository.findById(companyId, campaignId);
 
     if (!campaign) {
       throw new AppError("Campaign not found", 404);
@@ -576,50 +465,37 @@ async updateCampaign(companyId, id, data) {
 
     // Only scheduled campaigns
     // can be cancelled
-    if (
-      campaign.status !== "SCHEDULED"
-    ) {
+    if (campaign.status !== "SCHEDULED") {
       throw new AppError(
-        `Campaign cannot be cancelled because its current status is ${campaign.status}`
-      , 409);
+        `Campaign cannot be cancelled because its current status is ${campaign.status}`,
+        409,
+      );
     }
 
-    const updatedCampaign =
-      await campaignRepository.update(
-        campaign.id,
-        companyId,
-        {
-          status: "CANCELLED",
-        }
-      );
+    const updatedCampaign = await campaignRepository.update(
+      campaign.id,
+      companyId,
+      {
+        status: "CANCELLED",
+      },
+    );
 
     return {
-      campaignId:
-        updatedCampaign.id,
+      campaignId: updatedCampaign.id,
 
-      name:
-        updatedCampaign.name,
+      name: updatedCampaign.name,
 
-      status:
-        updatedCampaign.status,
+      status: updatedCampaign.status,
 
-      message:
-        "Campaign cancelled successfully",
+      message: "Campaign cancelled successfully",
     };
   }
 
   // =====================================
   // Campaign Report
   // =====================================
-  async getCampaignReport(
-    companyId,
-    campaignId
-  ) {
-    const campaign =
-      await campaignRepository.findById(
-        companyId,
-        campaignId
-      );
+  async getCampaignReport(companyId, campaignId) {
+    const campaign = await campaignRepository.findById(companyId, campaignId);
 
     if (!campaign) {
       throw new AppError("Campaign not found", 404);
@@ -629,79 +505,54 @@ async updateCampaign(companyId, id, data) {
     // Sync campaign counters
     // from recipient statuses
     // =====================================
-    await campaignRepository.syncCounters(
-      campaignId
-    );
+    await campaignRepository.syncCounters(campaignId);
 
     // =====================================
     // Fetch updated campaign
     // =====================================
-    const updatedCampaign =
-      await campaignRepository.findById(
-        companyId,
-        campaignId
-      );
+    const updatedCampaign = await campaignRepository.findById(
+      companyId,
+      campaignId,
+    );
 
     // =====================================
     // Campaign Statistics
     // =====================================
-    const totalRecipients =
-      updatedCampaign.totalRecipients || 0;
+    const totalRecipients = updatedCampaign.totalRecipients || 0;
 
-    const sentCount =
-      updatedCampaign.sentCount || 0;
+    const sentCount = updatedCampaign.sentCount || 0;
 
-    const deliveredCount =
-      updatedCampaign.deliveredCount || 0;
+    const deliveredCount = updatedCampaign.deliveredCount || 0;
 
-    const readCount =
-      updatedCampaign.readCount || 0;
+    const readCount = updatedCampaign.readCount || 0;
 
-    const failedCount =
-      updatedCampaign.failedCount || 0;
+    const failedCount = updatedCampaign.failedCount || 0;
 
     // =====================================
     // Calculate Rates
     // =====================================
     const deliveryRate =
       totalRecipients > 0
-        ? Math.round(
-            (deliveredCount /
-              totalRecipients) *
-              100
-          )
+        ? Math.round((deliveredCount / totalRecipients) * 100)
         : 0;
 
     const readRate =
-      totalRecipients > 0
-        ? Math.round(
-            (readCount /
-              totalRecipients) *
-              100
-          )
-        : 0;
+      totalRecipients > 0 ? Math.round((readCount / totalRecipients) * 100) : 0;
 
     const failureRate =
       totalRecipients > 0
-        ? Math.round(
-            (failedCount /
-              totalRecipients) *
-              100
-          )
+        ? Math.round((failedCount / totalRecipients) * 100)
         : 0;
 
     // =====================================
     // Return Campaign Report
     // =====================================
     return {
-      campaignId:
-        updatedCampaign.id,
+      campaignId: updatedCampaign.id,
 
-      campaignName:
-        updatedCampaign.name,
+      campaignName: updatedCampaign.name,
 
-      status:
-        updatedCampaign.status,
+      status: updatedCampaign.status,
 
       totalRecipients,
 
@@ -713,8 +564,7 @@ async updateCampaign(companyId, id, data) {
 
       failedCount,
 
-      progress:
-        updatedCampaign.progress,
+      progress: updatedCampaign.progress,
 
       deliveryRate,
 
@@ -722,11 +572,9 @@ async updateCampaign(companyId, id, data) {
 
       failureRate,
 
-      startedAt:
-        updatedCampaign.startedAt,
+      startedAt: updatedCampaign.startedAt,
 
-      completedAt:
-        updatedCampaign.completedAt,
+      completedAt: updatedCampaign.completedAt,
     };
   }
 }

@@ -14,7 +14,7 @@ class CustomerService {
     );
 
     if (existingCustomer) {
-      throw new Error("Customer with this mobile number already exists");
+      throw new AppError("Customer with this mobile number already exists", 409);
     }
 
     return await customerRepository.create({
@@ -95,8 +95,9 @@ class CustomerService {
       );
 
       if (existingMobile) {
-        throw new Error(
-          "Customer with this mobile number already exists"
+        throw new AppError(
+          "Customer with this mobile number already exists",
+          409
         );
       }
     }
@@ -112,8 +113,9 @@ class CustomerService {
       );
 
       if (existingEmail) {
-        throw new Error(
-          "Customer with this email already exists"
+        throw new AppError(
+          "Customer with this email already exists",
+          409
         );
       }
     }
@@ -172,7 +174,7 @@ class CustomerService {
 
     // Check if customer is already active
     if (customer.deletedAt === null) {
-      throw new Error("Customer is already active");
+      throw new AppError("Customer is already active", 409);
     }
 
     // Restore customer
@@ -193,7 +195,7 @@ class CustomerService {
   // =====================================
   async searchCustomers(companyId, keyword) {
     if (!keyword || keyword.trim() === "") {
-      throw new Error("Search keyword is required");
+      throw new AppError("Search keyword is required", 400);
     }
 
     return await customerRepository.search(
@@ -214,7 +216,7 @@ class CustomerService {
   // =====================================
   async bulkDeleteCustomers(companyId, customerIds) {
     if (!customerIds || customerIds.length === 0) {
-      throw new Error("Customer IDs are required");
+      throw new AppError("Customer IDs are required", 400);
     }
 
     await customerRepository.bulkDelete(
@@ -232,7 +234,7 @@ class CustomerService {
   // =====================================
   async bulkRestoreCustomers(companyId, customerIds) {
     if (!customerIds || customerIds.length === 0) {
-      throw new Error("Customer IDs are required");
+      throw new AppError("Customer IDs are required", 400);
     }
 
     await customerRepository.bulkRestore(
@@ -254,11 +256,11 @@ class CustomerService {
     status
   ) {
     if (!customerIds || customerIds.length === 0) {
-      throw new Error("Customer IDs are required");
+      throw new AppError("Customer IDs are required", 400);
     }
 
     if (!["ACTIVE", "BLOCKED"].includes(status)) {
-      throw new Error("Invalid status");
+      throw new AppError("Invalid status", 400);
     }
 
     await customerRepository.bulkStatusUpdate(
@@ -334,7 +336,7 @@ class CustomerService {
     const rows = readExcel(fileBuffer);
 
     if (!rows.length) {
-      throw new Error("Excel file is empty");
+      throw new AppError("Excel file is empty", 400);
     }
 
     const customers = [];

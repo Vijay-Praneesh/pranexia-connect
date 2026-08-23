@@ -6,20 +6,20 @@ class CampaignRepository {
     return await Campaign.create(data);
   }
 
-async findById(companyId, id) {
-  return await Campaign.findOne({
-    where: {
-      id,
-      companyId,
-    },
-    include: [
-      {
-        model: Template,
-        as: "template",
+  async findById(companyId, id) {
+    return await Campaign.findOne({
+      where: {
+        id,
+        companyId,
       },
-    ],
-  });
-}
+      include: [
+        {
+          model: Template,
+          as: "template",
+        },
+      ],
+    });
+  }
 
   async findByName(companyId, name) {
     return await Campaign.findOne({
@@ -30,55 +30,50 @@ async findById(companyId, id) {
     });
   }
 
-async findAll(
-  companyId,
-  page = 1,
-  limit = 10,
-  sortBy = "created_at",
-  order = "DESC",
-  filters = {}
-) {
-  const where = {
+  async findAll(
     companyId,
-  };
+    page = 1,
+    limit = 10,
+    sortBy = "created_at",
+    order = "DESC",
+    filters = {},
+  ) {
+    const where = {
+      companyId,
+    };
 
-  if (filters.status) {
-    where.status = filters.status;
-  }
+    if (filters.status) {
+      where.status = filters.status;
+    }
 
-  if (filters.sendType) {
-    where.sendType = filters.sendType;
-  }
+    if (filters.sendType) {
+      where.sendType = filters.sendType;
+    }
 
-  if (filters.templateId) {
-    where.templateId = filters.templateId;
-  }
+    if (filters.templateId) {
+      where.templateId = filters.templateId;
+    }
 
-  const offset = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-  const sortColumnMap = {
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-    created_at: "created_at",
-    updated_at: "updated_at",
-    name: "name",
-    status: "status",
-    sendType: "send_type",
-    send_type: "send_type",
-    scheduledAt: "scheduled_at",
-    scheduled_at: "scheduled_at",
-  };
+    const sortColumnMap = {
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      created_at: "created_at",
+      updated_at: "updated_at",
+      name: "name",
+      status: "status",
+      sendType: "send_type",
+      send_type: "send_type",
+      scheduledAt: "scheduled_at",
+      scheduled_at: "scheduled_at",
+    };
 
-  const safeSortBy =
-    sortColumnMap[sortBy] || "created_at";
+    const safeSortBy = sortColumnMap[sortBy] || "created_at";
 
-  const safeOrder =
-    order.toUpperCase() === "ASC"
-      ? "ASC"
-      : "DESC";
+    const safeOrder = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
-  const { rows, count } =
-    await Campaign.findAndCountAll({
+    const { rows, count } = await Campaign.findAndCountAll({
       where,
       include: [
         {
@@ -91,16 +86,16 @@ async findAll(
       order: [[safeSortBy, safeOrder]],
     });
 
-  return {
-    campaigns: rows,
-    pagination: {
-      page,
-      limit,
-      totalRecords: count,
-      totalPages: Math.ceil(count / limit),
-    },
-  };
-}
+    return {
+      campaigns: rows,
+      pagination: {
+        page,
+        limit,
+        totalRecords: count,
+        totalPages: Math.ceil(count / limit),
+      },
+    };
+  }
 
   async update(id, companyId, data) {
     await Campaign.update(data, {
@@ -114,90 +109,81 @@ async findAll(
   }
 
   async claimForSending(id, companyId, startedAt) {
-    const [updated] = await Campaign.update({ status: "RUNNING", startedAt, progress: 0 }, {
-      where: { id, companyId, status: { [Op.in]: ["DRAFT", "SCHEDULED"] } },
-    });
+    const [updated] = await Campaign.update(
+      { status: "RUNNING", startedAt, progress: 0 },
+      {
+        where: { id, companyId, status: { [Op.in]: ["DRAFT", "SCHEDULED"] } },
+      },
+    );
     return updated === 1;
   }
 
   async updateCounters(id, data) {
-  await Campaign.update(data, {
-    where: {
-      id,
-    },
-  });
+    await Campaign.update(data, {
+      where: {
+        id,
+      },
+    });
 
     return await Campaign.findByPk(id);
   }
 
-async syncCounters(id) {
-  const totalRecipients =
-    await CampaignRecipient.count({
+  async syncCounters(id) {
+    const totalRecipients = await CampaignRecipient.count({
       where: {
         campaignId: id,
       },
     });
 
-  const sentCount =
-    await CampaignRecipient.count({
+    const sentCount = await CampaignRecipient.count({
       where: {
         campaignId: id,
         status: {
-          [Op.in]: [
-            "SENT",
-            "DELIVERED",
-            "READ",
-          ],
+          [Op.in]: ["SENT", "DELIVERED", "READ"],
         },
       },
     });
 
-  const deliveredCount =
-    await CampaignRecipient.count({
+    const deliveredCount = await CampaignRecipient.count({
       where: {
         campaignId: id,
         status: {
-          [Op.in]: [
-            "DELIVERED",
-            "READ",
-          ],
+          [Op.in]: ["DELIVERED", "READ"],
         },
       },
     });
 
-  const readCount =
-    await CampaignRecipient.count({
+    const readCount = await CampaignRecipient.count({
       where: {
         campaignId: id,
         status: "READ",
       },
     });
 
-  const failedCount =
-    await CampaignRecipient.count({
+    const failedCount = await CampaignRecipient.count({
       where: {
         campaignId: id,
         status: "FAILED",
       },
     });
 
-  await Campaign.update(
-    {
-      totalRecipients,
-      sentCount,
-      deliveredCount,
-      readCount,
-      failedCount,
-    },
-    {
-      where: {
-        id,
+    await Campaign.update(
+      {
+        totalRecipients,
+        sentCount,
+        deliveredCount,
+        readCount,
+        failedCount,
       },
-    }
-  );
+      {
+        where: {
+          id,
+        },
+      },
+    );
 
-  return await Campaign.findByPk(id);
-}
+    return await Campaign.findByPk(id);
+  }
 
   async delete(id, companyId) {
     return await Campaign.destroy({
@@ -208,66 +194,96 @@ async syncCounters(id) {
     });
   }
 
-  async search(companyId, keyword) {
+  async search(companyId, keyword, filters = {}) {
+    const where = {
+      companyId,
+    };
+
+    // Search by campaign name or description
+    if (keyword && keyword.trim() !== "") {
+      where[Op.or] = [
+        {
+          name: {
+            [Op.like]: `%${keyword.trim()}%`,
+          },
+        },
+        {
+          description: {
+            [Op.like]: `%${keyword.trim()}%`,
+          },
+        },
+      ];
+    }
+
+    // Status filter
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    // Send type filter
+    if (filters.sendType) {
+      where.sendType = filters.sendType;
+    }
+
+    // Template filter
+    if (filters.templateId) {
+      where.templateId = filters.templateId;
+    }
+
     return await Campaign.findAll({
-      where: {
-        companyId,
-        [Op.or]: [
-          {
-            name: {
-              [Op.like]: `%${keyword}%`,
-            },
-          },
-          {
-            description: {
-              [Op.like]: `%${keyword}%`,
-            },
-          },
-        ],
-      },
+      where,
+      include: [
+        {
+          model: Template,
+          as: "template",
+        },
+      ],
       order: [["created_at", "DESC"]],
     });
   }
 
-async findScheduledCampaigns() {
-  const now = new Date();
+  async findScheduledCampaigns() {
+    const now = new Date();
 
-  console.log("==================================");
-  console.log("Current Server Time (UTC):", now.toISOString());
-  console.log("==================================");
+    console.log("==================================");
+    console.log("Current Server Time (UTC):", now.toISOString());
+    console.log("==================================");
 
-  const campaigns = await Campaign.findAll({
-    where: {
-      status: "SCHEDULED",
-    },
-  });
-  console.log("Raw Scheduled Campaigns:", campaigns.map(c => ({
-  id: c.id,
-  status: c.status,
-  scheduledAt: c.scheduledAt
-  })));
+    const campaigns = await Campaign.findAll({
+      where: {
+        status: "SCHEDULED",
+      },
+    });
+    console.log(
+      "Raw Scheduled Campaigns:",
+      campaigns.map((c) => ({
+        id: c.id,
+        status: c.status,
+        scheduledAt: c.scheduledAt,
+      })),
+    );
 
-  console.log("Total Scheduled Campaigns:", campaigns.length);
+    console.log("Total Scheduled Campaigns:", campaigns.length);
 
-  const dueCampaigns = [];
+    const dueCampaigns = [];
 
-  for (const campaign of campaigns) {
-    console.log("----------------------------------");
-    console.log("Campaign :", campaign.name);
-    console.log("Status   :", campaign.status);
-    console.log("Scheduled:", campaign.scheduledAt);
-    console.log("Due?     :", campaign.scheduledAt <= now);
-    console.log("----------------------------------");
+    for (const campaign of campaigns) {
+      console.log("----------------------------------");
+      console.log("Campaign :", campaign.name);
+      console.log("Status   :", campaign.status);
+      console.log("Scheduled:", campaign.scheduledAt);
+      console.log("Due?     :", campaign.scheduledAt <= now);
+      console.log("----------------------------------");
 
-    if (campaign.scheduledAt <= now) {
-      dueCampaigns.push(campaign);
+      if (campaign.scheduledAt <= now) {
+        dueCampaigns.push(campaign);
+      }
     }
+
+    console.log("Due Campaigns:", dueCampaigns.length);
+
+    return dueCampaigns;
   }
-
-  console.log("Due Campaigns:", dueCampaigns.length);
-
-  return dueCampaigns;
-}
 }
 
 module.exports = new CampaignRepository();

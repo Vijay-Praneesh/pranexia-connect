@@ -9,14 +9,14 @@ class CampaignController {
       if (error) return ApiResponse.error(res, error.details[0].message, 400);
       const campaign = await campaignService.createCampaign(
         req.user.companyId,
-        req.body
+        req.body,
       );
 
       return ApiResponse.success(
         res,
         "Campaign created successfully",
         campaign,
-        201
+        201,
       );
     } catch (error) {
       next(error);
@@ -43,13 +43,13 @@ class CampaignController {
         limit,
         sortBy,
         order,
-        filters
+        filters,
       );
 
       return ApiResponse.success(
         res,
         "Campaigns fetched successfully",
-        campaigns
+        campaigns,
       );
     } catch (error) {
       next(error);
@@ -60,13 +60,13 @@ class CampaignController {
     try {
       const campaign = await campaignService.getCampaignById(
         req.user.companyId,
-        req.params.id
+        req.params.id,
       );
 
       return ApiResponse.success(
         res,
         "Campaign fetched successfully",
-        campaign
+        campaign,
       );
     } catch (error) {
       next(error);
@@ -80,13 +80,13 @@ class CampaignController {
       const campaign = await campaignService.updateCampaign(
         req.user.companyId,
         req.params.id,
-        req.body
+        req.body,
       );
 
       return ApiResponse.success(
         res,
         "Campaign updated successfully",
-        campaign
+        campaign,
       );
     } catch (error) {
       next(error);
@@ -97,14 +97,10 @@ class CampaignController {
     try {
       const result = await campaignService.deleteCampaign(
         req.user.companyId,
-        req.params.id
+        req.params.id,
       );
 
-      return ApiResponse.success(
-        res,
-        result.message,
-        null
-      );
+      return ApiResponse.success(res, result.message, null);
     } catch (error) {
       next(error);
     }
@@ -114,15 +110,22 @@ class CampaignController {
     try {
       const keyword = req.query.keyword || req.query.q || "";
 
+      const filters = {
+        status: req.query.status,
+        sendType: req.query.sendType,
+        templateId: req.query.templateId,
+      };
+
       const campaigns = await campaignService.searchCampaigns(
         req.user.companyId,
-        keyword
+        keyword,
+        filters,
       );
 
       return ApiResponse.success(
         res,
         "Campaigns fetched successfully",
-        campaigns
+        campaigns,
       );
     } catch (error) {
       next(error);
@@ -130,55 +133,51 @@ class CampaignController {
   }
 
   async sendCampaign(req, res, next) {
-  try {
-    const result = await campaignService.sendCampaign(
-      req.user.companyId,
-      req.params.id
-    );
+    try {
+      const result = await campaignService.sendCampaign(
+        req.user.companyId,
+        req.params.id,
+      );
 
-    return ApiResponse.success(
-      res,
-      "Campaign sent successfully",
-      result
-    );
-  } catch (error) {
-    next(error);
-  }
+      return ApiResponse.success(res, "Campaign sent successfully", result);
+    } catch (error) {
+      next(error);
+    }
   }
 
   async cancel(req, res, next) {
-  try {
-    const result = await campaignService.cancelCampaign(
-      req.user.companyId,
-      req.params.id
-    );
+    try {
+      const result = await campaignService.cancelCampaign(
+        req.user.companyId,
+        req.params.id,
+      );
 
-    return ApiResponse.success(
-      res,
-      "Campaign cancelled successfully",
-      result
-    );
-  } catch (error) {
-    next(error);
-  }
+      return ApiResponse.success(
+        res,
+        "Campaign cancelled successfully",
+        result,
+      );
+    } catch (error) {
+      next(error);
+    }
   }
 
   async getReport(req, res, next) {
-  try {
-    const report = await campaignService.getCampaignReport(
-      req.user.companyId,
-      req.params.id
-    );
+    try {
+      const report = await campaignService.getCampaignReport(
+        req.user.companyId,
+        req.params.id,
+      );
 
-    return ApiResponse.success(
-      res,
-      "Campaign report fetched successfully",
-      report
-    );
-  } catch (error) {
-    next(error);
+      return ApiResponse.success(
+        res,
+        "Campaign report fetched successfully",
+        report,
+      );
+    } catch (error) {
+      next(error);
+    }
   }
-}
 }
 
 module.exports = new CampaignController();

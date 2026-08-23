@@ -51,7 +51,13 @@ export class CampaignsComponent implements OnDestroy {
 
   load(): void {
     this.loading = true; this.errorMessage = '';
-    const request: Observable<Campaign[] | CampaignListData> = this.keyword ? this.api.searchCampaigns(this.keyword) : this.api.getCampaigns({ page: this.page, limit: this.limit, sortBy: this.sortBy, order: this.order, status: this.status as CampaignStatus || undefined, sendType: this.sendType as CampaignSendType || undefined, templateId: this.templateId || undefined });
+    const request: Observable<Campaign[] | CampaignListData> = this.keyword
+      ? this.api.searchCampaigns(this.keyword, {
+        status: this.status as CampaignStatus || undefined,
+        sendType: this.sendType as CampaignSendType || undefined,
+        templateId: this.templateId || undefined
+      })
+      : this.api.getCampaigns({ page: this.page, limit: this.limit, sortBy: this.sortBy, order: this.order, status: this.status as CampaignStatus || undefined, sendType: this.sendType as CampaignSendType || undefined, templateId: this.templateId || undefined });
     request.pipe(finalize(() => { this.loading = false; })).subscribe({ next: (result) => { if (Array.isArray(result)) { this.campaigns = result; this.totalRecords = result.length; this.totalPages = result.length ? 1 : 0; this.page = 1; } else { this.campaigns = result.campaigns; this.totalRecords = result.pagination.totalRecords; this.totalPages = result.pagination.totalPages; } }, error: (error) => { this.errorMessage = this.errors.map(error).message; } });
   }
   loadOptions(): void {

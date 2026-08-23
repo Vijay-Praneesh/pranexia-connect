@@ -13,7 +13,12 @@ export class CampaignService {
   private readonly recipients = `${inject(API_BASE_URL)}/campaign-recipients`;
 
   getCampaigns(query: CampaignListQuery = {}): Observable<CampaignListData> { return this.getWithParams<CampaignListData>(this.campaigns, query); }
-  searchCampaigns(keyword: string): Observable<Campaign[]> { return this.getWithParams<Campaign[]>(`${this.campaigns}/search`, { keyword }); }
+  searchCampaigns(
+    keyword: string,
+    filters: Pick<CampaignListQuery, 'status' | 'sendType' | 'templateId'> = {}
+  ): Observable<Campaign[]> {
+    return this.getWithParams<Campaign[]>(`${this.campaigns}/search`, { keyword, ...filters });
+  }
   getCampaign(id: string): Observable<Campaign> { return this.http.get<ApiResponse<Campaign>>(`${this.campaigns}/${id}`).pipe(map((response) => response.data)); }
   createCampaign(data: CreateCampaignRequest): Observable<Campaign> { return this.http.post<ApiResponse<Campaign>>(this.campaigns, data).pipe(map((response) => response.data)); }
   updateCampaign(id: string, data: UpdateCampaignRequest): Observable<Campaign> { return this.http.put<ApiResponse<Campaign>>(`${this.campaigns}/${id}`, data).pipe(map((response) => response.data)); }

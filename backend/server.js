@@ -1,8 +1,8 @@
 const app = require("./src/app");
 const env = require("./src/config/env");
-const sequelize = require("./src/config/database");
 const db = require("./src/models");
 const startCampaignScheduler = require("./src/cron/campaign.cron");
+const logger = require("./src/config/logger");
 
 const startServer = async () => {
   try {
@@ -13,17 +13,14 @@ const startServer = async () => {
     // Start Campaign Scheduler
     startCampaignScheduler();
 
-    console.log("=====================================");
-    console.log("✅ Database Connected Successfully");
-    console.log("🚀 Pranexia Connect API Started");
-    console.log(`🌐 Server : http://localhost:${env.PORT}`);
-    console.log(`🌍 Environment : ${env.NODE_ENV}`);
-    console.log("=====================================");
-
-    app.listen(env.PORT);
-  } catch (error) {
-    console.error("❌ Database Connection Failed");
-    console.error(error.message);
+    app.listen(env.PORT, () => {
+      logger.info("Database connected successfully");
+      logger.info(
+        `Pranexia Connect API started on port ${env.PORT} in ${env.NODE_ENV} mode`
+      );
+    });
+  } catch {
+    logger.error("Pranexia Connect API startup failed");
   }
 };
 
