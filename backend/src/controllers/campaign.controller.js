@@ -75,12 +75,18 @@ class CampaignController {
 
   async update(req, res, next) {
     try {
-      const { error } = validator.campaignUpdate(req.body);
-      if (error) return ApiResponse.error(res, error.details[0].message, 400);
+      const body = req.body || {};
+
+      const { error } = validator.campaignUpdate(body);
+
+      if (error) {
+        return ApiResponse.error(res, error.details[0].message, 400);
+      }
+
       const campaign = await campaignService.updateCampaign(
         req.user.companyId,
         req.params.id,
-        req.body,
+        body,
       );
 
       return ApiResponse.success(

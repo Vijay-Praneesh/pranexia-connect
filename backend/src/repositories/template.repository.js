@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, literal } = require("sequelize");
 const { Template } = require("../models");
 
 class TemplateRepository {
@@ -24,54 +24,55 @@ class TemplateRepository {
     });
   }
 
-async findAll(
-  companyId,
-  page = 1,
-  limit = 10,
-  sortBy = "created_at",
-  order = "DESC",
-  filters = {}
-) {
-  const offset = (page - 1) * limit;
-
-  const where = {
+  async findAll(
     companyId,
-  };
+    page = 1,
+    limit = 10,
+    sortBy = "created_at",
+    order = "DESC",
+    filters = {},
+  ) {
+    const offset = (page - 1) * limit;
 
-  if (filters.category) {
-    where.category = filters.category;
+    const where = {
+      companyId,
+    };
+
+    if (filters.category) {
+      where.category = filters.category;
+    }
+
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    if (filters.language) {
+      where.language = filters.language;
+    }
+
+    // Only allow known database columns.
+    const sortColumnMap = {
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      created_at: "created_at",
+      updated_at: "updated_at",
+      name: "name",
+      category: "category",
+      language: "language",
+      status: "status",
+    };
+
+    const safeSortColumn = sortColumnMap[sortBy] || "created_at";
+
+    const safeOrder = String(order).toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+    return await Template.findAndCountAll({
+      where,
+      order: [[literal(`\`Template\`.\`${safeSortColumn}\``), safeOrder]],
+      limit,
+      offset,
+    });
   }
-
-  if (filters.status) {
-    where.status = filters.status;
-  }
-
-  if (filters.language) {
-    where.language = filters.language;
-  }
-
-  const sortColumnMap = {
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-    created_at: "created_at",
-    updated_at: "updated_at",
-    name: "name",
-    category: "category",
-    language: "language",
-    status: "status",
-  };
-
-  const safeSortBy = sortColumnMap[sortBy] || "created_at";
-  const safeOrder =
-    order.toUpperCase() === "ASC" ? "ASC" : "DESC";
-
-  return await Template.findAndCountAll({
-    where,
-    order: [[safeSortBy, safeOrder]],
-    limit,
-    offset,
-  });
-}
 
   async update(companyId, id, templateData) {
     return await Template.update(templateData, {
