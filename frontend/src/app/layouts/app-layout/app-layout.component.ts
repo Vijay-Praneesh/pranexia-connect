@@ -11,7 +11,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
   template: `
     <header class="border-bottom bg-white">
       <div class="container-fluid d-flex align-items-center justify-content-between gap-3 py-3">
-        <a class="brand-link fw-semibold" routerLink="/dashboard">Pranexia Connect</a>
+        <a class="brand-link fw-semibold" routerLink="/dashboard">Seyyon Connect</a>
         @if (auth.currentUser$ | async; as user) {
           <div class="d-flex align-items-center gap-3">
             <span class="d-none d-sm-inline text-body-secondary">{{ user.firstName }} · {{ user.company.companyName }}</span>
