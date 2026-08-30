@@ -1,12 +1,33 @@
 import { ApiErrorResponse } from '../../core/models/api-response.model';
-import { PaginationMeta, PaginationQuery } from '../../core/models/pagination.model';
+import {
+  PaginationMeta,
+  PaginationQuery,
+} from '../../core/models/pagination.model';
 import { Customer } from '../customers/customer.model';
 import { Template } from '../templates/template.model';
 
-export type CampaignStatus = 'DRAFT' | 'SCHEDULED' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+export type CampaignStatus =
+  | 'DRAFT'
+  | 'SCHEDULED'
+  | 'RUNNING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'CANCELLED';
 export type CampaignSendType = 'NOW' | 'SCHEDULED';
-export type CampaignSortField = 'created_at' | 'updated_at' | 'name' | 'status' | 'send_type' | 'scheduled_at';
-export type CampaignRecipientStatus = 'PENDING' | 'QUEUED' | 'SENT' | 'DELIVERED' | 'READ' | 'FAILED';
+export type CampaignSortField =
+  | 'created_at'
+  | 'updated_at'
+  | 'name'
+  | 'status'
+  | 'send_type'
+  | 'scheduled_at';
+export type CampaignRecipientStatus =
+  | 'PENDING'
+  | 'QUEUED'
+  | 'SENT'
+  | 'DELIVERED'
+  | 'READ'
+  | 'FAILED';
 export type CampaignApiError = ApiErrorResponse;
 
 export interface Campaign {
@@ -32,7 +53,10 @@ export interface Campaign {
   template?: Template;
 }
 
-export interface CampaignListData { campaigns: Campaign[]; pagination: PaginationMeta; }
+export interface CampaignListData {
+  campaigns: Campaign[];
+  pagination: PaginationMeta;
+}
 export interface CampaignListQuery extends PaginationQuery {
   status?: CampaignStatus;
   sendType?: CampaignSendType;
@@ -51,10 +75,19 @@ export interface CampaignWriteRequest {
 }
 export type CreateCampaignRequest = CampaignWriteRequest;
 export type UpdateCampaignRequest = CampaignWriteRequest;
-export interface ScheduleCampaignRequest extends CampaignWriteRequest { sendType: 'SCHEDULED'; scheduledAt: string; }
+export interface ScheduleCampaignRequest extends CampaignWriteRequest {
+  sendType: 'SCHEDULED';
+  scheduledAt: string;
+}
 
-export interface AssignRecipientsRequest { campaignId: string; customerIds: string[]; }
-export interface AssignRecipientsResult { message: string; totalRecipients: number; }
+export interface AssignRecipientsRequest {
+  campaignId: string;
+  customerIds: string[];
+}
+export interface AssignRecipientsResult {
+  message: string;
+  totalRecipients: number;
+}
 
 export interface CampaignRecipient {
   id: string;
@@ -71,8 +104,15 @@ export interface CampaignRecipient {
   campaign?: Campaign;
   customer?: Customer;
 }
-export interface CampaignRecipientListData { recipients: CampaignRecipient[]; pagination: PaginationMeta; }
-export interface CampaignRecipientListQuery extends PaginationQuery { campaignId?: string; customerId?: string; status?: CampaignRecipientStatus; }
+export interface CampaignRecipientListData {
+  recipients: CampaignRecipient[];
+  pagination: PaginationMeta;
+}
+export interface CampaignRecipientListQuery extends PaginationQuery {
+  campaignId?: string;
+  customerId?: string;
+  status?: CampaignRecipientStatus;
+}
 
 export interface CampaignReport {
   campaignId: string;
@@ -94,7 +134,20 @@ export interface CampaignReport {
 export interface CampaignSendResult extends CampaignReport {
   success: boolean;
   message: string;
-  successRecipients: { customerId: string; mobile: string; whatsappMessageId: string }[];
-  failedRecipients: { customerId: string | null; mobile: string | null; reason: string }[];
+  successRecipients: {
+    customerId: string;
+    mobile: string;
+    whatsappMessageId: string;
+  }[];
+  failedRecipients: {
+    customerId: string | null;
+    mobile: string | null;
+    reason: string;
+  }[];
 }
-export interface CampaignCancelResult { campaignId: string; name: string; status: 'CANCELLED'; message: string; }
+export interface CampaignCancelResult {
+  campaignId: string;
+  name: string;
+  status: 'CANCELLED';
+  message: string;
+}

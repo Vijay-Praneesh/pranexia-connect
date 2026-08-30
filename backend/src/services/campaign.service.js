@@ -18,10 +18,17 @@ class CampaignService {
     if (!template) {
       throw new AppError("Template not found", 404);
     }
-    if (template.status !== "APPROVED") throw new AppError("Only approved WhatsApp templates can be used in campaigns", 422);
+    if (template.status !== "APPROVED")
+      throw new AppError(
+        "Only approved WhatsApp templates can be used in campaigns",
+        422,
+      );
 
     if (data.mediaId) {
-      const media = await mediaService.assertOwnedByCompany(companyId, data.mediaId);
+      const media = await mediaService.assertOwnedByCompany(
+        companyId,
+        data.mediaId,
+      );
       if (!(await require("./storage.service").exists(media.storageKey))) {
         throw new AppError("Campaign media file is unavailable", 422);
       }
@@ -110,12 +117,18 @@ class CampaignService {
         throw new AppError("Template not found", 404);
       }
       if (template.status !== "APPROVED") {
-        throw new AppError("Only approved WhatsApp templates can be used in campaigns", 422);
+        throw new AppError(
+          "Only approved WhatsApp templates can be used in campaigns",
+          422,
+        );
       }
     }
 
     if (data.mediaId) {
-      const media = await mediaService.assertOwnedByCompany(companyId, data.mediaId);
+      const media = await mediaService.assertOwnedByCompany(
+        companyId,
+        data.mediaId,
+      );
       if (!(await require("./storage.service").exists(media.storageKey))) {
         throw new AppError("Campaign media file is unavailable", 422);
       }
@@ -173,22 +186,44 @@ class CampaignService {
   async sendCampaign(companyId, campaignId) {
     const campaign = await campaignRepository.findById(companyId, campaignId);
     if (!campaign) throw new AppError("Campaign not found", 404);
-    if (!['DRAFT', 'SCHEDULED'].includes(campaign.status)) {
+    if (!["DRAFT", "SCHEDULED"].includes(campaign.status)) {
       throw new AppError("Campaign cannot be sent in its current state", 409);
     }
-    if (campaign.status === 'SCHEDULED' && (!campaign.scheduledAt || new Date(campaign.scheduledAt) > new Date())) {
+    if (
+      campaign.status === "SCHEDULED" &&
+      (!campaign.scheduledAt || new Date(campaign.scheduledAt) > new Date())
+    ) {
       throw new AppError("Scheduled campaign is not due yet", 409);
     }
-    if (!campaign.template || campaign.template.status !== 'APPROVED' || !campaign.template.metaTemplateName) {
+    if (
+      !campaign.template ||
+      campaign.template.status !== "APPROVED" ||
+      !campaign.template.metaTemplateName
+    ) {
       throw new AppError("Campaign template is not approved by Meta", 422);
     }
     const connection = await whatsappRepository.findByCompanyId(companyId);
-    if (!connection || connection.status !== 'CONNECTED') throw new AppError("WhatsApp Business is not connected", 409);
-    if (campaign.mediaId) await mediaService.assertOwnedByCompany(companyId, campaign.mediaId);
-    const claimed = await campaignRepository.claimForSending(campaign.id, companyId, new Date());
-    if (!claimed) throw new AppError("Campaign is already being processed or cannot be sent", 409);
+    if (!connection || connection.status !== "CONNECTED")
+      throw new AppError("WhatsApp Business is not connected", 409);
+    if (campaign.mediaId)
+      await mediaService.assertOwnedByCompany(companyId, campaign.mediaId);
+    const claimed = await campaignRepository.claimForSending(
+      campaign.id,
+      companyId,
+      new Date(),
+    );
+    if (!claimed)
+      throw new AppError(
+        "Campaign is already being processed or cannot be sent",
+        409,
+      );
     campaignWorker.enqueue(companyId, campaignId);
-    return { campaignId, status: 'RUNNING', progress: 0, message: 'Campaign processing started' };
+    return {
+      campaignId,
+      status: "RUNNING",
+      progress: 0,
+      message: "Campaign processing started",
+    };
   }
 
   // =====================================
@@ -210,9 +245,19 @@ class CampaignService {
       );
     }
 
-    const claimed = await campaignRepository.claimScheduledCancellation(campaign.id, companyId);
-    if (!claimed) throw new AppError("Campaign is already being processed or cannot be cancelled", 409);
-    const updatedCampaign = await campaignRepository.findById(companyId, campaign.id);
+    const claimed = await campaignRepository.claimScheduledCancellation(
+      campaign.id,
+      companyId,
+    );
+    if (!claimed)
+      throw new AppError(
+        "Campaign is already being processed or cannot be cancelled",
+        409,
+      );
+    const updatedCampaign = await campaignRepository.findById(
+      companyId,
+      campaign.id,
+    );
 
     return {
       campaignId: updatedCampaign.id,

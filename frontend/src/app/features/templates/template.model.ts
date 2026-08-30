@@ -1,14 +1,41 @@
-import { PaginationMeta, PaginationQuery } from '../../core/models/pagination.model';
+import {
+  PaginationMeta,
+  PaginationQuery,
+} from '../../core/models/pagination.model';
 import { ApiErrorResponse } from '../../core/models/api-response.model';
 
-export type TemplateStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'PAUSED' | 'DISABLED' | 'UNKNOWN';
+export type TemplateStatus =
+  | 'DRAFT'
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'PAUSED'
+  | 'DISABLED'
+  | 'UNKNOWN';
 export type TemplateCategory = 'MARKETING' | 'UTILITY' | 'AUTHENTICATION';
-export type TemplateHeaderType = 'NONE' | 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+export type TemplateHeaderType =
+  | 'NONE'
+  | 'TEXT'
+  | 'IMAGE'
+  | 'VIDEO'
+  | 'DOCUMENT';
 export type TemplateLanguage = string;
-export type TemplateSortField = 'createdAt' | 'updatedAt' | 'name' | 'category' | 'language' | 'status';
+export type TemplateSortField =
+  | 'createdAt'
+  | 'updatedAt'
+  | 'name'
+  | 'category'
+  | 'language'
+  | 'status';
 export type TemplateApiError = ApiErrorResponse;
 
-export type TemplateJson = string | number | boolean | null | TemplateJson[] | { [key: string]: TemplateJson };
+export type TemplateJson =
+  | string
+  | number
+  | boolean
+  | null
+  | TemplateJson[]
+  | { [key: string]: TemplateJson };
 
 export interface TemplateButton {
   type?: string;
@@ -34,7 +61,9 @@ export interface Template {
   rejectionReason: string | null;
   createdAt: string;
   updatedAt: string;
-  variables?: Array<string | { key?: string; name?: string; required?: boolean }>;
+  variables?: Array<
+    string | { key?: string; name?: string; required?: boolean }
+  >;
 }
 
 export interface TemplateListData {

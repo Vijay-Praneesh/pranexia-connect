@@ -105,7 +105,12 @@ describe('CampaignsComponent', () => {
       }),
     );
     mediaApi = jasmine.createSpyObj('MediaService', ['getMedia']);
-    mediaApi.getMedia.and.returnValue(of({ media: [], pagination: { page: 1, limit: 100, totalRecords: 0, totalPages: 0 } }));
+    mediaApi.getMedia.and.returnValue(
+      of({
+        media: [],
+        pagination: { page: 1, limit: 100, totalRecords: 0, totalPages: 0 },
+      }),
+    );
     await TestBed.configureTestingModule({
       imports: [CampaignsComponent],
       providers: [

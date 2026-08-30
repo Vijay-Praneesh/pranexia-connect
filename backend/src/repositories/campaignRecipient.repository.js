@@ -1,9 +1,5 @@
 const { Op } = require("sequelize");
-const {
-  CampaignRecipient,
-  Campaign,
-  Customer,
-} = require("../models");
+const { CampaignRecipient, Campaign, Customer } = require("../models");
 
 class CampaignRecipientRepository {
   async create(data) {
@@ -54,7 +50,7 @@ class CampaignRecipientRepository {
     limit = 10,
     sortBy = "created_at",
     order = "DESC",
-    filters = {}
+    filters = {},
   ) {
     const where = {
       companyId,
@@ -82,31 +78,26 @@ class CampaignRecipientRepository {
       status: "status",
     };
 
-    const safeSortBy =
-      sortColumnMap[sortBy] || "created_at";
+    const safeSortBy = sortColumnMap[sortBy] || "created_at";
 
-    const safeOrder =
-      order.toUpperCase() === "ASC"
-        ? "ASC"
-        : "DESC";
+    const safeOrder = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
-    const { rows, count } =
-      await CampaignRecipient.findAndCountAll({
-        where,
-        include: [
-          {
-            model: Campaign,
-            as: "campaign",
-          },
-          {
-            model: Customer,
-            as: "customer",
-          },
-        ],
-        limit,
-        offset,
-        order: [[safeSortBy, safeOrder]],
-      });
+    const { rows, count } = await CampaignRecipient.findAndCountAll({
+      where,
+      include: [
+        {
+          model: Campaign,
+          as: "campaign",
+        },
+        {
+          model: Customer,
+          as: "customer",
+        },
+      ],
+      limit,
+      offset,
+      order: [[safeSortBy, safeOrder]],
+    });
 
     return {
       recipients: rows,
@@ -133,7 +124,9 @@ class CampaignRecipientRepository {
         { where: { id: recipient.id, companyId, status: "PENDING" } },
       );
       if (updated === 1) {
-        await recipient.reload({ include: [{ model: Customer, as: "customer" }] });
+        await recipient.reload({
+          include: [{ model: Customer, as: "customer" }],
+        });
         claimed.push(recipient);
       }
     }
@@ -161,128 +154,121 @@ class CampaignRecipientRepository {
   }
 
   async search(companyId, keyword) {
-  const searchKeyword = String(keyword || "").trim();
+    const searchKeyword = String(keyword || "").trim();
 
-  // Empty search should return no results
-  if (!searchKeyword) {
-    return [];
-  }
+    // Empty search should return no results
+    if (!searchKeyword) {
+      return [];
+    }
 
-  // ==========================================
-  // 1. Find matching customers
-  // ==========================================
-  const customers = await Customer.findAll({
-    where: {
-      companyId,
-      [Op.or]: [
-        {
-          firstName: {
-            [Op.like]: `%${searchKeyword}%`,
+    // ==========================================
+    // 1. Find matching customers
+    // ==========================================
+    const customers = await Customer.findAll({
+      where: {
+        companyId,
+        [Op.or]: [
+          {
+            firstName: {
+              [Op.like]: `%${searchKeyword}%`,
+            },
           },
+          {
+            lastName: {
+              [Op.like]: `%${searchKeyword}%`,
+            },
+          },
+          {
+            mobile: {
+              [Op.like]: `%${searchKeyword}%`,
+            },
+          },
+          {
+            email: {
+              [Op.like]: `%${searchKeyword}%`,
+            },
+          },
+        ],
+      },
+      attributes: ["id"],
+    });
+
+    const customerIds = customers.map((customer) => customer.id);
+
+    // ==========================================
+    // 2. Find matching campaigns
+    // ==========================================
+    const campaigns = await Campaign.findAll({
+      where: {
+        companyId,
+        [Op.or]: [
+          {
+            name: {
+              [Op.like]: `%${searchKeyword}%`,
+            },
+          },
+          {
+            description: {
+              [Op.like]: `%${searchKeyword}%`,
+            },
+          },
+        ],
+      },
+      attributes: ["id"],
+    });
+
+    const campaignIds = campaigns.map((campaign) => campaign.id);
+
+    // ==========================================
+    // 3. If nothing matches, return empty array
+    // ==========================================
+    if (customerIds.length === 0 && campaignIds.length === 0) {
+      return [];
+    }
+
+    // ==========================================
+    // 4. Find matching recipients
+    // ==========================================
+    return await CampaignRecipient.findAll({
+      where: {
+        companyId,
+        [Op.or]: [
+          ...(customerIds.length > 0
+            ? [
+                {
+                  customerId: {
+                    [Op.in]: customerIds,
+                  },
+                },
+              ]
+            : []),
+
+          ...(campaignIds.length > 0
+            ? [
+                {
+                  campaignId: {
+                    [Op.in]: campaignIds,
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+
+      include: [
+        {
+          model: Campaign,
+          as: "campaign",
         },
         {
-          lastName: {
-            [Op.like]: `%${searchKeyword}%`,
-          },
-        },
-        {
-          mobile: {
-            [Op.like]: `%${searchKeyword}%`,
-          },
-        },
-        {
-          email: {
-            [Op.like]: `%${searchKeyword}%`,
-          },
+          model: Customer,
+          as: "customer",
         },
       ],
-    },
-    attributes: ["id"],
-  });
 
-  const customerIds = customers.map(
-    (customer) => customer.id
-  );
-
-  // ==========================================
-  // 2. Find matching campaigns
-  // ==========================================
-const campaigns = await Campaign.findAll({
-  where: {
-    companyId,
-    [Op.or]: [
-      {
-        name: {
-          [Op.like]: `%${searchKeyword}%`,
-        },
-      },
-      {
-        description: {
-          [Op.like]: `%${searchKeyword}%`,
-        },
-      },
-    ],
-  },
-  attributes: ["id"],
-});
-
-  const campaignIds = campaigns.map(
-    (campaign) => campaign.id
-  );
-
-  // ==========================================
-  // 3. If nothing matches, return empty array
-  // ==========================================
-  if (
-    customerIds.length === 0 &&
-    campaignIds.length === 0
-  ) {
-    return [];
+      order: [["created_at", "DESC"]],
+    });
   }
-
-  // ==========================================
-  // 4. Find matching recipients
-  // ==========================================
-  return await CampaignRecipient.findAll({
-    where: {
-      companyId,
-      [Op.or]: [
-        ...(customerIds.length > 0
-          ? [
-              {
-                customerId: {
-                  [Op.in]: customerIds,
-                },
-              },
-            ]
-          : []),
-
-        ...(campaignIds.length > 0
-          ? [
-              {
-                campaignId: {
-                  [Op.in]: campaignIds,
-                },
-              },
-            ]
-          : []),
-      ],
-    },
-
-    include: [
-      {
-        model: Campaign,
-        as: "campaign",
-      },
-      {
-        model: Customer,
-        as: "customer",
-      },
-    ],
-
-    order: [["created_at", "DESC"]],
-  });
-}
 
   async findByWhatsappMessageId(messageId) {
     return await CampaignRecipient.findOne({
@@ -303,7 +289,9 @@ const campaigns = await Campaign.findAll({
   }
 
   async countPending(companyId, campaignId) {
-    return await CampaignRecipient.count({ where: { companyId, campaignId, status: "PENDING" } });
+    return await CampaignRecipient.count({
+      where: { companyId, campaignId, status: "PENDING" },
+    });
   }
 }
 
