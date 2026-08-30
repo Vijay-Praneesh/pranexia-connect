@@ -8,6 +8,7 @@ import { provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { CustomerService } from '../customers/customer.service';
 import { TemplateService } from '../templates/template.service';
+import { MediaService } from '../media/media.service';
 import { Campaign, CampaignListData, CampaignReport } from './campaign.model';
 import { CampaignService } from './campaign.service';
 import { CampaignsComponent } from './campaigns.component';
@@ -16,6 +17,7 @@ describe('CampaignsComponent', () => {
   let fixture: ComponentFixture<CampaignsComponent>;
   let component: CampaignsComponent;
   let api: jasmine.SpyObj<CampaignService>;
+  let mediaApi: jasmine.SpyObj<MediaService>;
   const campaign: Campaign = {
     id: 'c1',
     templateId: 't1',
@@ -102,6 +104,8 @@ describe('CampaignsComponent', () => {
         pagination: { page: 1, limit: 100, totalRecords: 1, totalPages: 1 },
       }),
     );
+    mediaApi = jasmine.createSpyObj('MediaService', ['getMedia']);
+    mediaApi.getMedia.and.returnValue(of({ media: [], pagination: { page: 1, limit: 100, totalRecords: 0, totalPages: 0 } }));
     await TestBed.configureTestingModule({
       imports: [CampaignsComponent],
       providers: [
@@ -109,6 +113,7 @@ describe('CampaignsComponent', () => {
         { provide: CampaignService, useValue: api },
         { provide: TemplateService, useValue: templates },
         { provide: CustomerService, useValue: customers },
+        { provide: MediaService, useValue: mediaApi },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(CampaignsComponent);

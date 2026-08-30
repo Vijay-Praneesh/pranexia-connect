@@ -245,44 +245,21 @@ class CampaignRepository {
   async findScheduledCampaigns() {
     const now = new Date();
 
-    console.log("==================================");
-    console.log("Current Server Time (UTC):", now.toISOString());
-    console.log("==================================");
-
     const campaigns = await Campaign.findAll({
       where: {
         status: "SCHEDULED",
+        scheduledAt: { [Op.lte]: now },
       },
     });
-    console.log(
-      "Raw Scheduled Campaigns:",
-      campaigns.map((c) => ({
-        id: c.id,
-        status: c.status,
-        scheduledAt: c.scheduledAt,
-      })),
+    return campaigns;
+  }
+
+  async claimScheduledCancellation(id, companyId) {
+    const [updated] = await Campaign.update(
+      { status: "CANCELLED" },
+      { where: { id, companyId, status: "SCHEDULED" } },
     );
-
-    console.log("Total Scheduled Campaigns:", campaigns.length);
-
-    const dueCampaigns = [];
-
-    for (const campaign of campaigns) {
-      console.log("----------------------------------");
-      console.log("Campaign :", campaign.name);
-      console.log("Status   :", campaign.status);
-      console.log("Scheduled:", campaign.scheduledAt);
-      console.log("Due?     :", campaign.scheduledAt <= now);
-      console.log("----------------------------------");
-
-      if (campaign.scheduledAt <= now) {
-        dueCampaigns.push(campaign);
-      }
-    }
-
-    console.log("Due Campaigns:", dueCampaigns.length);
-
-    return dueCampaigns;
+    return updated === 1;
   }
 }
 

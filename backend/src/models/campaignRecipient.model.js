@@ -27,6 +27,8 @@ const CampaignRecipient = sequelize.define(
       allowNull: false,
       field: "customer_id",
     },
+    variableData: { type: DataTypes.JSON, allowNull: true, field: "variable_data" },
+    phoneSnapshot: { type: DataTypes.STRING(30), allowNull: true, field: "phone_snapshot" },
 
     status: {
       type: DataTypes.ENUM(

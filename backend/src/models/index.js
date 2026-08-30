@@ -76,6 +76,9 @@ Campaign.belongsTo(Template, {
   as: "template",
 });
 
+Media.hasMany(Campaign, { foreignKey: "mediaId", as: "campaigns" });
+Campaign.belongsTo(Media, { foreignKey: "mediaId", as: "media" });
+
 // Company → CampaignRecipient
 Company.hasMany(CampaignRecipient, {
   foreignKey: "companyId",

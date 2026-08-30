@@ -16,6 +16,8 @@ export interface Campaign {
   description: string | null;
   sendType: CampaignSendType;
   scheduledAt: string | null;
+  mediaId?: string | null;
+  variableMappings?: Record<string, string> | null;
   status: CampaignStatus;
   totalRecipients: number;
   sentCount: number;
@@ -44,6 +46,8 @@ export interface CampaignWriteRequest {
   description: string | null;
   sendType: CampaignSendType;
   scheduledAt: string | null;
+  mediaId?: string | null;
+  variableMappings?: Record<string, string> | null;
 }
 export type CreateCampaignRequest = CampaignWriteRequest;
 export type UpdateCampaignRequest = CampaignWriteRequest;
@@ -94,4 +98,3 @@ export interface CampaignSendResult extends CampaignReport {
   failedRecipients: { customerId: string | null; mobile: string | null; reason: string }[];
 }
 export interface CampaignCancelResult { campaignId: string; name: string; status: 'CANCELLED'; message: string; }
-

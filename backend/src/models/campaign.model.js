@@ -21,6 +21,8 @@ const Campaign = sequelize.define(
       allowNull: false,
       field: "template_id",
     },
+    mediaId: { type: DataTypes.UUID, allowNull: true, field: "media_id" },
+    variableMappings: { type: DataTypes.JSON, allowNull: true, field: "variable_mappings" },
 
     name: {
       type: DataTypes.STRING(150),

@@ -18,6 +18,7 @@ class LocalStorageProvider {
     return storageKey;
   }
   async get(storageKey) { return fs.createReadStream(this.resolve(storageKey)); }
+  async readBuffer(storageKey) { return fsp.readFile(this.resolve(storageKey)); }
   async delete(storageKey) {
     try { await fsp.unlink(this.resolve(storageKey)); }
     catch (error) { if (error.code !== "ENOENT") throw error; }
@@ -37,6 +38,7 @@ class StorageService {
   }
   save(key, buffer) { return this.provider.save(key, buffer); }
   get(key) { return this.provider.get(key); }
+  readBuffer(key) { return this.provider.readBuffer(key); }
   delete(key) { return this.provider.delete(key); }
   exists(key) { return this.provider.exists(key); }
 }

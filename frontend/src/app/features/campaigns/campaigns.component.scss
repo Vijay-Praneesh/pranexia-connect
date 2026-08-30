@@ -13,4 +13,5 @@ th { white-space: nowrap; }
 .metric strong { font-size: 1.35rem; }
 .metric span, .rate small { color: var(--bs-secondary-color); font-size: .75rem; }
 .rate { font-weight: 700; }
+.preview-panel { padding: .9rem 1rem; border: 1px solid var(--bs-border-color); border-radius: .5rem; background: var(--bs-light); }
 @media (max-width: 575.98px) { .modal-layer { padding: 0; place-items: end stretch; } .modal-card, .detail-card { width: 100%; max-height: 95vh; border-radius: .75rem .75rem 0 0; } }

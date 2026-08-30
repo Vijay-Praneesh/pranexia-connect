@@ -24,6 +24,8 @@ const campaignFields = {
   templateId: uuid,
   sendType: Joi.string().valid("NOW", "SCHEDULED"),
   scheduledAt: Joi.date().iso().allow(null),
+  mediaId: uuid.allow(null),
+  variableMappings: Joi.object().pattern(Joi.string().pattern(/^\d+$/), Joi.string().valid("firstName", "lastName", "mobile", "email", "country", "notes")).allow(null),
   status: Joi.string().valid(
     "DRAFT",
     "SCHEDULED",

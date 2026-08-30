@@ -119,6 +119,27 @@ class CampaignRecipientRepository {
     };
   }
 
+  async claimPending(companyId, campaignId, limit) {
+    const recipients = await CampaignRecipient.findAll({
+      where: { companyId, campaignId, status: "PENDING" },
+      include: [{ model: Customer, as: "customer" }],
+      order: [["created_at", "ASC"]],
+      limit,
+    });
+    const claimed = [];
+    for (const recipient of recipients) {
+      const [updated] = await CampaignRecipient.update(
+        { status: "QUEUED", phoneSnapshot: recipient.customer?.mobile || null },
+        { where: { id: recipient.id, companyId, status: "PENDING" } },
+      );
+      if (updated === 1) {
+        await recipient.reload({ include: [{ model: Customer, as: "customer" }] });
+        claimed.push(recipient);
+      }
+    }
+    return claimed;
+  }
+
   async update(id, companyId, data) {
     await CampaignRecipient.update(data, {
       where: {
@@ -279,6 +300,10 @@ const campaigns = await Campaign.findAll({
         },
       ],
     });
+  }
+
+  async countPending(companyId, campaignId) {
+    return await CampaignRecipient.count({ where: { companyId, campaignId, status: "PENDING" } });
   }
 }
 

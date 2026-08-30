@@ -1,7 +1,9 @@
 const campaignRepository = require("../repositories/campaign.repository");
 const campaignRecipientRepository = require("../repositories/campaignRecipient.repository");
 const templateRepository = require("../repositories/template.repository");
-const whatsappService = require("./whatsapp.service");
+const campaignWorker = require("./campaign.worker");
+const whatsappRepository = require("../repositories/whatsapp.repository");
+const mediaService = require("./media.service");
 const AppError = require("../utils/appError");
 
 class CampaignService {
@@ -17,6 +19,13 @@ class CampaignService {
       throw new AppError("Template not found", 404);
     }
     if (template.status !== "APPROVED") throw new AppError("Only approved WhatsApp templates can be used in campaigns", 422);
+
+    if (data.mediaId) {
+      const media = await mediaService.assertOwnedByCompany(companyId, data.mediaId);
+      if (!(await require("./storage.service").exists(media.storageKey))) {
+        throw new AppError("Campaign media file is unavailable", 422);
+      }
+    }
 
     const existingCampaign = await campaignRepository.findByName(
       companyId,
@@ -100,6 +109,16 @@ class CampaignService {
       if (!template) {
         throw new AppError("Template not found", 404);
       }
+      if (template.status !== "APPROVED") {
+        throw new AppError("Only approved WhatsApp templates can be used in campaigns", 422);
+      }
+    }
+
+    if (data.mediaId) {
+      const media = await mediaService.assertOwnedByCompany(companyId, data.mediaId);
+      if (!(await require("./storage.service").exists(media.storageKey))) {
+        throw new AppError("Campaign media file is unavailable", 422);
+      }
     }
 
     const updateData = {
@@ -152,307 +171,24 @@ class CampaignService {
   // Send Campaign
   // =====================================
   async sendCampaign(companyId, campaignId) {
-    // =====================================
-    // Get Campaign
-    // =====================================
     const campaign = await campaignRepository.findById(companyId, campaignId);
-
-    if (!campaign) {
-      throw new AppError("Campaign not found", 404);
-    }
-
-    // =====================================
-    // Campaign Status Validation
-    // =====================================
-    console.log("🔎 Campaign Status Before Send:", campaign.status);
-
-    if (!["DRAFT", "SCHEDULED"].includes(campaign.status))
+    if (!campaign) throw new AppError("Campaign not found", 404);
+    if (!['DRAFT', 'SCHEDULED'].includes(campaign.status)) {
       throw new AppError("Campaign cannot be sent in its current state", 409);
-    if (
-      campaign.status === "SCHEDULED" &&
-      (!campaign.scheduledAt || new Date(campaign.scheduledAt) > new Date())
-    )
+    }
+    if (campaign.status === 'SCHEDULED' && (!campaign.scheduledAt || new Date(campaign.scheduledAt) > new Date())) {
       throw new AppError("Scheduled campaign is not due yet", 409);
-
-    // =====================================
-    // Template Validation
-    // =====================================
-    if (!campaign.template) {
-      throw new AppError("Template not found", 404);
     }
-
-    if (!campaign.template.metaTemplateName) {
-      throw new AppError("Meta template name is missing", 422);
+    if (!campaign.template || campaign.template.status !== 'APPROVED' || !campaign.template.metaTemplateName) {
+      throw new AppError("Campaign template is not approved by Meta", 422);
     }
-    if (campaign.template.status !== "APPROVED") throw new AppError("Campaign template is not approved by Meta", 422);
-
-    // =====================================
-    // Store Original Campaign Counts
-    // =====================================
-    const initialSentCount = campaign.sentCount || 0;
-
-    const initialFailedCount = campaign.failedCount || 0;
-
-    // =====================================
-    // Mark Campaign as Started
-    // =====================================
-    const startedAt = new Date();
-
-    console.log("🚀 Marking campaign as STARTED...");
-
-    const claimed = await campaignRepository.claimForSending(
-      campaign.id,
-      companyId,
-      startedAt,
-    );
-    if (!claimed)
-      throw new AppError(
-        "Campaign is already being processed or cannot be sent",
-        409,
-      );
-
-    // =====================================
-    // Get ALL Pending Recipients
-    // =====================================
-    const result = await campaignRecipientRepository.findAll(
-      companyId,
-      1,
-      100000,
-      "created_at",
-      "ASC",
-      {
-        campaignId,
-        status: "PENDING",
-      },
-    );
-
-    const recipients = result.recipients;
-
-    // =====================================
-    // No Pending Recipients
-    // =====================================
-    if (!recipients.length) {
-      await campaignRepository.update(campaign.id, companyId, {
-        status: campaign.status,
-        progress: 100,
-        completedAt: new Date(),
-      });
-
-      throw new AppError("No pending recipients found", 422);
-    }
-
-    // =====================================
-    // Total Recipients
-    // =====================================
-    const totalRecipients = recipients.length;
-
-    await campaignRepository.update(campaign.id, companyId, {
-      totalRecipients,
-    });
-
-    let sentCount = 0;
-    let failedCount = 0;
-    let processedCount = 0;
-
-    const successRecipients = [];
-    const failedRecipients = [];
-
-    // =====================================
-    // Send Messages
-    // =====================================
-    for (const recipient of recipients) {
-      try {
-        // ---------------------------------
-        // Validate Customer
-        // ---------------------------------
-        if (!recipient.customer) {
-          throw new Error("Customer not found");
-        }
-
-        if (!recipient.customer.mobile) {
-          throw new Error("Customer mobile number not found");
-        }
-
-        console.log("=================================");
-
-        console.log("Sending To :", recipient.customer.mobile);
-
-        console.log("Template   :", campaign.template.metaTemplateName);
-
-        console.log("=================================");
-
-        // ---------------------------------
-        // Send WhatsApp Template
-        // ---------------------------------
-        const response = await whatsappService.sendTemplateMessage({
-          to: recipient.customer.mobile,
-          templateName: campaign.template.metaTemplateName,
-          languageCode: campaign.template.language || "en_US",
-          components: [],
-        });
-
-        // ---------------------------------
-        // Get WhatsApp Message ID
-        // ---------------------------------
-        const whatsappMessageId = response?.messages?.[0]?.id;
-
-        if (!whatsappMessageId) {
-          throw new Error("WhatsApp message ID not returned");
-        }
-
-        // ---------------------------------
-        // Update Recipient - SENT
-        // ---------------------------------
-        await campaignRecipientRepository.update(recipient.id, companyId, {
-          status: "SENT",
-          sentAt: new Date(),
-          whatsappMessageId,
-        });
-
-        sentCount++;
-        processedCount++;
-
-        successRecipients.push({
-          customerId: recipient.customer.id,
-
-          mobile: recipient.customer.mobile,
-
-          whatsappMessageId,
-        });
-
-        console.log(`✅ Sent to ${recipient.customer.mobile}`);
-      } catch (error) {
-        // ---------------------------------
-        // Recipient Failed
-        // ---------------------------------
-        failedCount++;
-        processedCount++;
-
-        await campaignRecipientRepository.update(recipient.id, companyId, {
-          status: "FAILED",
-          failureReason: error.message,
-        });
-
-        failedRecipients.push({
-          customerId: recipient.customer?.id || null,
-
-          mobile: recipient.customer?.mobile || null,
-
-          reason: error.message,
-        });
-
-        console.log(`❌ Failed : ${error.message}`);
-      }
-
-      // =====================================
-      // Calculate Live Progress
-      // =====================================
-      const progress = Math.round((processedCount / totalRecipients) * 100);
-
-      // =====================================
-      // Update Live Campaign Statistics
-      // =====================================
-      await campaignRepository.update(campaign.id, companyId, {
-        sentCount: initialSentCount + sentCount,
-
-        failedCount: initialFailedCount + failedCount,
-
-        progress,
-
-        status: "RUNNING",
-      });
-
-      console.log(`📊 Campaign Progress: ${progress}%`);
-
-      console.log(`📤 Sent: ${sentCount}`);
-
-      console.log(`❌ Failed: ${failedCount}`);
-    }
-
-    // =====================================
-    // Determine Final Campaign Status
-    // =====================================
-    let finalStatus;
-
-    if (sentCount === 0 && failedCount > 0) {
-      // All recipients failed
-      finalStatus = "FAILED";
-    } else {
-      // All succeeded OR mixed success/failure
-      finalStatus = "COMPLETED";
-    }
-
-    const completedAt = new Date();
-
-    // =====================================
-    // Final Campaign Update
-    // =====================================
-    await campaignRepository.update(campaign.id, companyId, {
-      sentCount: initialSentCount + sentCount,
-
-      failedCount: initialFailedCount + failedCount,
-
-      progress: 100,
-
-      status: finalStatus,
-
-      completedAt,
-    });
-
-    // =====================================
-    // Final Logs
-    // =====================================
-    console.log("==========================================");
-
-    console.log("🏁 Campaign Processing Completed");
-
-    console.log("Campaign ID :", campaign.id);
-
-    console.log("Total       :", totalRecipients);
-
-    console.log("Sent        :", sentCount);
-
-    console.log("Failed      :", failedCount);
-
-    console.log("Progress    :", 100);
-
-    console.log("Status      :", finalStatus);
-
-    console.log("==========================================");
-
-    // =====================================
-    // Return Response
-    // =====================================
-    return {
-      success: sentCount > 0,
-
-      message:
-        finalStatus === "FAILED"
-          ? "Campaign failed. All recipients failed."
-          : failedCount > 0
-            ? "Campaign completed with some failed recipients."
-            : "Campaign completed successfully.",
-
-      campaignId: campaign.id,
-
-      totalRecipients,
-
-      sentCount,
-
-      failedCount,
-
-      progress: 100,
-
-      startedAt,
-
-      completedAt,
-
-      status: finalStatus,
-
-      successRecipients,
-
-      failedRecipients,
-    };
+    const connection = await whatsappRepository.findByCompanyId(companyId);
+    if (!connection || connection.status !== 'CONNECTED') throw new AppError("WhatsApp Business is not connected", 409);
+    if (campaign.mediaId) await mediaService.assertOwnedByCompany(companyId, campaign.mediaId);
+    const claimed = await campaignRepository.claimForSending(campaign.id, companyId, new Date());
+    if (!claimed) throw new AppError("Campaign is already being processed or cannot be sent", 409);
+    campaignWorker.enqueue(companyId, campaignId);
+    return { campaignId, status: 'RUNNING', progress: 0, message: 'Campaign processing started' };
   }
 
   // =====================================
@@ -474,13 +210,9 @@ class CampaignService {
       );
     }
 
-    const updatedCampaign = await campaignRepository.update(
-      campaign.id,
-      companyId,
-      {
-        status: "CANCELLED",
-      },
-    );
+    const claimed = await campaignRepository.claimScheduledCancellation(campaign.id, companyId);
+    if (!claimed) throw new AppError("Campaign is already being processed or cannot be cancelled", 409);
+    const updatedCampaign = await campaignRepository.findById(companyId, campaign.id);
 
     return {
       campaignId: updatedCampaign.id,

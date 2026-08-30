@@ -34,6 +34,7 @@ export interface Template {
   rejectionReason: string | null;
   createdAt: string;
   updatedAt: string;
+  variables?: Array<string | { key?: string; name?: string; required?: boolean }>;
 }
 
 export interface TemplateListData {
