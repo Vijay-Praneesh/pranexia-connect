@@ -9,6 +9,7 @@ const campaignRoutes = require("./campaign.routes");
 const campaignRecipientRoutes = require("./campaignRecipient.routes");
 const webhookRoutes = require("./webhook.routes");
 const dashboardRoutes = require("./dashboard.routes");
+const companyRoutes = require("./company.routes");
 
 router.use("/health", healthRoutes);
 router.use("/auth", authRoutes);
@@ -19,5 +20,8 @@ router.use("/campaign-recipients", campaignRecipientRoutes);
 
 // Dashboard
 router.use("/dashboard", dashboardRoutes);
+
+// SaaS Client Management
+router.use("/companies", companyRoutes);
 
 module.exports = router;

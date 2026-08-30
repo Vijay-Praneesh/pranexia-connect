@@ -31,13 +31,40 @@ const User = sequelize.define(
 
     mobile: {
       type: DataTypes.STRING(20),
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
 
+    // Required only for LOCAL authentication.
+    // Google users do not need a local password.
     password: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    // Authentication method used by this account.
+    authProvider: {
+      type: DataTypes.ENUM("LOCAL", "GOOGLE"),
       allowNull: false,
+      defaultValue: "LOCAL",
+      field: "auth_provider",
+    },
+
+    // Google account identifier.
+    // NULL for normal email/password users.
+    googleId: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      unique: true,
+      field: "google_id",
+    },
+
+    // Whether the user's email has been verified.
+    emailVerified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: "email_verified",
     },
 
     role: {

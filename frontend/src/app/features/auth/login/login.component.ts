@@ -33,7 +33,7 @@ export class LoginComponent {
 
   constructor() {
     if (this.auth.isAuthenticated()) {
-      void this.router.navigateByUrl(this.safeReturnUrl());
+      void this.router.navigateByUrl(this.safeReturnUrl(this.auth.getCurrentUser()?.role));
     }
   }
 
@@ -48,7 +48,7 @@ export class LoginComponent {
     this.auth.login(this.form.getRawValue()).pipe(
       finalize(() => { this.submitting = false; }),
     ).subscribe({
-      next: () => void this.router.navigateByUrl(this.safeReturnUrl()),
+      next: (session) => void this.router.navigateByUrl(this.safeReturnUrl(session.user.role)),
       error: (error: HttpErrorResponse) => {
         const mapped = this.errors.map(error);
         this.errorMessage = error.status === 401 ? 'Invalid email or password.' : mapped.message;
@@ -56,8 +56,9 @@ export class LoginComponent {
     });
   }
 
-  private safeReturnUrl(): string {
+  private safeReturnUrl(role = this.auth.getCurrentUser()?.role): string {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    return returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/dashboard';
+    if (returnUrl?.startsWith('/') && !returnUrl.startsWith('//')) return returnUrl;
+    return role === 'SUPER_ADMIN' ? '/owner-dashboard' : '/dashboard';
   }
 }

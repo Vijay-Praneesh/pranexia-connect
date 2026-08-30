@@ -59,18 +59,25 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
           </div>
         }
       </div>
-      <nav class="primary-nav container-fluid" aria-label="Primary navigation">
-        @for (item of navigation; track item.path) {
-          <a
-            [routerLink]="item.path"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-          >
-            <i class="bi {{ item.icon }}" aria-hidden="true"></i
-            >{{ item.label }}
-          </a>
-        }
-      </nav>
+      @if (auth.currentUser$ | async; as user) {
+        <nav
+          class="primary-nav container-fluid"
+          aria-label="Primary navigation"
+        >
+          @for (item of navigation; track item.path) {
+            @if (canShow(item.roles, user.role)) {
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <i class="bi {{ item.icon }}" aria-hidden="true"></i
+                >{{ item.label }}
+              </a>
+            }
+          }
+        </nav>
+      }
     </header>
     <main class="container-fluid py-4">
       @if (feedback.message$ | async; as message) {
@@ -95,8 +102,8 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
         white-space: nowrap;
       }
       img.brand-logo {
-        height: 58px;
-        width: 290px;
+        height: 47px;
+        width: 250px;
         object-fit: cover;
       }
       .primary-nav {
@@ -136,14 +143,17 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
 export class AppLayoutComponent {
   readonly auth = inject(AuthService);
   readonly feedback = inject(AuthorizationFeedbackService);
+  canShow(roles: readonly string[], role: string): boolean { return roles.includes(role); }
   readonly navigation = [
-    { path: '/dashboard', label: 'Dashboard', icon: 'bi-grid' },
-    { path: '/customers', label: 'Customers', icon: 'bi-people' },
-    { path: '/templates', label: 'Templates', icon: 'bi-chat-square-text' },
-    { path: '/campaigns', label: 'Campaigns', icon: 'bi-megaphone' },
-    { path: '/reports', label: 'Reports', icon: 'bi-bar-chart' },
-    { path: '/notifications', label: 'Activity', icon: 'bi-bell' },
-    { path: '/settings', label: 'Settings', icon: 'bi-gear' },
-    { path: '/settings/whatsapp', label: 'WhatsApp', icon: 'bi-whatsapp' },
+    { path: '/owner-dashboard', label: 'Owner Dashboard', icon: 'bi-speedometer2', roles: ['SUPER_ADMIN'] },
+    { path: '/companies', label: 'Client Management', icon: 'bi-building', roles: ['SUPER_ADMIN'] },
+    { path: '/dashboard', label: 'Dashboard', icon: 'bi-grid', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { path: '/customers', label: 'Customers', icon: 'bi-people', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { path: '/templates', label: 'Templates', icon: 'bi-chat-square-text', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { path: '/campaigns', label: 'Campaigns', icon: 'bi-megaphone', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { path: '/reports', label: 'Reports', icon: 'bi-bar-chart', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { path: '/notifications', label: 'Activity', icon: 'bi-bell', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { path: '/settings', label: 'Settings', icon: 'bi-gear', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { path: '/settings/whatsapp', label: 'WhatsApp', icon: 'bi-whatsapp', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
   ] as const;
 }

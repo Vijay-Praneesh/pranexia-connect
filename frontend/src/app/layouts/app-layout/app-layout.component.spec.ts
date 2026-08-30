@@ -9,30 +9,65 @@ import { AppLayoutComponent } from './app-layout.component';
 
 describe('AppLayoutComponent', () => {
   let fixture: ComponentFixture<AppLayoutComponent>;
-  const user = {
+  const user: AuthenticatedUser = {
     firstName: 'Asha',
     company: { companyName: 'Pranexia' },
+    role: 'COMPANY_ADMIN',
   } as AuthenticatedUser;
+  let currentUser$: BehaviorSubject<AuthenticatedUser>;
 
   beforeEach(async () => {
-    const auth = { currentUser$: of(user), logout: jasmine.createSpy('logout') };
-    const feedback = { message$: new BehaviorSubject<string | null>(null), clear: jasmine.createSpy('clear') };
+    currentUser$ = new BehaviorSubject(user);
+    const auth = {
+      currentUser$: currentUser$.asObservable(),
+      logout: jasmine.createSpy('logout'),
+    };
+    const feedback = {
+      message$: new BehaviorSubject<string | null>(null),
+      clear: jasmine.createSpy('clear'),
+    };
     await TestBed.configureTestingModule({
       imports: [AppLayoutComponent],
-      providers: [provideRouter([]), { provide: AuthService, useValue: auth }, { provide: AuthorizationFeedbackService, useValue: feedback }],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: auth },
+        { provide: AuthorizationFeedbackService, useValue: feedback },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(AppLayoutComponent);
     fixture.detectChanges();
   });
 
-  it('provides navigation to every supported authenticated section', () => {
-    const hrefs = Array.from(fixture.nativeElement.querySelectorAll('.primary-nav a') as NodeListOf<HTMLAnchorElement>)
-      .map((link) => link.getAttribute('href'));
-    expect(hrefs).toEqual(['/dashboard', '/customers', '/templates', '/campaigns', '/reports', '/notifications', '/settings', '/settings/whatsapp']);
+  it('provides role-based navigation for client admins and platform owners', () => {
+    const getHrefs = (): (string | null)[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll(
+          '.primary-nav a',
+        ) as NodeListOf<HTMLAnchorElement>,
+      ).map((link) => link.getAttribute('href'));
+
+    expect(getHrefs()).toEqual([
+      '/dashboard',
+      '/customers',
+      '/templates',
+      '/campaigns',
+      '/reports',
+      '/notifications',
+      '/settings',
+      '/settings/whatsapp',
+    ]);
+
+    currentUser$.next({ ...user, role: 'SUPER_ADMIN' });
+    fixture.detectChanges();
+    expect(getHrefs()).toEqual(['/owner-dashboard', '/companies']);
   });
 
   it('labels the responsive navigation and keeps logout available', () => {
-    expect(fixture.nativeElement.querySelector('nav[aria-label="Primary navigation"]')).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(
+        'nav[aria-label="Primary navigation"]',
+      ),
+    ).not.toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Logout');
   });
 });

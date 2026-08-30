@@ -39,6 +39,59 @@ class AuthValidator {
       allowUnknown: false,
     });
   }
+
+  clientCreate(data) {
+    const schema = Joi.object({
+      companyName: Joi.string()
+        .trim()
+        .min(3)
+        .max(150)
+        .required(),
+
+      firstName: Joi.string()
+        .trim()
+        .min(2)
+        .max(100)
+        .required(),
+
+      lastName: Joi.string()
+        .trim()
+        .min(2)
+        .max(100)
+        .required(),
+
+      email: Joi.string()
+        .email()
+        .required(),
+
+      mobile: Joi.string()
+        .pattern(/^[0-9]{10}$/)
+        .required()
+        .messages({
+          "string.pattern.base":
+            "Mobile number must be 10 digits",
+        }),
+
+      password: Joi.string()
+        .min(8)
+        .max(30)
+        .required(),
+
+      plan: Joi.string()
+        .valid(
+          "STARTER",
+          "BUSINESS",
+          "PROFESSIONAL",
+          "ENTERPRISE"
+        )
+        .default("STARTER"),
+    });
+
+    return schema.validate(data, {
+      abortEarly: false,
+      allowUnknown: false,
+    });
+  }
 }
 
 module.exports = new AuthValidator();
