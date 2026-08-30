@@ -167,20 +167,51 @@ class CampaignRepository {
       },
     });
 
-    await Campaign.update(
-      {
-        totalRecipients,
-        sentCount,
-        deliveredCount,
-        readCount,
-        failedCount,
-      },
-      {
-        where: {
-          id,
+    const pendingCount = await CampaignRecipient.count({
+      where: {
+        campaignId: id,
+        status: {
+          [Op.in]: ["PENDING", "QUEUED"],
         },
       },
-    );
+    });
+
+    const processedCount = sentCount + failedCount;
+    const progress =
+      totalRecipients > 0
+        ? Math.min(100, Math.round((processedCount / totalRecipients) * 100))
+        : 0;
+
+    const campaign = await Campaign.findByPk(id);
+    const updateData = {
+      totalRecipients,
+      sentCount,
+      deliveredCount,
+      readCount,
+      failedCount,
+      progress,
+    };
+
+    if (
+      campaign &&
+      campaign.status === "RUNNING" &&
+      pendingCount === 0 &&
+      totalRecipients > 0
+    ) {
+      if (failedCount === totalRecipients) {
+        updateData.status = "FAILED";
+      } else {
+        updateData.status = "COMPLETED";
+      }
+      updateData.completedAt = new Date();
+      updateData.progress = 100;
+    }
+
+    await Campaign.update(updateData, {
+      where: {
+        id,
+      },
+    });
 
     return await Campaign.findByPk(id);
   }

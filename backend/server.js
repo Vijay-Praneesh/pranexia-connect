@@ -47,7 +47,9 @@ const startServer = async () => {
   try {
     env.validateEnvironment();
     await db.sequelize.authenticate();
-    await db.sequelize.sync();
+    await db.sequelize.sync(
+      env.NODE_ENV === "development" ? { alter: true } : {}
+    );
     
     // Start Campaign Scheduler
     startCampaignScheduler();

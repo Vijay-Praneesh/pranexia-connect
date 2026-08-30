@@ -627,29 +627,35 @@
             Delete
           </button>
         </div>
-        <div class="row g-3 mb-4">
-          <div class="col-6 col-md-3">
+        <div class="row g-2 mb-4">
+          <div class="col-6 col-md">
             <div class="metric">
               <strong>{{ detail.totalRecipients }}</strong
               ><span>Recipients</span>
             </div>
           </div>
-          <div class="col-6 col-md-3">
+          <div class="col-6 col-md">
             <div class="metric">
               <strong>{{ detail.sentCount }}</strong
               ><span>Sent</span>
             </div>
           </div>
-          <div class="col-6 col-md-3">
+          <div class="col-4 col-md">
             <div class="metric">
               <strong>{{ detail.deliveredCount }}</strong
               ><span>Delivered</span>
             </div>
           </div>
-          <div class="col-6 col-md-3">
+          <div class="col-4 col-md">
             <div class="metric">
               <strong>{{ detail.readCount }}</strong
               ><span>Read</span>
+            </div>
+          </div>
+          <div class="col-4 col-md">
+            <div class="metric">
+              <strong class="text-danger">{{ detail.failedCount }}</strong
+              ><span>Failed</span>
             </div>
           </div>
         </div>

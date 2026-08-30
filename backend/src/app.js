@@ -42,7 +42,7 @@ app.use(helmet());
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(
-  "/api/v1/webhook",
+  ["/api/v1/webhook", "/api/v1/webhooks"],
   express.json({
     verify: (req, res, buffer) => {
       req.rawBody = buffer;

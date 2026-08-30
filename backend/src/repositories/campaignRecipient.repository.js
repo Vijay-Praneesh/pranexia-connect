@@ -288,6 +288,26 @@ class CampaignRecipientRepository {
     });
   }
 
+  async findByWhatsappMessageIdAndCompany(messageId, companyId) {
+    if (!messageId || !companyId) return null;
+    return await CampaignRecipient.findOne({
+      where: {
+        whatsappMessageId: messageId,
+        companyId,
+      },
+      include: [
+        {
+          model: Campaign,
+          as: "campaign",
+        },
+        {
+          model: Customer,
+          as: "customer",
+        },
+      ],
+    });
+  }
+
   async countPending(companyId, campaignId) {
     return await CampaignRecipient.count({
       where: { companyId, campaignId, status: "PENDING" },
