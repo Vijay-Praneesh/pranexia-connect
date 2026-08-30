@@ -1,0 +1,21 @@
+<section aria-labelledby="media-title">
+  <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
+    <div><h1 id="media-title" class="h3 mb-1">Media library</h1><p class="text-body-secondary mb-0">Secure media available to your company.</p></div>
+    <button class="btn btn-primary btn-sm" type="button" (click)="choose(fileInput)" [disabled]="uploading"><i class="bi bi-upload me-1" aria-hidden="true"></i>Upload media</button>
+    <input #fileInput class="visually-hidden" type="file" accept=".jpg,.jpeg,.png,.webp,.mp4,.pdf,.doc,.docx,.xls,.xlsx" (change)="onFileChange($event)" />
+  </div>
+  @if (successMessage) { <div class="alert alert-success" role="status">{{ successMessage }}</div> }
+  @if (errorMessage && media.length) { <div class="alert alert-warning" role="alert">{{ errorMessage }}</div> }
+  <div class="drop-zone mb-4" [class.is-uploading]="uploading" (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="choose(fileInput)" role="button" tabindex="0" (keydown.enter)="choose(fileInput)">
+    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i><strong>{{ uploading ? 'Uploading media' : 'Drop a file here or choose one' }}</strong><small>Images up to 5 MB, videos up to 16 MB, documents up to 100 MB</small>
+    @if (uploading) { <div class="progress w-100 mt-2" role="progressbar" [attr.aria-valuenow]="uploadProgress"><div class="progress-bar" [style.width.%]="uploadProgress"></div></div> }
+  </div>
+  @if (loading) { <app-loading-state message="Loading media…" /> }
+  @else if (errorMessage && !media.length) { <app-error-state title="Media unavailable" [message]="errorMessage" [retryable]="true" (retry)="load()" /> }
+  @else if (!media.length) { <app-empty-state title="No media yet" message="Upload images, videos, or documents for future WhatsApp campaigns."><button class="btn btn-primary btn-sm" type="button" (click)="choose(fileInput)">Upload media</button></app-empty-state> }
+  @else { <div class="media-grid">@for (item of media; track item.id) { <article class="media-item border rounded bg-white overflow-hidden">
+    <div class="media-preview">@if (item.mediaType === 'IMAGE' && previewUrl(item)) { <img [src]="previewUrl(item)" [alt]="item.originalName" /> } @else { <i class="bi {{ icon(item.mediaType) }}" aria-hidden="true"></i> }</div>
+    <div class="p-3"><div class="d-flex justify-content-between gap-2"><strong class="filename" [title]="item.originalName">{{ item.originalName }}</strong><span class="badge text-bg-light">{{ item.mediaType }}</span></div><small class="d-block text-body-secondary mt-2">{{ fileSize(item.size) }} · {{ item.createdAt | date:'mediumDate' }}</small>
+      <div class="d-flex gap-2 mt-3"><button class="btn btn-outline-secondary btn-sm" type="button" (click)="download(item)"><i class="bi bi-download" aria-hidden="true"></i><span class="visually-hidden">Download</span></button><button class="btn btn-outline-danger btn-sm" type="button" (click)="remove(item)"><i class="bi bi-trash" aria-hidden="true"></i><span class="visually-hidden">Delete</span></button></div>
+    </div></article> }</div> }
+</section>

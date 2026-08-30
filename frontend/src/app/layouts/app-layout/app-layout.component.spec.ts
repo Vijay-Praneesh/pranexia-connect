@@ -51,6 +51,7 @@ describe('AppLayoutComponent', () => {
       '/customers',
       '/templates',
       '/campaigns',
+      '/media',
       '/reports',
       '/notifications',
       '/settings',

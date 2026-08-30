@@ -7,6 +7,7 @@ const Template = require("./template.model");
 const Campaign = require("./campaign.model");
 const CampaignRecipient = require("./campaignRecipient.model");
 const WhatsAppConnection = require("./whatsappConnection.model");
+const Media = require("./media.model");
 
 // Company -> Users
 Company.hasMany(User, {
@@ -39,6 +40,9 @@ Customer.belongsTo(Company, {
   foreignKey: "companyId",
   as: "company",
 });
+
+Company.hasMany(Media, { foreignKey: "companyId", as: "media" });
+Media.belongsTo(Company, { foreignKey: "companyId", as: "company" });
 
 Company.hasMany(Template, {
   foreignKey: "companyId",
@@ -114,6 +118,7 @@ const db = {
   Campaign,
   CampaignRecipient,
   WhatsAppConnection,
+  Media,
 };
 
 module.exports = db;

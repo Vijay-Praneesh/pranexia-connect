@@ -72,6 +72,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'media',
+        loadComponent: () =>
+          import('./features/media/media.component').then(
+            (c) => c.MediaComponent,
+          ),
+        canActivate: [roleGuard(['COMPANY_ADMIN'])],
+      },
+      {
         path: 'settings/whatsapp',
         loadComponent: () =>
           import('./features/settings/whatsapp/whatsapp-settings.component').then(
