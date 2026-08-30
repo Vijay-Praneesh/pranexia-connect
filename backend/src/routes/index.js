@@ -10,6 +10,7 @@ const campaignRecipientRoutes = require("./campaignRecipient.routes");
 const webhookRoutes = require("./webhook.routes");
 const dashboardRoutes = require("./dashboard.routes");
 const companyRoutes = require("./company.routes");
+const whatsappRoutes = require("./whatsapp.routes");
 
 router.use("/health", healthRoutes);
 router.use("/auth", authRoutes);
@@ -23,5 +24,6 @@ router.use("/dashboard", dashboardRoutes);
 
 // SaaS Client Management
 router.use("/companies", companyRoutes);
+router.use("/whatsapp", whatsappRoutes);
 
 module.exports = router;

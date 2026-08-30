@@ -19,6 +19,10 @@ const env = {
   WHATSAPP_API_VERSION: process.env.WHATSAPP_API_VERSION,
   WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
   WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN,
+  META_APP_ID: process.env.META_APP_ID,
+  META_APP_SECRET: process.env.META_APP_SECRET,
+  META_API_VERSION: process.env.META_API_VERSION,
+  WHATSAPP_TOKEN_ENCRYPTION_KEY: process.env.WHATSAPP_TOKEN_ENCRYPTION_KEY,
 };
 
 const validateEnvironment = () => {
@@ -36,6 +40,10 @@ const validateEnvironment = () => {
     "WHATSAPP_API_VERSION",
     "WHATSAPP_PHONE_NUMBER_ID",
     "WHATSAPP_ACCESS_TOKEN",
+    "META_APP_ID",
+    "META_APP_SECRET",
+    "META_API_VERSION",
+    "WHATSAPP_TOKEN_ENCRYPTION_KEY",
   ];
   const missing = required.filter((name) => !env[name]);
 
