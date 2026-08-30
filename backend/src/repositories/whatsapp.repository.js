@@ -6,7 +6,10 @@ class WhatsAppRepository {
   }
 
   async upsert(companyId, data) {
-    const [connection, created] = await WhatsAppConnection.findOrCreate({ where: { companyId }, defaults: { companyId, ...data } });
+    const [connection, created] = await WhatsAppConnection.findOrCreate({
+      where: { companyId },
+      defaults: { companyId, ...data },
+    });
     if (!created) await connection.update(data);
     return connection;
   }
@@ -14,7 +17,10 @@ class WhatsAppRepository {
   async disconnect(companyId) {
     const connection = await this.findByCompanyId(companyId);
     if (!connection) return null;
-    await connection.update({ status: "DISCONNECTED", disconnectedAt: new Date() });
+    await connection.update({
+      status: "DISCONNECTED",
+      disconnectedAt: new Date(),
+    });
     return connection;
   }
 }

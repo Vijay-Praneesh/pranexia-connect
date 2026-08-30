@@ -1,4 +1,8 @@
-export type WhatsAppConnectionStatus = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'ERROR';
+export type WhatsAppConnectionStatus =
+  | 'DISCONNECTED'
+  | 'CONNECTING'
+  | 'CONNECTED'
+  | 'ERROR';
 
 export interface WhatsAppConnection {
   id: string;

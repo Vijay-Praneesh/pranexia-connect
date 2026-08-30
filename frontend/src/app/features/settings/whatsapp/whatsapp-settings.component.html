@@ -1,11 +1,84 @@
 <section class="settings-page" aria-labelledby="whatsapp-title">
-  <header class="mb-4"><p class="text-body-secondary small mb-1">Settings</p><h1 id="whatsapp-title" class="h3 mb-2">WhatsApp Business</h1><p class="text-body-secondary mb-0">Connect your WhatsApp Business account to start sending campaigns.</p></header>
-  @if (successMessage) { <div class="alert alert-success" role="status">{{ successMessage }}</div> }
-  @if (loading) { <app-loading-state message="Checking WhatsApp connection..." /> }
-  @else if (errorMessage && !connection) { <app-error-state title="WhatsApp connection unavailable" [message]="errorMessage" [retryable]="true" (retry)="load()" /> }
-  @else { <article class="card border-0 shadow-sm connection-card"><div class="card-body p-4"><div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4"><div><h2 class="h5 mb-1">WhatsApp Business</h2><p class="text-body-secondary mb-0">Your company connection</p></div><app-status-badge [status]="status" /></div>
-    @if (status === 'CONNECTED' && connection) { <dl class="connection-list mb-4"><div><dt>Business Account</dt><dd>{{ connection.verifiedName || connection.wabaId }}</dd></div><div><dt>Phone Number</dt><dd>{{ connection.displayPhoneNumber || connection.phoneNumberId }}</dd></div><div><dt>Connected</dt><dd>{{ connection.connectedAt | date:'medium' }}</dd></div></dl><button class="btn btn-outline-danger" type="button" (click)="disconnect()" [disabled]="actionLoading"><i class="bi bi-link-45deg me-1" aria-hidden="true"></i>{{ actionLoading ? 'Disconnecting...' : 'Disconnect' }}</button> }
-    @else { <div class="not-connected"><i class="bi bi-whatsapp" aria-hidden="true"></i><p>Connect your WhatsApp Business account to start sending campaigns.</p><button class="btn btn-primary" type="button" (click)="connect()" [disabled]="actionLoading"><i class="bi bi-link-45deg me-1" aria-hidden="true"></i>{{ actionLoading ? 'Connecting...' : 'Connect WhatsApp' }}</button></div> }
-    @if (errorMessage) { <div class="alert alert-warning mt-4 mb-0" role="alert">{{ errorMessage }}</div> }
-  </div></article> }
+  <header class="mb-4">
+    <p class="text-body-secondary small mb-1">Settings</p>
+    <h1 id="whatsapp-title" class="h3 mb-2">WhatsApp Business</h1>
+    <p class="text-body-secondary mb-0">
+      Connect your WhatsApp Business account to start sending campaigns.
+    </p>
+  </header>
+  @if (successMessage) {
+    <div class="alert alert-success" role="status">{{ successMessage }}</div>
+  }
+  @if (loading) {
+    <app-loading-state message="Checking WhatsApp connection..." />
+  } @else if (errorMessage && !connection) {
+    <app-error-state
+      title="WhatsApp connection unavailable"
+      [message]="errorMessage"
+      [retryable]="true"
+      (retry)="load()"
+    />
+  } @else {
+    <article class="card border-0 shadow-sm connection-card">
+      <div class="card-body p-4">
+        <div
+          class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4"
+        >
+          <div>
+            <h2 class="h5 mb-1">WhatsApp Business</h2>
+            <p class="text-body-secondary mb-0">Your company connection</p>
+          </div>
+          <app-status-badge [status]="status" />
+        </div>
+        @if (status === "CONNECTED" && connection) {
+          <dl class="connection-list mb-4">
+            <div>
+              <dt>Business Account</dt>
+              <dd>{{ connection.verifiedName || connection.wabaId }}</dd>
+            </div>
+            <div>
+              <dt>Phone Number</dt>
+              <dd>
+                {{ connection.displayPhoneNumber || connection.phoneNumberId }}
+              </dd>
+            </div>
+            <div>
+              <dt>Connected</dt>
+              <dd>{{ connection.connectedAt | date: "medium" }}</dd>
+            </div>
+          </dl>
+          <button
+            class="btn btn-outline-danger"
+            type="button"
+            (click)="disconnect()"
+            [disabled]="actionLoading"
+          >
+            <i class="bi bi-link-45deg me-1" aria-hidden="true"></i
+            >{{ actionLoading ? "Disconnecting..." : "Disconnect" }}
+          </button>
+        } @else {
+          <div class="not-connected">
+            <i class="bi bi-whatsapp" aria-hidden="true"></i>
+            <p>
+              Connect your WhatsApp Business account to start sending campaigns.
+            </p>
+            <button
+              class="btn btn-primary"
+              type="button"
+              (click)="connect()"
+              [disabled]="actionLoading"
+            >
+              <i class="bi bi-link-45deg me-1" aria-hidden="true"></i
+              >{{ actionLoading ? "Connecting..." : "Connect WhatsApp" }}
+            </button>
+          </div>
+        }
+        @if (errorMessage) {
+          <div class="alert alert-warning mt-4 mb-0" role="alert">
+            {{ errorMessage }}
+          </div>
+        }
+      </div>
+    </article>
+  }
 </section>

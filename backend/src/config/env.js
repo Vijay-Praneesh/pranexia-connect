@@ -49,7 +49,7 @@ const validateEnvironment = () => {
 
   if (missing.length) {
     throw new Error(
-      `Missing required production environment variable(s): ${missing.join(", ")}`
+      `Missing required production environment variable(s): ${missing.join(", ")}`,
     );
   }
 };
