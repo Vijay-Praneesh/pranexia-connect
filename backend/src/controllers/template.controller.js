@@ -56,6 +56,11 @@ class TemplateController {
     }
   }
 
+  async sync(req, res, next) {
+    try { return ApiResponse.success(res, "Templates synchronized successfully", await templateService.syncTemplates(req.user.companyId)); }
+    catch (error) { next(error); }
+  }
+
 async getById(req, res, next) {
   try {
     const template = await templateService.getTemplateById(

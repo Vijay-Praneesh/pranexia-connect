@@ -14,7 +14,7 @@ describe('TemplatesComponent', () => {
   const list: TemplateListData = { templates: [template], pagination: { page: 1, limit: 10, totalRecords: 1, totalPages: 1 } };
 
   beforeEach(async () => {
-    api = jasmine.createSpyObj<TemplateService>('TemplateService', ['getTemplates', 'searchTemplates', 'getTemplate', 'createTemplate', 'updateTemplate', 'deleteTemplate']);
+    api = jasmine.createSpyObj<TemplateService>('TemplateService', ['getTemplates', 'searchTemplates', 'getTemplate', 'createTemplate', 'syncTemplates']);
     api.getTemplates.and.returnValue(of(list)); api.searchTemplates.and.returnValue(of([template])); api.getTemplate.and.returnValue(of(template));
     await TestBed.configureTestingModule({ imports: [TemplatesComponent], providers: [provideRouter([]), { provide: TemplateService, useValue: api }] }).compileComponents();
     fixture = TestBed.createComponent(TemplatesComponent); component = fixture.componentInstance; fixture.detectChanges();
@@ -29,7 +29,7 @@ describe('TemplatesComponent', () => {
   it('validates required create fields', () => { component.openCreate(); component.save(); expect(component.templateForm.invalid).toBeTrue(); expect(api.createTemplate).not.toHaveBeenCalled(); });
   it('rejects invalid button JSON', () => { component.openCreate(); component.templateForm.patchValue({ name: 'Test', body: 'Body', buttons: '{}' }); component.save(); expect(component.formError).toContain('JSON array'); });
   it('creates a valid template without companyId', () => { api.createTemplate.and.returnValue(of(template)); component.openCreate(); component.templateForm.patchValue({ name: 'Test', body: 'Body' }); component.save(); const payload = api.createTemplate.calls.mostRecent().args[0]; expect((payload as unknown as Record<string, unknown>)['companyId']).toBeUndefined(); });
-  it('updates an existing template', () => { api.updateTemplate.and.returnValue(of(template)); component.openEdit(template); component.save(); expect(api.updateTemplate).toHaveBeenCalledWith('1', jasmine.objectContaining({ name: 'Welcome' })); });
+  it('does not expose unsupported Meta edit or delete actions', () => { expect(fixture.nativeElement.querySelector('[aria-label^="Edit"]')).toBeNull(); expect(fixture.nativeElement.querySelector('[aria-label^="Delete"]')).toBeNull(); });
   it('changes page through URL state', fakeAsync(() => { component.changePage(2); tick(); fixture.detectChanges(); expect(component.page).toBe(2); }));
   it('filters search results by active filters', () => { component.category = 'MARKETING'; component.keyword = 'welcome'; component.load(); expect(component.templates).toEqual([]); });
 });

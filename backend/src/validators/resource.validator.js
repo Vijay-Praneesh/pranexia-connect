@@ -15,6 +15,7 @@ const templateFields = {
   buttons: Joi.array().max(10),
   status: Joi.string().valid("DRAFT", "PENDING", "APPROVED", "REJECTED"),
   rejectionReason: Joi.string().allow("", null),
+  components: Joi.array().max(10),
 };
 
 const campaignFields = {

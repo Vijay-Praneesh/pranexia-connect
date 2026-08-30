@@ -91,7 +91,10 @@ const Template = sequelize.define(
         "DRAFT",
         "PENDING",
         "APPROVED",
-        "REJECTED"
+        "REJECTED",
+        "PAUSED",
+        "DISABLED",
+        "UNKNOWN"
       ),
       allowNull: false,
       defaultValue: "DRAFT",
@@ -102,6 +105,10 @@ const Template = sequelize.define(
       allowNull: true,
       field: "rejection_reason",
     },
+    components: { type: DataTypes.JSON, allowNull: true },
+    variables: { type: DataTypes.JSON, allowNull: true },
+    metaStatus: { type: DataTypes.STRING(50), allowNull: true, field: "meta_status" },
+    syncedAt: { type: DataTypes.DATE, allowNull: true, field: "synced_at" },
   },
   {
     tableName: "templates",

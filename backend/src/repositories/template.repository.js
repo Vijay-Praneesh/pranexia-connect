@@ -1,4 +1,4 @@
-const { Op, literal } = require("sequelize");
+const { Op } = require("sequelize");
 const { Template } = require("../models");
 
 class TemplateRepository {
@@ -13,6 +13,15 @@ class TemplateRepository {
         name,
       },
     });
+  }
+  async findByMetaIdentity(companyId, metaTemplateId, name, language) {
+    return await Template.findOne({ where: { companyId, ...(metaTemplateId ? { metaTemplateId } : { name, language }) } });
+  }
+
+  async upsertFromMeta(companyId, data) {
+    const existing = await this.findByMetaIdentity(companyId, data.metaTemplateId, data.name, data.language);
+    if (existing) { await existing.update(data); return existing; }
+    return await Template.create({ companyId, ...data });
   }
 
   async findById(companyId, id) {
@@ -68,7 +77,7 @@ class TemplateRepository {
 
     return await Template.findAndCountAll({
       where,
-      order: [[literal(`\`Template\`.\`${safeSortColumn}\``), safeOrder]],
+      order: [[safeSortColumn, safeOrder]],
       limit,
       offset,
     });

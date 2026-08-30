@@ -32,10 +32,10 @@ export class TemplatesComponent implements OnDestroy {
   sortBy: TemplateSortField = 'createdAt'; order: 'ASC' | 'DESC' = 'DESC';
   loading = true; actionLoading = false; detailLoading = false;
   errorMessage = ''; formError = ''; successMessage = '';
-  editorOpen = false; editing: Template | null = null; detail: Template | null = null;
+  editorOpen = false; detail: Template | null = null;
 
   readonly categories: TemplateCategory[] = ['MARKETING', 'UTILITY', 'AUTHENTICATION'];
-  readonly statuses: TemplateStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED'];
+  readonly statuses: TemplateStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'PAUSED', 'DISABLED', 'UNKNOWN'];
   readonly headerTypes: TemplateHeaderType[] = ['NONE', 'TEXT', 'IMAGE', 'VIDEO', 'DOCUMENT'];
   readonly filtersForm = this.fb.nonNullable.group({ keyword: [''], category: [''], status: [''], language: [''] });
   readonly templateForm = this.fb.nonNullable.group({
@@ -89,15 +89,8 @@ export class TemplatesComponent implements OnDestroy {
   clearFilters(): void { void this.router.navigate([], { relativeTo: this.route, queryParams: { keyword: null, category: null, status: null, language: null, page: 1 }, queryParamsHandling: 'merge' }); }
 
   openCreate(): void {
-    this.editing = null; this.formError = '';
+    this.formError = '';
     this.templateForm.reset({ name: '', metaTemplateName: '', metaTemplateId: '', category: 'UTILITY', language: 'en_US', headerType: 'NONE', headerText: '', body: '', footer: '', buttons: '' });
-    this.editorOpen = true;
-  }
-
-  openEdit(template: Template): void {
-    this.editing = template; this.formError = '';
-    this.templateForm.reset({ name: template.name, metaTemplateName: template.metaTemplateName ?? '', metaTemplateId: template.metaTemplateId ?? '', category: template.category,
-      language: template.language, headerType: template.headerType, headerText: template.headerText ?? '', body: template.body, footer: template.footer ?? '', buttons: template.buttons ? JSON.stringify(template.buttons, null, 2) : '' });
     this.editorOpen = true;
   }
 
@@ -112,11 +105,16 @@ export class TemplatesComponent implements OnDestroy {
       category: raw.category, language: raw.language.trim(), headerType: raw.headerType, headerText: raw.headerType === 'TEXT' ? raw.headerText.trim() || null : null,
       body: raw.body.trim(), footer: raw.footer.trim() || null, buttons };
     this.actionLoading = true; this.formError = '';
-    const request = this.editing ? this.api.updateTemplate(this.editing.id, payload) : this.api.createTemplate(payload);
-    request.pipe(finalize(() => { this.actionLoading = false; })).subscribe({
-      next: () => { this.editorOpen = false; this.notify(this.editing ? 'Template updated successfully.' : 'Template created successfully.'); this.load(); },
+    this.api.createTemplate(payload).pipe(finalize(() => { this.actionLoading = false; })).subscribe({
+      next: () => { this.editorOpen = false; this.notify('Template submitted to Meta successfully.'); this.load(); },
       error: (error) => { this.formError = this.errors.map(error).message; },
     });
+  }
+
+  sync(): void {
+    if (this.actionLoading) return;
+    this.actionLoading = true; this.errorMessage = '';
+    this.api.syncTemplates().pipe(finalize(() => { this.actionLoading = false; })).subscribe({ next: (result) => { this.notify(`${result.synchronized} template${result.synchronized === 1 ? '' : 's'} synchronized.`); this.load(); }, error: (error) => { this.errorMessage = this.errors.map(error).message; } });
   }
 
   showDetail(id: string): void {

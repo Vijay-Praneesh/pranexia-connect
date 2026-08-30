@@ -27,6 +27,10 @@ export class TemplateService {
     return this.http.get<ApiResponse<Template>>(`${this.endpoint}/${id}`).pipe(map((response) => response.data));
   }
 
+  syncTemplates(): Observable<{ templates: Template[]; synchronized: number }> {
+    return this.http.post<ApiResponse<{ templates: Template[]; synchronized: number }>>(`${this.endpoint}/sync`, {}).pipe(map((response) => response.data));
+  }
+
   createTemplate(data: CreateTemplateRequest): Observable<Template> {
     return this.http.post<ApiResponse<Template>>(this.endpoint, data).pipe(map((response) => response.data));
   }
@@ -39,4 +43,3 @@ export class TemplateService {
     return this.http.delete<ApiResponse<null>>(`${this.endpoint}/${id}`).pipe(map(() => undefined));
   }
 }
-

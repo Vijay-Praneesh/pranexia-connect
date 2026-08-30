@@ -1,7 +1,7 @@
 import { PaginationMeta, PaginationQuery } from '../../core/models/pagination.model';
 import { ApiErrorResponse } from '../../core/models/api-response.model';
 
-export type TemplateStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
+export type TemplateStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'PAUSED' | 'DISABLED' | 'UNKNOWN';
 export type TemplateCategory = 'MARKETING' | 'UTILITY' | 'AUTHENTICATION';
 export type TemplateHeaderType = 'NONE' | 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT';
 export type TemplateLanguage = string;

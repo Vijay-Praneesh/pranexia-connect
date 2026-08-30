@@ -11,6 +11,7 @@ router.use(authorize("COMPANY_ADMIN"));
 
 // Search
 router.get("/search", templateController.search);
+router.post("/sync", templateController.sync);
 
 // CRUD
 router.post("/", templateController.create);

@@ -16,6 +16,7 @@ class CampaignService {
     if (!template) {
       throw new AppError("Template not found", 404);
     }
+    if (template.status !== "APPROVED") throw new AppError("Only approved WhatsApp templates can be used in campaigns", 422);
 
     const existingCampaign = await campaignRepository.findByName(
       companyId,
@@ -183,6 +184,7 @@ class CampaignService {
     if (!campaign.template.metaTemplateName) {
       throw new AppError("Meta template name is missing", 422);
     }
+    if (campaign.template.status !== "APPROVED") throw new AppError("Campaign template is not approved by Meta", 422);
 
     // =====================================
     // Store Original Campaign Counts
