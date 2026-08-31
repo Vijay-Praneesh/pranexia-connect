@@ -4,6 +4,7 @@ const whatsappRepository = require("../repositories/whatsapp.repository");
 const mediaService = require("./media.service");
 const storageService = require("./storage.service");
 const metaWhatsAppService = require("./meta.whatsapp.service");
+const usageService = require("./usage.service");
 const AppError = require("../utils/appError");
 
 const BATCH_SIZE = 25;
@@ -136,6 +137,9 @@ class CampaignWorker {
       progress: 100,
       completedAt: new Date(),
     });
+    if (finalStatus === "COMPLETED") {
+      void usageService.recordCampaignCompleted(companyId, campaignId);
+    }
   }
 
   async processRecipient(
@@ -182,6 +186,15 @@ class CampaignWorker {
       sentAt: new Date(),
       whatsappMessageId: metaMessageId,
     });
+
+    // Record SaaS Usage
+    void usageService.recordMessageSent(companyId, {
+      campaignRecipientId: recipient.id,
+      metaMessageId,
+      campaignId: campaign.id,
+      templateId: campaign.templateId,
+    });
+
     return { mediaId: metaMediaId };
   }
 

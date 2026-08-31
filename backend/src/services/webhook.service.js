@@ -2,6 +2,7 @@ const logger = require("../config/logger");
 const whatsappRepository = require("../repositories/whatsapp.repository");
 const campaignRecipientRepository = require("../repositories/campaignRecipient.repository");
 const campaignRepository = require("../repositories/campaign.repository");
+const usageService = require("./usage.service");
 
 const STATUS_RANK = {
   PENDING: 0,
@@ -171,6 +172,13 @@ class WebhookService {
       if (recipient.campaignId) {
         await campaignRepository.syncCounters(recipient.campaignId);
       }
+
+      // Record SaaS Usage Status Progression (idempotent)
+      void usageService.recordMessageStatus(recipient.companyId, {
+        campaignRecipientId: recipient.id,
+        metaMessageId: messageId,
+        status: updateData.status || rawStatus,
+      });
     }
   }
 

@@ -4,6 +4,7 @@ const templateRepository = require("../repositories/template.repository");
 const campaignWorker = require("./campaign.worker");
 const whatsappRepository = require("../repositories/whatsapp.repository");
 const mediaService = require("./media.service");
+const usageService = require("./usage.service");
 const AppError = require("../utils/appError");
 
 class CampaignService {
@@ -53,10 +54,19 @@ class CampaignService {
       data = { ...data, status: "SCHEDULED" };
     }
 
-    return await campaignRepository.create({
+    const campaign = await campaignRepository.create({
       ...data,
       companyId,
     });
+
+    // Record SaaS Usage
+    void usageService.recordCampaignCreated(companyId, campaign.id);
+    void usageService.recordTemplateUsed(companyId, {
+      campaignId: campaign.id,
+      templateId: campaign.templateId,
+    });
+
+    return campaign;
   }
 
   // =====================================

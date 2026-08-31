@@ -8,6 +8,9 @@ const Campaign = require("./campaign.model");
 const CampaignRecipient = require("./campaignRecipient.model");
 const WhatsAppConnection = require("./whatsappConnection.model");
 const Media = require("./media.model");
+const Usage = require("./usage.model");
+const UsageEvent = require("./usageEvent.model");
+const MetaUsage = require("./metaUsage.model");
 
 // Company -> Users
 Company.hasMany(User, {
@@ -112,6 +115,39 @@ CampaignRecipient.belongsTo(Customer, {
   as: "customer",
 });
 
+// Company → Usages
+Company.hasMany(Usage, {
+  foreignKey: "companyId",
+  as: "usages",
+});
+
+Usage.belongsTo(Company, {
+  foreignKey: "companyId",
+  as: "company",
+});
+
+// Company → UsageEvents
+Company.hasMany(UsageEvent, {
+  foreignKey: "companyId",
+  as: "usageEvents",
+});
+
+UsageEvent.belongsTo(Company, {
+  foreignKey: "companyId",
+  as: "company",
+});
+
+// Company → MetaUsages
+Company.hasMany(MetaUsage, {
+  foreignKey: "companyId",
+  as: "metaUsages",
+});
+
+MetaUsage.belongsTo(Company, {
+  foreignKey: "companyId",
+  as: "company",
+});
+
 const db = {
   sequelize,
   User,
@@ -122,6 +158,9 @@ const db = {
   CampaignRecipient,
   WhatsAppConnection,
   Media,
+  Usage,
+  UsageEvent,
+  MetaUsage,
 };
 
 module.exports = db;

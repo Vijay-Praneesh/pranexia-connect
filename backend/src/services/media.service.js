@@ -2,6 +2,7 @@ const { randomUUID } = require("crypto");
 const path = require("path");
 const mediaRepository = require("../repositories/media.repository");
 const storageService = require("./storage.service");
+const usageService = require("./usage.service");
 const { validateMediaFile } = require("../utils/media.validation");
 const AppError = require("../utils/appError");
 
@@ -15,7 +16,9 @@ class MediaService {
     try {
       await storageService.save(storageKey, file.buffer);
       saved = true;
-      return await mediaRepository.create({ id, companyId, originalName: validation.originalName, storedName, mimeType: file.mimetype.toLowerCase(), mediaType: validation.mediaType, size: file.size, storageKey, status: "READY" });
+      const media = await mediaRepository.create({ id, companyId, originalName: validation.originalName, storedName, mimeType: file.mimetype.toLowerCase(), mediaType: validation.mediaType, size: file.size, storageKey, status: "READY" });
+      void usageService.recordMediaUpload(companyId, { mediaId: id, size: file.size });
+      return media;
     } catch (error) {
       if (saved) {
         try { await storageService.delete(storageKey); } catch { /* preserve the original persistence error */ }

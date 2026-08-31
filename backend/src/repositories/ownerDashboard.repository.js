@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
 const { Company, User } = require("../models");
+const usageRepository = require("./usage.repository");
 
 class OwnerDashboardRepository {
   async getCompanyStatistics() {
@@ -62,14 +63,15 @@ class OwnerDashboardRepository {
   }
 
   async getSummary() {
-    const [companies, plans, recentCompanies, overview] = await Promise.all([
+    const [companies, plans, recentCompanies, overview, usage] = await Promise.all([
       this.getCompanyStatistics(),
       this.getPlanStatistics(),
       this.getRecentCompanies(),
       this.getUserStatistics(),
+      usageRepository.getPlatformAggregateUsage(),
     ]);
 
-    return { companies, plans, recentCompanies, overview };
+    return { companies, plans, recentCompanies, overview, usage };
   }
 }
 

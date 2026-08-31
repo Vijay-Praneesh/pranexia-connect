@@ -101,6 +101,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'usage',
+        loadComponent: () =>
+          import('./features/usage/usage.component').then(
+            (c) => c.UsageComponent,
+          ),
+      },
+      {
         path: 'notifications',
         loadComponent: () =>
           import('./features/notifications/notifications.component').then(

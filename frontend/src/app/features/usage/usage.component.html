@@ -1,0 +1,429 @@
+<section aria-labelledby="usage-title" class="usage-container">
+  <!-- Header / Period Filter Bar -->
+  <div
+    class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4"
+  >
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h1 id="usage-title" class="h3 mb-0">Usage &amp; Cost Tracking</h1>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+          Production Accurate
+        </span>
+      </div>
+      <p class="text-body-secondary mb-0">
+        Transparently monitor Seyyon Connect SaaS consumption and third-party Meta WhatsApp usage.
+      </p>
+    </div>
+
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- Period Selector -->
+      <div class="input-group input-group-sm period-select-group">
+        <span class="input-group-text bg-light text-body-secondary border-end-0">
+          <i class="bi bi-calendar3" aria-hidden="true"></i>
+        </span>
+        <select
+          class="form-select border-start-0"
+          [ngModel]="selectedPeriod"
+          (ngModelChange)="onPeriodChange($event)"
+          aria-label="Select billing period"
+        >
+          @for (p of availablePeriods; track p) {
+            <option [value]="p">
+              {{ formatPeriodLabel(p) }} {{ p === availablePeriods[0] ? '(Current)' : '' }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <!-- Sync Meta Button -->
+      @if (isCompanyAdmin) {
+        <button
+          class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+          type="button"
+          (click)="syncMeta()"
+          [disabled]="syncingMeta || loading"
+        >
+          @if (syncingMeta) {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span>Syncing Meta...</span>
+          } @else {
+            <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+            <span>Sync Meta Analytics</span>
+          }
+        </button>
+      }
+
+      <!-- Refresh Button -->
+      <button
+        class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+        type="button"
+        (click)="refresh()"
+        [disabled]="refreshing || loading"
+        aria-label="Refresh usage data"
+      >
+        <i class="bi bi-arrow-clockwise" [class.spin]="refreshing" aria-hidden="true"></i>
+        <span>{{ refreshing ? 'Refreshing...' : 'Refresh' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading && !summary) {
+    <app-loading-state message="Loading usage and billing metrics..." />
+  } @else if (errorMessage && !summary) {
+    <app-error-state
+      title="Usage metrics unavailable"
+      [message]="errorMessage"
+      [retryable]="true"
+      (retry)="refresh()"
+    />
+  } @else if (summary) {
+    <!-- Feedback banner from Meta Sync -->
+    @if (metaFeedbackMessage) {
+      <div
+        class="alert alert-dismissible fade show mb-4"
+        [ngClass]="{
+          'alert-success': metaFeedbackTone === 'success',
+          'alert-info': metaFeedbackTone === 'info',
+          'alert-warning': metaFeedbackTone === 'warning'
+        }"
+        role="alert"
+      >
+        <div class="d-flex align-items-center gap-2">
+          <i
+            class="bi"
+            [ngClass]="{
+              'bi-check-circle-fill': metaFeedbackTone === 'success',
+              'bi-info-circle-fill': metaFeedbackTone === 'info',
+              'bi-exclamation-triangle-fill': metaFeedbackTone === 'warning'
+            }"
+            aria-hidden="true"
+          ></i>
+          <span>{{ metaFeedbackMessage }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          (click)="metaFeedbackMessage = ''"
+        ></button>
+      </div>
+    }
+
+    <!-- SECTION 1: SEYYON CONNECT SaaS USAGE -->
+    <div class="usage-section mb-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <h2 class="h5 mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-cloud-check text-primary" aria-hidden="true"></i>
+            <span>Seyyon Connect SaaS Usage</span>
+          </h2>
+          <span class="text-body-secondary small">
+            Consumption metrics for {{ formatPeriodLabel(summary.period.period) }}
+          </span>
+        </div>
+        <span class="badge bg-light text-dark border">
+          UTC: {{ summary.period.periodStart | date: 'mediumDate' : 'UTC' }} –
+          {{ summary.period.periodEnd | date: 'mediumDate' : 'UTC' }}
+        </span>
+      </div>
+
+      <!-- SaaS KPI Grid -->
+      <div class="row g-3 mb-4">
+        <!-- Messages Card -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="card h-100 border-0 shadow-sm usage-kpi-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-body-secondary fw-medium small">WhatsApp Messages Sent</span>
+                <span class="kpi-icon-pill bg-primary-subtle text-primary">
+                  <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+                </span>
+              </div>
+              <div class="display-6 fw-bold mb-2">
+                {{ summary.saas.messages.sent | number }}
+              </div>
+              <div class="stat-progress mb-2">
+                <div
+                  class="progress"
+                  role="progressbar"
+                  [attr.aria-valuenow]="deliveryRate"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  style="height: 6px;"
+                >
+                  <div
+                    class="progress-bar bg-success"
+                    [style.width.%]="deliveryRate"
+                  ></div>
+                </div>
+              </div>
+              <div class="d-flex align-items-center justify-content-between small text-body-secondary">
+                <span>Delivered: <strong>{{ summary.saas.messages.delivered | number }}</strong> ({{ deliveryRate }}%)</span>
+                <span>Read: <strong>{{ summary.saas.messages.read | number }}</strong> ({{ readRate }}%)</span>
+              </div>
+              @if (summary.saas.messages.failed > 0) {
+                <div class="small text-danger mt-1">
+                  <i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>
+                  Failed: {{ summary.saas.messages.failed | number }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaigns Card -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="card h-100 border-0 shadow-sm usage-kpi-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-body-secondary fw-medium small">Campaigns</span>
+                <span class="kpi-icon-pill bg-info-subtle text-info">
+                  <i class="bi bi-megaphone-fill" aria-hidden="true"></i>
+                </span>
+              </div>
+              <div class="display-6 fw-bold mb-2">
+                {{ summary.saas.campaigns.created | number }}
+              </div>
+              <div class="small text-body-secondary d-flex flex-column gap-1">
+                <span>Created in Period: <strong>{{ summary.saas.campaigns.created }}</strong></span>
+                <span>Completed in Period: <strong class="text-success">{{ summary.saas.campaigns.completed }}</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Media Storage Card -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="card h-100 border-0 shadow-sm usage-kpi-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-body-secondary fw-medium small">Media Storage</span>
+                <span class="kpi-icon-pill bg-warning-subtle text-warning">
+                  <i class="bi bi-folder-fill" aria-hidden="true"></i>
+                </span>
+              </div>
+              <div class="display-6 fw-bold mb-2">
+                {{ formatBytes(summary.saas.media.activeStorageBytes || 0) }}
+              </div>
+              <div class="small text-body-secondary d-flex flex-column gap-1">
+                <span>Active Files: <strong>{{ summary.saas.media.activeFileCount || 0 }}</strong></span>
+                <span>Monthly Uploads: <strong>{{ summary.saas.media.uploadedCount }}</strong> ({{ formatBytes(summary.saas.media.uploadedBytes) }})</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Templates Used Card -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="card h-100 border-0 shadow-sm usage-kpi-card">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-body-secondary fw-medium small">Templates Used</span>
+                <span class="kpi-icon-pill bg-success-subtle text-success">
+                  <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
+                </span>
+              </div>
+              <div class="display-6 fw-bold mb-2">
+                {{ summary.saas.templates.used | number }}
+              </div>
+              <div class="small text-body-secondary">
+                <span>Distinct templates triggered across campaigns</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: META / WHATSAPP USAGE & COST (STRICTLY SEPARATED) -->
+    <div class="usage-section mb-5">
+      <div class="card border-0 shadow-sm meta-container-card">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+          <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+            <div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                  <i class="bi bi-whatsapp me-1" aria-hidden="true"></i>Meta Cloud API
+                </span>
+                <h2 class="h5 mb-0">Meta / WhatsApp Usage &amp; Cost</h2>
+              </div>
+              <p class="text-body-secondary small mb-0 mt-1">
+                Third-party WhatsApp Business charges from Meta Platforms, Inc. (kept strictly separate from SaaS subscriptions).
+              </p>
+            </div>
+            <div>
+              @if (summary.meta.status === 'SYNCED') {
+                <span class="badge bg-success text-white">
+                  <i class="bi bi-check-circle me-1" aria-hidden="true"></i>Synchronized
+                </span>
+              } @else {
+                <span class="badge bg-secondary-subtle text-secondary border">
+                  <i class="bi bi-clock-history me-1" aria-hidden="true"></i>{{ summary.meta.status }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          @if (summary.meta.status === 'SYNCED') {
+            <div class="row g-3 mb-3">
+              <div class="col-6 col-md-3">
+                <div class="meta-stat-box p-3 rounded-3 bg-light">
+                  <div class="small text-body-secondary mb-1">Marketing Conversations</div>
+                  <div class="h4 mb-0 fw-semibold">{{ summary.meta.marketingConversations | number }}</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="meta-stat-box p-3 rounded-3 bg-light">
+                  <div class="small text-body-secondary mb-1">Utility Conversations</div>
+                  <div class="h4 mb-0 fw-semibold">{{ summary.meta.utilityConversations | number }}</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="meta-stat-box p-3 rounded-3 bg-light">
+                  <div class="small text-body-secondary mb-1">Authentication</div>
+                  <div class="h4 mb-0 fw-semibold">{{ summary.meta.authenticationConversations | number }}</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="meta-stat-box p-3 rounded-3 bg-light">
+                  <div class="small text-body-secondary mb-1">Service Conversations</div>
+                  <div class="h4 mb-0 fw-semibold">{{ summary.meta.serviceConversations | number }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-3 bg-light-subtle border d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+              <div>
+                <div class="fw-semibold">
+                  Total Synced Conversations: {{ summary.meta.totalConversations | number }}
+                </div>
+                <div class="small text-body-secondary">
+                  WABA ID: <code>{{ summary.meta.wabaId || 'Configured' }}</code> · Last synced:
+                  {{ summary.meta.syncedAt | date: 'medium' }}
+                </div>
+              </div>
+
+              <div>
+                @if (summary.meta.costAvailable && summary.meta.amount !== null) {
+                  <div class="text-md-end">
+                    <span class="small text-body-secondary d-block">Authoritative Meta Cost</span>
+                    <span class="h5 text-dark fw-bold mb-0">
+                      {{ summary.meta.currency || 'USD' }} {{ summary.meta.amount | number: '1.2-2' }}
+                    </span>
+                  </div>
+                } @else {
+                  <div class="text-md-end text-body-secondary small">
+                    <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                    Direct Meta Billing (Billed directly to Meta Payment Method)
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="alert alert-light border mb-0 d-flex align-items-start gap-3">
+              <i class="bi bi-info-circle-fill text-primary fs-4 mt-1" aria-hidden="true"></i>
+              <div>
+                <h3 class="h6 mb-1">Meta Analytics &amp; Cost Not Synchronized</h3>
+                <p class="small text-body-secondary mb-2">
+                  Authoritative Meta conversation and billing data has not been synchronized for this period.
+                  Seyyon Connect adheres to live Meta account reporting and never fabricates estimated bills.
+                </p>
+                @if (isCompanyAdmin) {
+                  <button
+                    class="btn btn-sm btn-primary"
+                    type="button"
+                    (click)="syncMeta()"
+                    [disabled]="syncingMeta"
+                  >
+                    <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>
+                    Synchronize with Meta Graph API
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: USAGE HISTORY -->
+    <div class="usage-section">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2">
+          <h2 class="h5 mb-0">Monthly Usage History</h2>
+          <p class="text-body-secondary small mb-0">
+            Historical overview of messages, campaigns, and media usage across previous billing periods.
+          </p>
+        </div>
+
+        <div class="card-body px-0 pb-0">
+          @if (history.length > 0) {
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="ps-4">Period</th>
+                    <th>Messages Sent</th>
+                    <th>Delivered</th>
+                    <th>Read</th>
+                    <th>Failed</th>
+                    <th>Campaigns</th>
+                    <th>Media Uploads</th>
+                    <th>Templates</th>
+                    <th class="pe-4">Meta Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of history; track item.period) {
+                    <tr>
+                      <td class="ps-4 fw-semibold">
+                        {{ formatPeriodLabel(item.period) }}
+                        @if (item.period === availablePeriods[0]) {
+                          <span class="badge bg-primary-subtle text-primary ms-1">Active</span>
+                        }
+                      </td>
+                      <td><strong>{{ item.messages.sent | number }}</strong></td>
+                      <td>{{ item.messages.delivered | number }}</td>
+                      <td>{{ item.messages.read | number }}</td>
+                      <td>
+                        @if (item.messages.failed > 0) {
+                          <span class="text-danger fw-semibold">{{ item.messages.failed | number }}</span>
+                        } @else {
+                          <span class="text-body-secondary">0</span>
+                        }
+                      </td>
+                      <td>{{ item.campaigns.created }} created / {{ item.campaigns.completed }} done</td>
+                      <td>{{ item.media.uploadedCount }} ({{ formatBytes(item.media.uploadedBytes) }})</td>
+                      <td>{{ item.templates.used }}</td>
+                      <td class="pe-4">
+                        @if (item.meta.status === 'SYNCED') {
+                          <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            {{ item.meta.totalConversations }} convs
+                          </span>
+                        } @else {
+                          <span class="badge bg-secondary-subtle text-secondary border">
+                            {{ item.meta.status }}
+                          </span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="p-4">
+              <app-empty-state
+                title="No usage history"
+                message="Historical usage records will appear here as your billing cycles progress."
+              />
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</section>
