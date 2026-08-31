@@ -9,13 +9,14 @@ import {
   PaymentHistoryResponse,
   PaymentOrderResponse,
   PricingMatrixResponse,
-  VerifyPaymentResponse,
 } from './payment.model';
 import { PaymentService } from './payment.service';
 import { SubscriptionComponent } from './subscription.component';
 import {
   CurrentSubscriptionResponse,
+  PlanChangePreview,
   SubscriptionHistoryItem,
+  SubscriptionInfo,
 } from './subscription.model';
 import { SubscriptionService } from './subscription.service';
 
@@ -29,18 +30,19 @@ describe('SubscriptionComponent', () => {
     subscription: {
       id: 'sub-1',
       companyId: 'company-1',
-      plan: 'BUSINESS',
+      plan: 'STARTER',
       status: 'ACTIVE',
       startDate: '2026-08-01T00:00:00.000Z',
       currentPeriodStart: '2026-08-01T00:00:00.000Z',
       currentPeriodEnd: '2026-08-31T23:59:59.999Z',
       cancelAtPeriodEnd: false,
+      pendingPlan: null,
     },
     planOverview: {
       plan: {
-        name: 'BUSINESS',
-        displayName: 'Business',
-        tagline: 'Growing business plan',
+        name: 'STARTER',
+        displayName: 'Starter',
+        tagline: 'Starter plan',
         customLimits: null,
       },
       metrics: [
@@ -50,9 +52,9 @@ describe('SubscriptionComponent', () => {
           description: 'Monthly messages',
           unit: 'messages',
           isMonthly: true,
-          currentUsage: 5000,
-          limit: 25000,
-          remaining: 20000,
+          currentUsage: 1000,
+          limit: 5000,
+          remaining: 4000,
           percentage: 20,
           status: 'NORMAL',
         },
@@ -123,6 +125,25 @@ describe('SubscriptionComponent', () => {
         updatedAt: '2026-08-01T00:00:00.000Z',
       },
     ],
+  };
+
+  const mockPreview: PlanChangePreview = {
+    companyId: 'company-1',
+    currentPlan: 'STARTER',
+    currentDisplayName: 'Starter',
+    targetPlan: 'BUSINESS',
+    targetDisplayName: 'Business',
+    targetTagline: 'Growing businesses',
+    direction: 'UPGRADE',
+    isPurchasable: true,
+    paymentRequired: true,
+    billingInterval: 'MONTHLY',
+    price: { amount: 249900, displayAmount: 2499, formatted: '₹2,499/mo' },
+    currentPeriodEnd: '2026-08-31T23:59:59.999Z',
+    effectiveDate: '2026-08-31T23:59:59.999Z',
+    hasOverLimitMetrics: false,
+    overLimitMetrics: [],
+    metricsComparison: [],
   };
 
   const mockUser = {
@@ -200,16 +221,28 @@ describe('SubscriptionComponent', () => {
     expect(component.loading).toBe(false);
   });
 
-  it('should open and close checkout modal', () => {
-    expect(component.showCheckoutModal).toBe(false);
-    component.openCheckout('BUSINESS');
-    expect(component.showCheckoutModal).toBe(true);
-    expect(component.selectedPlanForCheckout).toBe('BUSINESS');
-    component.closeCheckout();
-    expect(component.showCheckoutModal).toBe(false);
+  it('should calculate plan direction accurately', () => {
+    component.subscription = { ...mockCurrentResponse.subscription, plan: 'BUSINESS' };
+    expect(component.getPlanDirection('PROFESSIONAL')).toBe('UPGRADE');
+    expect(component.getPlanDirection('STARTER')).toBe('DOWNGRADE');
+    expect(component.getPlanDirection('BUSINESS')).toBe('SAME');
   });
 
-  it('should initiate checkout and create payment order', () => {
+  it('should open and close plan change modal with preview loaded', () => {
+    spyOn(subscriptionService, 'previewPlanChange').and.returnValue(of(mockPreview));
+
+    expect(component.showPlanChangeModal).toBe(false);
+    component.openPlanChangeModal('BUSINESS');
+    expect(component.showPlanChangeModal).toBe(true);
+    expect(component.selectedPlanForChange).toBe('BUSINESS');
+    expect(subscriptionService.previewPlanChange).toHaveBeenCalledWith('BUSINESS', 'MONTHLY');
+    expect(component.planChangePreview).toEqual(mockPreview);
+
+    component.closePlanChangeModal();
+    expect(component.showPlanChangeModal).toBe(false);
+  });
+
+  it('should initiate upgrade checkout and create payment order', () => {
     const mockOrder: PaymentOrderResponse = {
       paymentId: 'pay-new',
       orderId: 'order_test_999',
@@ -226,15 +259,39 @@ describe('SubscriptionComponent', () => {
 
     spyOn(paymentService, 'createOrder').and.returnValue(of(mockOrder));
 
-    component.openCheckout('BUSINESS');
+    component.selectedPlanForChange = 'BUSINESS';
     component.selectedInterval = 'MONTHLY';
-    component.startCheckout();
+    component.startUpgradeCheckout();
 
     expect(paymentService.createOrder).toHaveBeenCalledWith({
       plan: 'BUSINESS',
       billingInterval: 'MONTHLY',
     });
     expect(component.checkoutOrder).toEqual(mockOrder);
+  });
+
+  it('should schedule downgrade and cancel pending downgrade successfully', () => {
+    const mockSub: SubscriptionInfo = {
+      ...mockCurrentResponse.subscription,
+      pendingPlan: 'STARTER',
+      pendingPlanEffectiveAt: '2026-08-31T23:59:59.999Z',
+    };
+
+    spyOn(subscriptionService, 'requestPlanChange').and.returnValue(of(mockSub));
+    spyOn(subscriptionService, 'cancelPendingPlanChange').and.returnValue(
+      of({ ...mockCurrentResponse.subscription, pendingPlan: null })
+    );
+
+    component.selectedPlanForChange = 'STARTER';
+    component.confirmDowngrade();
+
+    expect(subscriptionService.requestPlanChange).toHaveBeenCalledWith({
+      plan: 'STARTER',
+      interval: 'MONTHLY',
+    });
+
+    component.cancelPendingDowngrade();
+    expect(subscriptionService.cancelPendingPlanChange).toHaveBeenCalled();
   });
 
   it('should format bytes and progress bar class accurately', () => {

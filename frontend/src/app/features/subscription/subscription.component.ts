@@ -19,10 +19,19 @@ import {
 } from './payment.model';
 import { PaymentService } from './payment.service';
 import {
+  PlanChangeDirection,
+  PlanChangePreview,
   SubscriptionHistoryItem,
   SubscriptionInfo,
 } from './subscription.model';
 import { SubscriptionService } from './subscription.service';
+
+const PLAN_LEVELS: Record<string, number> = {
+  STARTER: 1,
+  BUSINESS: 2,
+  PROFESSIONAL: 3,
+  ENTERPRISE: 4,
+};
 
 @Component({
   selector: 'app-subscription',
@@ -61,12 +70,16 @@ export class SubscriptionComponent implements OnInit {
   showPlanComparison = false;
   activeTab: 'usage' | 'subscriptionHistory' | 'paymentHistory' = 'usage';
 
-  // Checkout modal state
-  showCheckoutModal = false;
-  selectedPlanForCheckout: PlanTier = 'BUSINESS';
+  // Plan Change / Checkout modal state
+  showPlanChangeModal = false;
+  selectedPlanForChange: PlanTier = 'BUSINESS';
   selectedInterval: BillingInterval = 'MONTHLY';
+  planChangePreview: PlanChangePreview | null = null;
+  isLoadingPreview = false;
   isProcessingPayment = false;
-  checkoutError = '';
+  isConfirmingDowngrade = false;
+  isCancellingDowngrade = false;
+  modalError = '';
   checkoutOrder: PaymentOrderResponse | null = null;
 
   get isSuperAdmin(): boolean {
@@ -88,6 +101,10 @@ export class SubscriptionComponent implements OnInit {
     return this.subscription?.status === 'EXPIRED';
   }
 
+  get hasPendingDowngrade(): boolean {
+    return Boolean(this.subscription?.pendingPlan);
+  }
+
   get daysRemainingInPeriod(): number {
     if (!this.subscription?.currentPeriodEnd) return 0;
     const diff = new Date(this.subscription.currentPeriodEnd).getTime() - Date.now();
@@ -101,7 +118,7 @@ export class SubscriptionComponent implements OnInit {
   }
 
   get selectedPlanPricing(): PricingPlanItem | undefined {
-    return this.pricingMatrix?.plans?.find((p) => p.name === this.selectedPlanForCheckout);
+    return this.pricingMatrix?.plans?.find((p) => p.name === this.selectedPlanForChange);
   }
 
   get selectedPriceFormatted(): string {
@@ -121,34 +138,79 @@ export class SubscriptionComponent implements OnInit {
     this.showPlanComparison = !this.showPlanComparison;
   }
 
-  openCheckout(plan: PlanTier = 'BUSINESS'): void {
-    this.selectedPlanForCheckout = plan;
-    this.showCheckoutModal = true;
-    this.checkoutError = '';
-    this.checkoutOrder = null;
-  }
+  /**
+   * Determine plan change direction relative to current plan
+   */
+  getPlanDirection(targetPlan: PlanTier): PlanChangeDirection {
+    const currentPlan = this.subscription?.plan || 'STARTER';
+    const currentLevel = PLAN_LEVELS[currentPlan] || 0;
+    const targetLevel = PLAN_LEVELS[targetPlan] || 0;
 
-  closeCheckout(): void {
-    this.showCheckoutModal = false;
-    this.isProcessingPayment = false;
-    this.checkoutError = '';
-    this.checkoutOrder = null;
+    if (targetLevel > currentLevel) return 'UPGRADE';
+    if (targetLevel < currentLevel) return 'DOWNGRADE';
+    return 'SAME';
   }
 
   /**
-   * Start Checkout Flow:
-   * 1. Request server-side payment order (calculates authoritative price)
-   * 2. Open Razorpay Checkout or fallback test simulation
+   * Open Plan Change / Checkout Modal and fetch authoritative preview
    */
-  startCheckout(): void {
-    if (!this.selectedPlanForCheckout) return;
+  openPlanChangeModal(plan: PlanTier = 'BUSINESS'): void {
+    this.selectedPlanForChange = plan;
+    this.showPlanChangeModal = true;
+    this.modalError = '';
+    this.checkoutOrder = null;
+    this.loadPlanChangePreview();
+  }
+
+  closePlanChangeModal(): void {
+    this.showPlanChangeModal = false;
+    this.isProcessingPayment = false;
+    this.isConfirmingDowngrade = false;
+    this.modalError = '';
+    this.checkoutOrder = null;
+    this.planChangePreview = null;
+  }
+
+  onIntervalChanged(interval: BillingInterval): void {
+    this.selectedInterval = interval;
+    this.loadPlanChangePreview();
+  }
+
+  /**
+   * Fetch authoritative plan change preview from backend
+   */
+  private loadPlanChangePreview(): void {
+    if (!this.selectedPlanForChange) return;
+
+    this.isLoadingPreview = true;
+    this.modalError = '';
+
+    this.subscriptionService
+      .previewPlanChange(this.selectedPlanForChange, this.selectedInterval)
+      .pipe(finalize(() => (this.isLoadingPreview = false)))
+      .subscribe({
+        next: (preview) => {
+          this.planChangePreview = preview;
+        },
+        error: (err) => {
+          this.modalError = this.httpErrors.map(err).message;
+        },
+      });
+  }
+
+  /**
+   * Start Upgrade Checkout Flow:
+   * Request server-side payment order (calculates authoritative price)
+   */
+  startUpgradeCheckout(): void {
+    if (!this.selectedPlanForChange) return;
 
     this.isProcessingPayment = true;
-    this.checkoutError = '';
+    this.modalError = '';
 
     this.paymentService
       .createOrder({
-        plan: this.selectedPlanForCheckout,
+        plan: this.selectedPlanForChange,
         billingInterval: this.selectedInterval,
       })
       .subscribe({
@@ -158,13 +220,63 @@ export class SubscriptionComponent implements OnInit {
         },
         error: (err) => {
           this.isProcessingPayment = false;
-          this.checkoutError = this.httpErrors.map(err).message;
+          this.modalError = this.httpErrors.map(err).message;
         },
       });
   }
 
   /**
-   * Open Razorpay modal if window.Razorpay SDK is loaded, otherwise handle simulation
+   * Confirm Scheduled Downgrade
+   */
+  confirmDowngrade(): void {
+    if (!this.selectedPlanForChange) return;
+
+    this.isConfirmingDowngrade = true;
+    this.modalError = '';
+
+    this.subscriptionService
+      .requestPlanChange({
+        plan: this.selectedPlanForChange,
+        interval: this.selectedInterval,
+      })
+      .pipe(finalize(() => (this.isConfirmingDowngrade = false)))
+      .subscribe({
+        next: (sub) => {
+          this.closePlanChangeModal();
+          this.feedbackMessage = `Plan downgrade to ${sub.pendingPlan || this.selectedPlanForChange} has been scheduled for the end of your billing cycle (${new Date(sub.pendingPlanEffectiveAt || sub.currentPeriodEnd).toLocaleDateString()}). Existing data remains safe.`;
+          this.feedbackTone = 'warning';
+          this.refresh();
+        },
+        error: (err) => {
+          this.modalError = this.httpErrors.map(err).message;
+        },
+      });
+  }
+
+  /**
+   * Cancel Pending Scheduled Downgrade
+   */
+  cancelPendingDowngrade(): void {
+    this.isCancellingDowngrade = true;
+
+    this.subscriptionService
+      .cancelPendingPlanChange()
+      .pipe(finalize(() => (this.isCancellingDowngrade = false)))
+      .subscribe({
+        next: () => {
+          this.feedbackMessage = `Scheduled plan downgrade has been cancelled. Your ${this.subscription?.plan} plan remains active.`;
+          this.feedbackTone = 'success';
+          this.refresh();
+        },
+        error: (err) => {
+          this.feedbackMessage = this.httpErrors.map(err).message;
+          this.feedbackTone = 'warning';
+        },
+      });
+  }
+
+  /**
+   * Open Razorpay modal if window.Razorpay SDK is loaded, otherwise handle test simulation
    */
   private handleRazorpayCheckout(order: PaymentOrderResponse): void {
     const rzpWindow = window as any;
@@ -175,7 +287,7 @@ export class SubscriptionComponent implements OnInit {
         amount: order.amount,
         currency: order.currency,
         name: 'Seyyon Connect',
-        description: `${order.planDisplayName} Subscription (${order.billingInterval})`,
+        description: `${order.planDisplayName} Upgrade (${order.billingInterval})`,
         order_id: order.orderId,
         prefill: {
           name: order.companyName,
@@ -206,7 +318,6 @@ export class SubscriptionComponent implements OnInit {
       const rzpInstance = new rzpWindow.Razorpay(options);
       rzpInstance.open();
     } else {
-      // Direct completion verification for sandbox/mock testing
       this.isProcessingPayment = false;
     }
   }
@@ -218,7 +329,6 @@ export class SubscriptionComponent implements OnInit {
     if (!this.checkoutOrder) return;
     this.isProcessingPayment = true;
 
-    // Test payment credentials matching server verification test secret
     const testPaymentId = `pay_sim_${Date.now()}`;
     const testSignature = 'test_simulated_signature';
 
@@ -243,14 +353,14 @@ export class SubscriptionComponent implements OnInit {
     this.paymentService.verifyPayment(verificationData).subscribe({
       next: (res) => {
         this.isProcessingPayment = false;
-        this.closeCheckout();
-        this.feedbackMessage = `Payment confirmed! Your ${res.payment.plan} subscription is now active.`;
+        this.closePlanChangeModal();
+        this.feedbackMessage = `Payment confirmed! Your plan has been upgraded to ${res.payment.plan}.`;
         this.feedbackTone = 'success';
         this.refresh();
       },
       error: (err) => {
         this.isProcessingPayment = false;
-        this.checkoutError = this.httpErrors.map(err).message;
+        this.modalError = this.httpErrors.map(err).message;
       },
     });
   }

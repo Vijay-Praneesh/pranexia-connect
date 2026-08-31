@@ -214,6 +214,116 @@ class SubscriptionController {
       next(error);
     }
   };
+
+  /**
+   * GET /api/v1/subscriptions/change-plan/preview
+   * Preview impact of upgrading or downgrading plan
+   */
+  previewPlanChange = async (req, res, next) => {
+    try {
+      const companyId = this.resolveCompanyId(req);
+      const targetPlan = req.query.plan;
+      const targetInterval = req.query.interval || "MONTHLY";
+
+      if (!targetPlan) {
+        throw new AppError("Target plan is required in query parameter ?plan=", 400);
+      }
+
+      const preview = await planService.previewPlanChange(companyId, targetPlan, targetInterval);
+
+      return res.status(200).json({
+        success: true,
+        message: "Plan change preview generated successfully",
+        data: preview,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/v1/subscriptions/change-plan
+   * Schedule a downgrade or apply an administrative plan change
+   */
+  changePlan = async (req, res, next) => {
+    try {
+      const companyId = this.resolveCompanyId(req);
+      const { plan, interval = "MONTHLY", reason, immediate } = req.body;
+
+      if (!plan) {
+        throw new AppError("Target plan is required", 400);
+      }
+
+      const { getPlanDirection } = require("../config/plans.config");
+      const currentSub = await subscriptionService.getCurrentSubscription(companyId);
+      const direction = getPlanDirection(currentSub.plan, plan);
+
+      if (direction === "SAME") {
+        throw new AppError("You are already on this plan", 400);
+      }
+
+      let result;
+      // If SUPER_ADMIN explicitly passes immediate = true, apply immediately
+      if (req.user.role === "SUPER_ADMIN" && immediate) {
+        result = await subscriptionService.changePlan(companyId, plan, {
+          source: "ADMIN",
+          performedBy: req.user.id,
+          reason: reason || "Administrative plan change",
+        });
+        return res.status(200).json({
+          success: true,
+          message: `Plan changed immediately to ${result.plan}`,
+          data: result,
+        });
+      }
+
+      if (direction === "UPGRADE") {
+        throw new AppError(
+          "Paid upgrades require checkout. Please initiate a payment order via POST /api/v1/payments/order",
+          400
+        );
+      }
+
+      // Schedule Downgrade for period end
+      result = await subscriptionService.scheduleDowngrade(companyId, plan, {
+        billingInterval: interval,
+        source: req.user.role === "SUPER_ADMIN" ? "ADMIN" : "CLIENT",
+        performedBy: req.user.id,
+        reason: reason || "Downgrade requested by user",
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: `Plan downgrade to ${plan} scheduled for ${result.pendingPlanEffectiveAt}`,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /api/v1/subscriptions/cancel-pending-plan
+   * Cancel a scheduled downgrade
+   */
+  cancelPendingDowngrade = async (req, res, next) => {
+    try {
+      const companyId = this.resolveCompanyId(req);
+      const result = await subscriptionService.cancelPendingDowngrade(companyId, {
+        source: req.user.role === "SUPER_ADMIN" ? "ADMIN" : "CLIENT",
+        performedBy: req.user.id,
+        reason: "User cancelled scheduled downgrade",
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Scheduled plan downgrade has been cancelled",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 module.exports = new SubscriptionController();

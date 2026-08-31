@@ -91,6 +91,24 @@ const Subscription = sequelize.define(
       allowNull: true,
       field: "external_subscription_id",
     },
+
+    pendingPlan: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      field: "pending_plan",
+    },
+
+    pendingBillingInterval: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      field: "pending_billing_interval",
+    },
+
+    pendingPlanEffectiveAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: "pending_plan_effective_at",
+    },
   },
   {
     tableName: "subscriptions",

@@ -7,6 +7,8 @@ import { ApiResponse } from '../../core/models/api-response.model';
 import {
   AdminCompanySubscriptionResponse,
   CurrentSubscriptionResponse,
+  PlanChangePreview,
+  PlanChangeRequest,
   SubscriptionHistoryItem,
   SubscriptionInfo,
 } from './subscription.model';
@@ -36,6 +38,39 @@ export class SubscriptionService {
       .get<ApiResponse<SubscriptionHistoryItem[]>>(`${this.baseUrl}/subscriptions/history`, {
         params,
       })
+      .pipe(map((res) => res.data));
+  }
+
+  /**
+   * Preview impact and pricing of upgrading or downgrading plan
+   */
+  previewPlanChange(plan: string, interval: string = 'MONTHLY'): Observable<PlanChangePreview> {
+    const params = new HttpParams().set('plan', plan).set('interval', interval);
+    return this.http
+      .get<ApiResponse<PlanChangePreview>>(`${this.baseUrl}/subscriptions/change-plan/preview`, {
+        params,
+      })
+      .pipe(map((res) => res.data));
+  }
+
+  /**
+   * Request a plan change (schedules downgrade or executes immediate upgrade/admin change)
+   */
+  requestPlanChange(payload: PlanChangeRequest): Observable<SubscriptionInfo> {
+    return this.http
+      .post<ApiResponse<SubscriptionInfo>>(`${this.baseUrl}/subscriptions/change-plan`, payload)
+      .pipe(map((res) => res.data));
+  }
+
+  /**
+   * Cancel a scheduled pending downgrade
+   */
+  cancelPendingPlanChange(): Observable<SubscriptionInfo> {
+    return this.http
+      .post<ApiResponse<SubscriptionInfo>>(
+        `${this.baseUrl}/subscriptions/cancel-pending-plan`,
+        {}
+      )
       .pipe(map((res) => res.data));
   }
 

@@ -191,12 +191,25 @@ class PaymentService {
     const periodDays =
       INTERVAL_DAYS[payment.billingInterval] || INTERVAL_DAYS[BILLING_INTERVALS.MONTHLY];
 
-    const updatedSubscription = await subscriptionService.activateSubscription(companyId, {
-      plan: payment.plan,
-      periodDays,
-      source: SUBSCRIPTION_SOURCES.PAYMENT,
-      reason: `Paid subscription via ${payment.provider} (Ref: ${providerPaymentId})`,
-    });
+    let updatedSubscription;
+    if (payment.paymentType === PAYMENT_TYPES.PLAN_CHANGE) {
+      updatedSubscription = await subscriptionService.changePlan(companyId, payment.plan, {
+        source: SUBSCRIPTION_SOURCES.PAYMENT,
+        reason: `Paid plan upgrade via ${payment.provider} (Ref: ${providerPaymentId})`,
+      });
+      // Extend billing period
+      updatedSubscription = await subscriptionService.renewSubscriptionPeriod(companyId, {
+        periodDays,
+        source: SUBSCRIPTION_SOURCES.PAYMENT,
+      });
+    } else {
+      updatedSubscription = await subscriptionService.activateSubscription(companyId, {
+        plan: payment.plan,
+        periodDays,
+        source: SUBSCRIPTION_SOURCES.PAYMENT,
+        reason: `Paid subscription via ${payment.provider} (Ref: ${providerPaymentId})`,
+      });
+    }
 
     // Link subscription ID if not previously attached
     if (!payment.subscriptionId && updatedSubscription?.id) {
@@ -272,12 +285,23 @@ class PaymentService {
           const periodDays =
             INTERVAL_DAYS[payment.billingInterval] || INTERVAL_DAYS[BILLING_INTERVALS.MONTHLY];
 
-          await subscriptionService.activateSubscription(payment.companyId, {
-            plan: payment.plan,
-            periodDays,
-            source: SUBSCRIPTION_SOURCES.PAYMENT,
-            reason: `Webhook confirmed payment (${providerPaymentId})`,
-          });
+          if (payment.paymentType === PAYMENT_TYPES.PLAN_CHANGE) {
+            await subscriptionService.changePlan(payment.companyId, payment.plan, {
+              source: SUBSCRIPTION_SOURCES.PAYMENT,
+              reason: `Webhook confirmed plan change (${providerPaymentId})`,
+            });
+            await subscriptionService.renewSubscriptionPeriod(payment.companyId, {
+              periodDays,
+              source: SUBSCRIPTION_SOURCES.PAYMENT,
+            });
+          } else {
+            await subscriptionService.activateSubscription(payment.companyId, {
+              plan: payment.plan,
+              periodDays,
+              source: SUBSCRIPTION_SOURCES.PAYMENT,
+              reason: `Webhook confirmed payment (${providerPaymentId})`,
+            });
+          }
         }
       }
     } else if (eventType === "payment.failed") {

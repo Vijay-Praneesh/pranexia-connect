@@ -170,11 +170,32 @@ function calculateThresholdStatus(currentUsage, limit) {
   return WARNING_THRESHOLDS.NORMAL;
 }
 
+const PLAN_TIER_LEVELS = Object.freeze({
+  [PLAN_NAMES.STARTER]: 1,
+  [PLAN_NAMES.BUSINESS]: 2,
+  [PLAN_NAMES.PROFESSIONAL]: 3,
+  [PLAN_NAMES.ENTERPRISE]: 4,
+});
+
+/**
+ * Determine plan change direction: 'UPGRADE', 'DOWNGRADE', or 'SAME'
+ */
+function getPlanDirection(currentPlan, targetPlan) {
+  const currentLevel = PLAN_TIER_LEVELS[currentPlan] || 0;
+  const targetLevel = PLAN_TIER_LEVELS[targetPlan] || 0;
+
+  if (targetLevel > currentLevel) return "UPGRADE";
+  if (targetLevel < currentLevel) return "DOWNGRADE";
+  return "SAME";
+}
+
 module.exports = {
   PLAN_NAMES,
   METRIC_KEYS,
   METRIC_DEFINITIONS,
   PLANS,
+  PLAN_TIER_LEVELS,
   WARNING_THRESHOLDS,
   calculateThresholdStatus,
+  getPlanDirection,
 };

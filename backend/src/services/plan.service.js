@@ -280,6 +280,110 @@ class PlanService {
 
     return await this.getCompanyPlanOverview(companyId);
   }
+
+  /**
+   * Authoritative Plan Change Preview
+   * Compares current live usage against target plan limits and calculates price, direction, and over-limit impacts.
+   */
+  async previewPlanChange(companyId, targetPlanName, targetInterval = "MONTHLY") {
+    if (!PLANS[targetPlanName]) {
+      throw new AppError(`Invalid target plan: ${targetPlanName}`, 400);
+    }
+
+    const { getPlanDirection } = require("../config/plans.config");
+    const {
+      getPlanPrice,
+      isPlanPurchasable,
+      formatPaiseToRupees,
+    } = require("../config/pricing.config");
+    const subscriptionService = require("./subscription.service");
+
+    const companyPlan = await this.getCompanyPlan(companyId);
+    const currentSub = await subscriptionService.ensureCompanySubscription(companyId);
+    const targetPlan = PLANS[targetPlanName];
+    const direction = getPlanDirection(companyPlan.planName, targetPlanName);
+
+    const priceConfig = getPlanPrice(targetPlanName, targetInterval);
+    const purchasable = isPlanPurchasable(targetPlanName, targetInterval);
+
+    const effectiveDate =
+      direction === "DOWNGRADE"
+        ? currentSub.currentPeriodEnd
+        : new Date(); // Upgrades take effect immediately upon payment
+
+    const metricsComparison = [];
+    const overLimitMetrics = [];
+
+    for (const [key, def] of Object.entries(METRIC_DEFINITIONS)) {
+      const currentUsage = await this.getCurrentUsage(companyId, key);
+      const currentLimit = companyPlan.limits[key];
+      const targetLimit = targetPlan.limits[key];
+
+      let targetStatus = calculateThresholdStatus(currentUsage, targetLimit);
+      let isOverLimit = targetLimit !== null && currentUsage > targetLimit;
+      let overBy = isOverLimit ? currentUsage - targetLimit : 0;
+
+      let impact = null;
+      if (isOverLimit) {
+        let formattedOverBy = def.unit === "bytes" ? `${Math.round(overBy / (1024 * 1024))} MB` : overBy;
+        let formattedLimit = def.unit === "bytes" ? `${Math.round(targetLimit / (1024 * 1024))} MB` : targetLimit;
+        let formattedUsage = def.unit === "bytes" ? `${Math.round(currentUsage / (1024 * 1024))} MB` : currentUsage;
+
+        impact = `You currently use ${formattedUsage} ${def.unit}. ${targetPlan.displayName} allows ${formattedLimit} ${def.unit} (${formattedOverBy} over limit). Existing data remains safe, but new additions will be restricted.`;
+
+        overLimitMetrics.push({
+          metric: key,
+          label: def.label,
+          unit: def.unit,
+          currentUsage,
+          targetLimit,
+          overBy,
+          impact,
+        });
+      }
+
+      metricsComparison.push({
+        metric: key,
+        label: def.label,
+        unit: def.unit,
+        isMonthly: def.isMonthly,
+        currentUsage,
+        currentLimit,
+        targetLimit,
+        targetStatus,
+        isOverLimit,
+        overBy,
+        impact,
+      });
+    }
+
+    return {
+      companyId,
+      currentPlan: companyPlan.planName,
+      currentDisplayName: companyPlan.displayName,
+      targetPlan: targetPlanName,
+      targetDisplayName: targetPlan.displayName,
+      targetTagline: targetPlan.tagline,
+      direction,
+      isPurchasable: purchasable,
+      paymentRequired: direction === "UPGRADE" && purchasable,
+      billingInterval: targetInterval,
+      price: priceConfig
+        ? {
+            amount: priceConfig.amount,
+            displayAmount: priceConfig.displayAmount,
+            formatted: priceConfig.formatted,
+          }
+        : null,
+      currentPeriodEnd: currentSub.currentPeriodEnd,
+      effectiveDate,
+      pendingPlan: currentSub.pendingPlan || null,
+      pendingPlanEffectiveAt: currentSub.pendingPlanEffectiveAt || null,
+      hasOverLimitMetrics: overLimitMetrics.length > 0,
+      overLimitMetrics,
+      metricsComparison,
+    };
+  }
 }
 
 module.exports = new PlanService();

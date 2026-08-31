@@ -148,6 +148,24 @@ class SubscriptionRepository {
       limit: 100,
     });
   }
+
+  /**
+   * Find active subscriptions with pending plan changes whose effective date has passed
+   */
+  async findSubscriptionsWithPendingPlanChange(now = new Date()) {
+    return await Subscription.findAll({
+      where: {
+        status: SUBSCRIPTION_STATUSES.ACTIVE,
+        pendingPlan: {
+          [Op.ne]: null,
+        },
+        pendingPlanEffectiveAt: {
+          [Op.lte]: now,
+        },
+      },
+      limit: 100,
+    });
+  }
 }
 
 module.exports = new SubscriptionRepository();

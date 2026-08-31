@@ -5,7 +5,7 @@ const {
   SUBSCRIPTION_SOURCES,
   SUBSCRIPTION_DEFAULTS,
 } = require("../config/subscriptions.config");
-const { PLAN_NAMES, PLANS } = require("../config/plans.config");
+const { PLAN_NAMES, PLANS, getPlanDirection } = require("../config/plans.config");
 const { Company, Subscription } = require("../models");
 const subscriptionRepository = require("../repositories/subscription.repository");
 const AppError = require("../utils/appError");
@@ -154,6 +154,9 @@ class SubscriptionService {
         cancelAtPeriodEnd: false,
         cancelledAt: null,
         endedAt: null,
+        pendingPlan: null,
+        pendingBillingInterval: null,
+        pendingPlanEffectiveAt: null,
       });
     } else {
       subscription = await subscriptionRepository.createSubscription({
@@ -238,6 +241,9 @@ class SubscriptionService {
         cancelAtPeriodEnd: false,
         cancelledAt: null,
         endedAt: null,
+        pendingPlan: null,
+        pendingBillingInterval: null,
+        pendingPlanEffectiveAt: null,
       });
     } else {
       subscription = await subscriptionRepository.createSubscription({
@@ -271,7 +277,7 @@ class SubscriptionService {
   }
 
   /**
-   * Change plan for an active/trialing subscription (Upgrade or Downgrade)
+   * Change plan immediately (e.g. Paid Upgrade, Admin Assignment, or Scheduler Activation)
    * Non-destructive: preserves existing data and usage.
    */
   async changePlan(companyId, newPlan, options = {}) {
@@ -293,10 +299,11 @@ class SubscriptionService {
 
     const current = await this.ensureCompanySubscription(companyId, newPlan);
 
-    // Idempotent: same plan and same custom limits
+    // Idempotent check
     if (
       current.plan === newPlan &&
-      JSON.stringify(company.customLimits || null) === JSON.stringify(customLimits || null)
+      JSON.stringify(company.customLimits || null) === JSON.stringify(customLimits || null) &&
+      !current.pendingPlan
     ) {
       return current;
     }
@@ -304,8 +311,13 @@ class SubscriptionService {
     const prevPlan = current.plan;
     const prevStatus = current.status;
 
+    let action = options.action || SUBSCRIPTION_ACTIONS.PLAN_CHANGED;
+
     const updated = await subscriptionRepository.updateSubscription(current, {
       plan: newPlan,
+      pendingPlan: null,
+      pendingBillingInterval: null,
+      pendingPlanEffectiveAt: null,
     });
 
     // Synchronize Company model
@@ -321,7 +333,97 @@ class SubscriptionService {
       newPlan,
       previousStatus: prevStatus,
       newStatus: updated.status,
-      action: SUBSCRIPTION_ACTIONS.PLAN_CHANGED,
+      action,
+      source,
+      performedBy,
+      reason,
+    });
+
+    return updated;
+  }
+
+  /**
+   * Schedule a plan downgrade for the end of the current billing cycle
+   */
+  async scheduleDowngrade(companyId, targetPlan, options = {}) {
+    if (!PLANS[targetPlan]) {
+      throw new AppError(`Invalid target plan: ${targetPlan}`, 400);
+    }
+
+    const current = await this.getCurrentSubscription(companyId);
+    const direction = getPlanDirection(current.plan, targetPlan);
+
+    if (direction === "SAME") {
+      throw new AppError("You are already on this plan", 400);
+    }
+
+    if (direction === "UPGRADE") {
+      throw new AppError("Upgrades take effect immediately upon payment. Please use the upgrade flow.", 400);
+    }
+
+    const {
+      billingInterval = "MONTHLY",
+      source = SUBSCRIPTION_SOURCES.ADMIN,
+      performedBy = null,
+      reason = "Downgrade scheduled for period end",
+    } = options;
+
+    // Effective date is currentPeriodEnd
+    const effectiveAt = current.currentPeriodEnd || this.addDays(new Date(), SUBSCRIPTION_DEFAULTS.PERIOD_DAYS);
+
+    const updated = await subscriptionRepository.updateSubscription(current, {
+      pendingPlan: targetPlan,
+      pendingBillingInterval: billingInterval,
+      pendingPlanEffectiveAt: effectiveAt,
+    });
+
+    await this.safeRecordHistory({
+      companyId,
+      subscriptionId: updated.id,
+      previousPlan: current.plan,
+      newPlan: targetPlan,
+      previousStatus: current.status,
+      newStatus: current.status,
+      action: SUBSCRIPTION_ACTIONS.DOWNGRADE_SCHEDULED,
+      source,
+      performedBy,
+      reason,
+    });
+
+    return updated;
+  }
+
+  /**
+   * Cancel a scheduled pending downgrade
+   */
+  async cancelPendingDowngrade(companyId, options = {}) {
+    const current = await this.getCurrentSubscription(companyId);
+
+    if (!current.pendingPlan) {
+      throw new AppError("No pending downgrade found to cancel", 400);
+    }
+
+    const pendingPlan = current.pendingPlan;
+    const {
+      source = SUBSCRIPTION_SOURCES.ADMIN,
+      performedBy = null,
+      reason = "Scheduled downgrade cancelled by user",
+    } = options;
+
+    const updated = await subscriptionRepository.updateSubscription(current, {
+      pendingPlan: null,
+      pendingBillingInterval: null,
+      pendingPlanEffectiveAt: null,
+    });
+
+    await this.safeRecordHistory({
+      companyId,
+      subscriptionId: updated.id,
+      previousPlan: pendingPlan,
+      newPlan: current.plan,
+      previousStatus: current.status,
+      newStatus: current.status,
+      action: SUBSCRIPTION_ACTIONS.DOWNGRADE_CANCELLED,
       source,
       performedBy,
       reason,
@@ -343,10 +445,8 @@ class SubscriptionService {
     } = options;
 
     const current = await this.getCurrentSubscription(companyId);
-
     const now = new Date();
 
-    // Idempotent check
     if (immediate || !cancelAtPeriodEnd) {
       if (current.status === SUBSCRIPTION_STATUSES.CANCELLED) {
         return current;
@@ -358,6 +458,9 @@ class SubscriptionService {
         cancelAtPeriodEnd: false,
         cancelledAt: now,
         endedAt: now,
+        pendingPlan: null,
+        pendingBillingInterval: null,
+        pendingPlanEffectiveAt: null,
       });
 
       await this.safeRecordHistory({
@@ -375,7 +478,6 @@ class SubscriptionService {
 
       return updated;
     } else {
-      // Cancel at period end
       if (current.cancelAtPeriodEnd) {
         return current;
       }
@@ -486,17 +588,29 @@ class SubscriptionService {
 
   /**
    * Execute scheduled lifecycle checks (called by background cron job)
-   * Scans expired trials, expired periods, and cancel-at-period-end subscriptions.
+   * Scans expired trials, expired periods, cancel-at-period-end, and scheduled pending downgrades.
    */
   async processScheduledLifecycleChecks(now = new Date()) {
     const results = {
       expiredTrials: 0,
       cancelledAtPeriodEnd: 0,
       expiredSubscriptions: 0,
+      appliedPendingPlanChanges: 0,
     };
 
     try {
-      // 1. Expire trials that passed trialEnd
+      // 1. Process scheduled pending plan downgrades whose effective date has passed
+      const pendingChanges = await subscriptionRepository.findSubscriptionsWithPendingPlanChange(now);
+      for (const sub of pendingChanges) {
+        const targetPlan = sub.pendingPlan;
+        await this.changePlan(sub.companyId, targetPlan, {
+          source: SUBSCRIPTION_SOURCES.SYSTEM,
+          reason: "Scheduled plan change activated at period end",
+        });
+        results.appliedPendingPlanChanges++;
+      }
+
+      // 2. Expire trials that passed trialEnd
       const expiredTrials = await subscriptionRepository.findExpiredTrials(now);
       for (const sub of expiredTrials) {
         await this.expireSubscription(sub.companyId, {
@@ -506,7 +620,7 @@ class SubscriptionService {
         results.expiredTrials++;
       }
 
-      // 2. Transition cancelAtPeriodEnd subscriptions that passed currentPeriodEnd
+      // 3. Transition cancelAtPeriodEnd subscriptions that passed currentPeriodEnd
       const toCancel = await subscriptionRepository.findSubscriptionsToCancelAtPeriodEnd(now);
       for (const sub of toCancel) {
         await subscriptionRepository.updateSubscription(sub, {
@@ -529,7 +643,7 @@ class SubscriptionService {
         results.cancelledAtPeriodEnd++;
       }
 
-      // 3. Expire active non-cancelling subscriptions whose period ended (awaiting renewal / payment in Module #13)
+      // 4. Expire active non-cancelling subscriptions whose period ended (awaiting renewal)
       const expiredSubs = await subscriptionRepository.findExpiredSubscriptions(now);
       for (const sub of expiredSubs) {
         await this.expireSubscription(sub.companyId, {

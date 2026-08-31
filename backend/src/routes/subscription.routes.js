@@ -21,6 +21,24 @@ router.get(
   subscriptionController.getSubscriptionHistory
 );
 
+router.get(
+  "/change-plan/preview",
+  authorize("COMPANY_ADMIN", "SUPER_ADMIN"),
+  subscriptionController.previewPlanChange
+);
+
+router.post(
+  "/change-plan",
+  authorize("COMPANY_ADMIN", "SUPER_ADMIN"),
+  subscriptionController.changePlan
+);
+
+router.post(
+  "/cancel-pending-plan",
+  authorize("COMPANY_ADMIN", "SUPER_ADMIN"),
+  subscriptionController.cancelPendingDowngrade
+);
+
 // SUPER_ADMIN Management Endpoints
 router.get(
   "/company/:companyId",

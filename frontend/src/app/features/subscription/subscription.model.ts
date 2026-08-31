@@ -1,4 +1,5 @@
-import { CompanyPlanOverview, PlanTier } from '../plans/plan.model';
+import { CompanyPlanOverview, PlanTier, WarningThresholdStatus } from '../plans/plan.model';
+import { BillingInterval } from './payment.model';
 
 export type SubscriptionStatus =
   | 'TRIALING'
@@ -6,6 +7,8 @@ export type SubscriptionStatus =
   | 'PAST_DUE'
   | 'CANCELLED'
   | 'EXPIRED';
+
+export type PlanChangeDirection = 'UPGRADE' | 'DOWNGRADE' | 'SAME';
 
 export interface SubscriptionInfo {
   id: string;
@@ -21,6 +24,9 @@ export interface SubscriptionInfo {
   cancelAtPeriodEnd: boolean;
   endedAt?: string | null;
   externalSubscriptionId?: string | null;
+  pendingPlan?: string | null;
+  pendingBillingInterval?: string | null;
+  pendingPlanEffectiveAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -49,4 +55,60 @@ export interface AdminCompanySubscriptionResponse {
   subscription: SubscriptionInfo;
   planOverview: CompanyPlanOverview;
   history: SubscriptionHistoryItem[];
+}
+
+export interface OverLimitMetricPreview {
+  metric: string;
+  label: string;
+  unit: string;
+  currentUsage: number;
+  targetLimit: number;
+  overBy: number;
+  impact: string;
+}
+
+export interface MetricComparisonItem {
+  metric: string;
+  label: string;
+  unit: string;
+  isMonthly: boolean;
+  currentUsage: number;
+  currentLimit: number | null;
+  targetLimit: number | null;
+  targetStatus: WarningThresholdStatus;
+  isOverLimit: boolean;
+  overBy: number;
+  impact?: string | null;
+}
+
+export interface PlanChangePreview {
+  companyId: string;
+  currentPlan: PlanTier;
+  currentDisplayName: string;
+  targetPlan: PlanTier;
+  targetDisplayName: string;
+  targetTagline: string;
+  direction: PlanChangeDirection;
+  isPurchasable: boolean;
+  paymentRequired: boolean;
+  billingInterval: BillingInterval;
+  price: {
+    amount: number;
+    displayAmount: number;
+    formatted: string;
+  } | null;
+  currentPeriodEnd: string;
+  effectiveDate: string;
+  pendingPlan?: string | null;
+  pendingPlanEffectiveAt?: string | null;
+  hasOverLimitMetrics: boolean;
+  overLimitMetrics: OverLimitMetricPreview[];
+  metricsComparison: MetricComparisonItem[];
+}
+
+export interface PlanChangeRequest {
+  plan: PlanTier;
+  interval?: BillingInterval;
+  reason?: string;
+  immediate?: boolean;
 }
