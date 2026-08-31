@@ -15,6 +15,7 @@ import { SubscriptionComponent } from './subscription.component';
 import {
   CurrentSubscriptionResponse,
   PlanChangePreview,
+  RenewalPreview,
   SubscriptionHistoryItem,
   SubscriptionInfo,
 } from './subscription.model';
@@ -144,6 +145,24 @@ describe('SubscriptionComponent', () => {
     hasOverLimitMetrics: false,
     overLimitMetrics: [],
     metricsComparison: [],
+  };
+
+  const mockRenewalPreview: RenewalPreview = {
+    companyId: 'company-1',
+    plan: 'BUSINESS',
+    planDisplayName: 'Business',
+    currentStatus: 'ACTIVE',
+    billingInterval: 'MONTHLY',
+    currentPeriodStart: '2026-08-01T00:00:00.000Z',
+    currentPeriodEnd: '2026-08-31T23:59:59.000Z',
+    nextPeriodStart: '2026-08-31T23:59:59.000Z',
+    nextPeriodEnd: '2026-09-30T23:59:59.000Z',
+    daysUntilExpiry: 5,
+    isExpired: false,
+    isEligible: true,
+    isPurchasable: true,
+    hasPendingDowngrade: false,
+    price: { amount: 249900, displayAmount: 2499, formatted: '₹2,499/mo' },
   };
 
   const mockUser = {
@@ -292,6 +311,43 @@ describe('SubscriptionComponent', () => {
 
     component.cancelPendingDowngrade();
     expect(subscriptionService.cancelPendingPlanChange).toHaveBeenCalled();
+  });
+
+  it('should open renewal modal, load renewal preview, and initiate renewal checkout', () => {
+    spyOn(subscriptionService, 'previewRenewal').and.returnValue(of(mockRenewalPreview));
+    const mockRenewalOrder: PaymentOrderResponse = {
+      paymentId: 'pay-renew-1',
+      orderId: 'order_renew_123',
+      amount: 249900,
+      currency: 'INR',
+      keyId: 'rzp_test_123',
+      plan: 'BUSINESS',
+      planDisplayName: 'Business',
+      billingInterval: 'MONTHLY',
+      displayAmount: '2499.00',
+      companyName: 'Acme Corp',
+      companyEmail: 'billing@acme.com',
+    };
+    spyOn(paymentService, 'createOrder').and.returnValue(of(mockRenewalOrder));
+
+    component.subscription = { ...mockCurrentResponse.subscription, plan: 'BUSINESS' };
+    expect(component.showRenewalModal).toBe(false);
+
+    component.openRenewalModal('MONTHLY');
+    expect(component.showRenewalModal).toBe(true);
+    expect(subscriptionService.previewRenewal).toHaveBeenCalledWith('MONTHLY');
+    expect(component.renewalPreview).toEqual(mockRenewalPreview);
+
+    component.startRenewalCheckout();
+    expect(paymentService.createOrder).toHaveBeenCalledWith({
+      plan: 'BUSINESS',
+      billingInterval: 'MONTHLY',
+      paymentType: 'RENEWAL',
+    });
+    expect(component.renewalOrder).toEqual(mockRenewalOrder);
+
+    component.closeRenewalModal();
+    expect(component.showRenewalModal).toBe(false);
   });
 
   it('should format bytes and progress bar class accurately', () => {

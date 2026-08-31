@@ -21,6 +21,7 @@ import { PaymentService } from './payment.service';
 import {
   PlanChangeDirection,
   PlanChangePreview,
+  RenewalPreview,
   SubscriptionHistoryItem,
   SubscriptionInfo,
 } from './subscription.model';
@@ -82,6 +83,15 @@ export class SubscriptionComponent implements OnInit {
   modalError = '';
   checkoutOrder: PaymentOrderResponse | null = null;
 
+  // Renewal modal state
+  showRenewalModal = false;
+  selectedRenewalInterval: BillingInterval = 'MONTHLY';
+  renewalPreview: RenewalPreview | null = null;
+  isLoadingRenewalPreview = false;
+  isProcessingRenewalPayment = false;
+  renewalModalError = '';
+  renewalOrder: PaymentOrderResponse | null = null;
+
   get isSuperAdmin(): boolean {
     return this.auth.getCurrentUser()?.role === 'SUPER_ADMIN';
   }
@@ -99,6 +109,21 @@ export class SubscriptionComponent implements OnInit {
 
   get isExpired(): boolean {
     return this.subscription?.status === 'EXPIRED';
+  }
+
+  get isRenewalDue(): boolean {
+    return (
+      (this.subscription?.status === 'ACTIVE' && this.daysRemainingInPeriod <= 14) ||
+      this.isExpired
+    );
+  }
+
+  get isRenewalEligible(): boolean {
+    return (
+      this.subscription?.status === 'ACTIVE' ||
+      this.subscription?.status === 'EXPIRED' ||
+      this.subscription?.status === 'TRIALING'
+    );
   }
 
   get hasPendingDowngrade(): boolean {
@@ -341,8 +366,133 @@ export class SubscriptionComponent implements OnInit {
   }
 
   /**
-   * Cryptographically verify payment on backend
+   * Open Renewal Modal and fetch authoritative renewal preview
    */
+  openRenewalModal(interval: BillingInterval = 'MONTHLY'): void {
+    this.selectedRenewalInterval = interval;
+    this.showRenewalModal = true;
+    this.renewalModalError = '';
+    this.renewalOrder = null;
+    this.loadRenewalPreview();
+  }
+
+  closeRenewalModal(): void {
+    this.showRenewalModal = false;
+    this.isProcessingRenewalPayment = false;
+    this.renewalModalError = '';
+    this.renewalOrder = null;
+    this.renewalPreview = null;
+  }
+
+  onRenewalIntervalChanged(interval: BillingInterval): void {
+    this.selectedRenewalInterval = interval;
+    this.loadRenewalPreview();
+  }
+
+  loadRenewalPreview(): void {
+    this.isLoadingRenewalPreview = true;
+    this.renewalModalError = '';
+    this.subscriptionService.previewRenewal(this.selectedRenewalInterval).subscribe({
+      next: (preview) => {
+        this.renewalPreview = preview;
+        this.isLoadingRenewalPreview = false;
+      },
+      error: (err) => {
+        this.isLoadingRenewalPreview = false;
+        this.renewalModalError = this.httpErrors.map(err).message;
+      },
+    });
+  }
+
+  /**
+   * Initiate customer renewal order with Razorpay
+   */
+  startRenewalCheckout(): void {
+    if (!this.subscription?.plan) return;
+    this.isProcessingRenewalPayment = true;
+    this.renewalModalError = '';
+
+    this.paymentService
+      .createOrder({
+        plan: this.subscription.plan,
+        billingInterval: this.selectedRenewalInterval,
+        paymentType: 'RENEWAL',
+      })
+      .subscribe({
+        next: (order) => {
+          this.renewalOrder = order;
+          this.openRazorpayRenewalModal(order);
+        },
+        error: (err) => {
+          this.isProcessingRenewalPayment = false;
+          this.renewalModalError = this.httpErrors.map(err).message;
+        },
+      });
+  }
+
+  private openRazorpayRenewalModal(order: PaymentOrderResponse): void {
+    const user = this.auth.getCurrentUser();
+    const rzpWindow = window as unknown as {
+      Razorpay: new (options: unknown) => { open: () => void };
+    };
+
+    if (typeof rzpWindow.Razorpay === 'function') {
+      const options = {
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Seyyon Connect',
+        description: `Subscription Renewal - ${order.planDisplayName} (${order.billingInterval})`,
+        order_id: order.orderId,
+        prefill: {
+          name: order.companyName,
+          email: order.companyEmail || user?.email || '',
+        },
+        theme: {
+          color: '#198754',
+        },
+        handler: (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          this.verifyRenewalPayment({
+            paymentId: order.paymentId,
+            orderId: response.razorpay_order_id,
+            providerPaymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature,
+          });
+        },
+        modal: {
+          ondismiss: () => {
+            this.isProcessingRenewalPayment = false;
+          },
+        },
+      };
+
+      const rzpInstance = new rzpWindow.Razorpay(options);
+      rzpInstance.open();
+    } else {
+      this.isProcessingRenewalPayment = false;
+    }
+  }
+
+  /**
+   * Sandbox simulator for renewal payment in environments without Razorpay script
+   */
+  simulateRenewalPaymentSuccess(): void {
+    if (!this.renewalOrder) return;
+    const testPaymentId = `pay_sim_${Date.now()}`;
+    const testSignature = `sig_sim_${Date.now()}`;
+
+    this.verifyRenewalPayment({
+      paymentId: this.renewalOrder.paymentId,
+      orderId: this.renewalOrder.orderId,
+      providerPaymentId: testPaymentId,
+      signature: testSignature,
+    });
+  }
+
   private verifyPayment(verificationData: {
     paymentId?: string;
     orderId: string;
@@ -361,6 +511,28 @@ export class SubscriptionComponent implements OnInit {
       error: (err) => {
         this.isProcessingPayment = false;
         this.modalError = this.httpErrors.map(err).message;
+      },
+    });
+  }
+
+  private verifyRenewalPayment(verificationData: {
+    paymentId?: string;
+    orderId: string;
+    providerPaymentId: string;
+    signature: string;
+  }): void {
+    this.isProcessingRenewalPayment = true;
+    this.paymentService.verifyPayment(verificationData).subscribe({
+      next: (res) => {
+        this.isProcessingRenewalPayment = false;
+        this.closeRenewalModal();
+        this.feedbackMessage = `Subscription renewed successfully! Next billing period active.`;
+        this.feedbackTone = 'success';
+        this.refresh();
+      },
+      error: (err) => {
+        this.isProcessingRenewalPayment = false;
+        this.renewalModalError = this.httpErrors.map(err).message;
       },
     });
   }

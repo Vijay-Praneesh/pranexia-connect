@@ -195,9 +195,27 @@ class PlanService {
   }
 
   /**
-   * Assert within limit, throwing a user-friendly AppError (409) if exceeded
+   * Assert within limit, throwing a user-friendly AppError (409) if exceeded or expired
    */
   async assertWithinLimit(companyId, metricKey, requestedQuantity = 1, periodStr = null) {
+    const subscriptionService = require("./subscription.service");
+    const sub = await subscriptionService.ensureCompanySubscription(companyId);
+
+    if (sub && sub.status === "EXPIRED") {
+      const isOutboundDispatch = [
+        METRIC_KEYS.MONTHLY_MESSAGES,
+        METRIC_KEYS.MONTHLY_CAMPAIGNS,
+        METRIC_KEYS.MONTHLY_MEDIA_UPLOADS,
+      ].includes(metricKey);
+
+      if (isOutboundDispatch) {
+        throw new AppError(
+          "Your subscription has expired. Please renew your subscription to resume sending messages and creating campaigns.",
+          409
+        );
+      }
+    }
+
     const result = await this.checkLimit(companyId, metricKey, requestedQuantity, periodStr);
 
     if (!result.allowed) {

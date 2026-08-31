@@ -192,14 +192,20 @@ class PaymentService {
       INTERVAL_DAYS[payment.billingInterval] || INTERVAL_DAYS[BILLING_INTERVALS.MONTHLY];
 
     let updatedSubscription;
-    if (payment.paymentType === PAYMENT_TYPES.PLAN_CHANGE) {
+    if (payment.paymentType === PAYMENT_TYPES.RENEWAL) {
+      updatedSubscription = await subscriptionService.renewSubscriptionPeriod(companyId, {
+        billingInterval: payment.billingInterval,
+        source: SUBSCRIPTION_SOURCES.PAYMENT,
+        reason: `Paid subscription renewal via ${payment.provider} (Ref: ${providerPaymentId})`,
+      });
+    } else if (payment.paymentType === PAYMENT_TYPES.PLAN_CHANGE) {
       updatedSubscription = await subscriptionService.changePlan(companyId, payment.plan, {
         source: SUBSCRIPTION_SOURCES.PAYMENT,
         reason: `Paid plan upgrade via ${payment.provider} (Ref: ${providerPaymentId})`,
       });
       // Extend billing period
       updatedSubscription = await subscriptionService.renewSubscriptionPeriod(companyId, {
-        periodDays,
+        billingInterval: payment.billingInterval,
         source: SUBSCRIPTION_SOURCES.PAYMENT,
       });
     } else {
@@ -285,13 +291,19 @@ class PaymentService {
           const periodDays =
             INTERVAL_DAYS[payment.billingInterval] || INTERVAL_DAYS[BILLING_INTERVALS.MONTHLY];
 
-          if (payment.paymentType === PAYMENT_TYPES.PLAN_CHANGE) {
+          if (payment.paymentType === PAYMENT_TYPES.RENEWAL) {
+            await subscriptionService.renewSubscriptionPeriod(payment.companyId, {
+              billingInterval: payment.billingInterval,
+              source: SUBSCRIPTION_SOURCES.PAYMENT,
+              reason: `Webhook confirmed renewal (${providerPaymentId})`,
+            });
+          } else if (payment.paymentType === PAYMENT_TYPES.PLAN_CHANGE) {
             await subscriptionService.changePlan(payment.companyId, payment.plan, {
               source: SUBSCRIPTION_SOURCES.PAYMENT,
               reason: `Webhook confirmed plan change (${providerPaymentId})`,
             });
             await subscriptionService.renewSubscriptionPeriod(payment.companyId, {
-              periodDays,
+              billingInterval: payment.billingInterval,
               source: SUBSCRIPTION_SOURCES.PAYMENT,
             });
           } else {

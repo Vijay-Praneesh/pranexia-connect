@@ -117,6 +117,26 @@
       </div>
     }
 
+    <!-- Renewal Due Banner -->
+    @if (isRenewalDue && !isExpired) {
+      <div class="alert alert-info d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-start gap-3">
+          <i class="bi bi-clock-history fs-4 flex-shrink-0 text-info"></i>
+          <div>
+            <h5 class="alert-heading mb-1 fw-bold">Subscription Renewal Approaching</h5>
+            <p class="mb-0">
+              Your <strong>{{ subscription.plan }}</strong> plan period ends on
+              <strong>{{ subscription.currentPeriodEnd | date: 'mediumDate' }}</strong>
+              (in <strong>{{ daysRemainingInPeriod }} days</strong>). Renew seamlessly to ensure uninterrupted WhatsApp campaign delivery.
+            </p>
+          </div>
+        </div>
+        <button class="btn btn-info btn-sm text-nowrap align-self-md-center shadow-sm" (click)="openRenewalModal()">
+          <i class="bi bi-arrow-repeat me-1"></i>Renew Subscription
+        </button>
+      </div>
+    }
+
     <!-- Expired Warning Banner -->
     @if (isExpired) {
       <div class="alert alert-danger d-flex align-items-start gap-3 shadow-sm mb-4" role="alert">
@@ -128,8 +148,8 @@
               Your subscription period or free trial has ended. New message sends and campaign dispatches are paused. Your contacts, templates, and data remain safe.
             </p>
           </div>
-          <button class="btn btn-danger btn-sm text-nowrap" (click)="openPlanChangeModal(subscription.plan)">
-            Renew Now
+          <button class="btn btn-danger btn-sm text-nowrap shadow-sm" (click)="openRenewalModal()">
+            <i class="bi bi-arrow-repeat me-1"></i>Renew Subscription Now
           </button>
         </div>
       </div>
@@ -728,6 +748,154 @@
                 }
               </button>
             }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- RENEWAL MODAL                                                             -->
+  <!-- ========================================================================= -->
+  @if (showRenewalModal) {
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true" style="background: rgba(15, 23, 42, 0.65);">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content border-0 shadow-lg overflow-hidden">
+          <!-- Modal Header -->
+          <div class="modal-header border-bottom bg-light px-4 py-3">
+            <div class="d-flex align-items-center gap-2">
+              <div class="p-2 rounded bg-primary-subtle text-primary">
+                <i class="bi bi-arrow-repeat fs-5"></i>
+              </div>
+              <div>
+                <h5 class="modal-title fw-bold mb-0">Renew Subscription</h5>
+                <small class="text-body-secondary">Extend your {{ subscription?.plan }} plan billing period</small>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn-close"
+              (click)="closeRenewalModal()"
+              [disabled]="isProcessingRenewalPayment"
+              aria-label="Close"
+            ></button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body p-4">
+            @if (renewalModalError) {
+              <div class="alert alert-danger d-flex align-items-center gap-2 mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                <div class="flex-grow-1">{{ renewalModalError }}</div>
+              </div>
+            }
+
+            @if (isLoadingRenewalPreview) {
+              <div class="text-center py-5">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <p class="text-body-secondary small mb-0">Calculating renewal pricing and dates...</p>
+              </div>
+            } @else if (renewalPreview) {
+              <!-- Billing Interval Selector -->
+              <div class="mb-4">
+                <label class="form-label fw-semibold text-uppercase small text-body-secondary">Select Billing Interval</label>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <div
+                      class="card h-100 p-3 border cursor-pointer interval-option text-center"
+                      [class.border-primary]="selectedRenewalInterval === 'MONTHLY'"
+                      [class.bg-primary-subtle]="selectedRenewalInterval === 'MONTHLY'"
+                      (click)="onRenewalIntervalChanged('MONTHLY')"
+                    >
+                      <span class="fw-bold d-block">Monthly Billing</span>
+                      <small class="text-body-secondary">Billed every month</small>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div
+                      class="card h-100 p-3 border cursor-pointer interval-option text-center position-relative"
+                      [class.border-primary]="selectedRenewalInterval === 'YEARLY'"
+                      [class.bg-primary-subtle]="selectedRenewalInterval === 'YEARLY'"
+                      (click)="onRenewalIntervalChanged('YEARLY')"
+                    >
+                      <span class="badge bg-success position-absolute top-0 end-0 m-2">Save ~16%</span>
+                      <span class="fw-bold d-block">Yearly Billing</span>
+                      <small class="text-body-secondary">2 months free included</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Renewal Summary Card -->
+              <div class="card border bg-light p-3 mb-3">
+                <h6 class="fw-bold text-uppercase small text-body-secondary mb-3">Renewal Period Breakdown</h6>
+                <div class="row g-3">
+                  <div class="col-12 col-sm-6">
+                    <span class="text-body-secondary small d-block">Current Period End</span>
+                    <strong class="text-dark">{{ renewalPreview.currentPeriodEnd | date: 'mediumDate' }}</strong>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <span class="text-body-secondary small d-block">New Period End (After Renewal)</span>
+                    <strong class="text-success">{{ renewalPreview.nextPeriodEnd | date: 'mediumDate' }}</strong>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <span class="text-body-secondary small d-block">Plan Tier</span>
+                    <strong class="text-primary">{{ renewalPreview.planDisplayName }}</strong>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <span class="text-body-secondary small d-block">Authoritative Renewal Price</span>
+                    <h4 class="h4 mb-0 fw-bold text-dark">{{ renewalPreview.price?.formatted || 'Custom Pricing' }}</h4>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Data Preservation Guarantee Banner -->
+              <div class="alert alert-light border small text-body-secondary d-flex align-items-center gap-2 mb-0">
+                <i class="bi bi-shield-check text-success fs-5"></i>
+                <span>Your WhatsApp connections, templates, campaigns, contact lists, and media remain 100% intact.</span>
+              </div>
+
+              <!-- Sandbox Testing Simulator -->
+              @if (renewalOrder) {
+                <div class="alert alert-info py-2 px-3 small d-flex justify-content-between align-items-center mt-3 mb-0">
+                  <span>Renewal Order <code>{{ renewalOrder.orderId }}</code> active.</span>
+                  <button
+                    class="btn btn-sm btn-outline-dark"
+                    (click)="simulateRenewalPaymentSuccess()"
+                    [disabled]="isProcessingRenewalPayment"
+                  >
+                    <i class="bi bi-play-fill me-1"></i>Simulate Payment Verification
+                  </button>
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer border-top bg-light d-flex justify-content-between">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="closeRenewalModal()"
+              [disabled]="isProcessingRenewalPayment"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-success d-inline-flex align-items-center gap-2 px-4 shadow-sm"
+              (click)="startRenewalCheckout()"
+              [disabled]="isProcessingRenewalPayment || isLoadingRenewalPreview"
+            >
+              @if (isProcessingRenewalPayment) {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                <span>Processing Renewal...</span>
+              } @else {
+                <i class="bi bi-lock-fill"></i>
+                <span>Pay & Renew ({{ renewalPreview?.price?.formatted }})</span>
+              }
+            </button>
           </div>
         </div>
       </div>

@@ -324,6 +324,27 @@ class SubscriptionController {
       next(error);
     }
   };
+
+  /**
+   * GET /api/v1/subscriptions/renew/preview
+   * Authoritative preview for subscription renewal
+   */
+  previewRenewal = async (req, res, next) => {
+    try {
+      const companyId = this.resolveCompanyId(req);
+      const targetInterval = req.query.interval || "MONTHLY";
+
+      const preview = await subscriptionService.previewRenewal(companyId, targetInterval);
+
+      return res.status(200).json({
+        success: true,
+        message: "Renewal preview generated successfully",
+        data: preview,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 module.exports = new SubscriptionController();

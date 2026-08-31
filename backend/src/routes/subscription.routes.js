@@ -27,6 +27,12 @@ router.get(
   subscriptionController.previewPlanChange
 );
 
+router.get(
+  "/renew/preview",
+  authorize("COMPANY_ADMIN", "SUPER_ADMIN"),
+  subscriptionController.previewRenewal
+);
+
 router.post(
   "/change-plan",
   authorize("COMPANY_ADMIN", "SUPER_ADMIN"),

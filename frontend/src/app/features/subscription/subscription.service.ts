@@ -9,6 +9,7 @@ import {
   CurrentSubscriptionResponse,
   PlanChangePreview,
   PlanChangeRequest,
+  RenewalPreview,
   SubscriptionHistoryItem,
   SubscriptionInfo,
 } from './subscription.model';
@@ -48,6 +49,18 @@ export class SubscriptionService {
     const params = new HttpParams().set('plan', plan).set('interval', interval);
     return this.http
       .get<ApiResponse<PlanChangePreview>>(`${this.baseUrl}/subscriptions/change-plan/preview`, {
+        params,
+      })
+      .pipe(map((res) => res.data));
+  }
+
+  /**
+   * Authoritative preview for subscription renewal
+   */
+  previewRenewal(interval: string = 'MONTHLY'): Observable<RenewalPreview> {
+    const params = new HttpParams().set('interval', interval);
+    return this.http
+      .get<ApiResponse<RenewalPreview>>(`${this.baseUrl}/subscriptions/renew/preview`, {
         params,
       })
       .pipe(map((res) => res.data));

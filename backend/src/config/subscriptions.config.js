@@ -29,6 +29,7 @@ const SUBSCRIPTION_SOURCES = Object.freeze({
 const SUBSCRIPTION_DEFAULTS = Object.freeze({
   TRIAL_DAYS: 14,
   PERIOD_DAYS: 30,
+  RENEWAL_WINDOW_DAYS: 14,
 });
 
 module.exports = {

@@ -112,3 +112,28 @@ export interface PlanChangeRequest {
   reason?: string;
   immediate?: boolean;
 }
+
+export interface RenewalPreview {
+  companyId: string;
+  plan: PlanTier;
+  planDisplayName: string;
+  currentStatus: SubscriptionStatus;
+  billingInterval: BillingInterval;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  nextPeriodStart: string;
+  nextPeriodEnd: string;
+  daysUntilExpiry: number;
+  isExpired: boolean;
+  isEligible: boolean;
+  isPurchasable: boolean;
+  hasPendingDowngrade: boolean;
+  pendingPlan?: string | null;
+  pendingPlanEffectiveAt?: string | null;
+  price: {
+    amount: number;
+    displayAmount: number;
+    formatted: string;
+  } | null;
+}
+

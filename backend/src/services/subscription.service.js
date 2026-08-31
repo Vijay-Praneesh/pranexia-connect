@@ -543,37 +543,114 @@ class SubscriptionService {
   }
 
   /**
-   * Renew subscription period
+   * Authoritative Renewal Preview
+   * Calculates new billing period dates, price, interval, and renewal eligibility.
+   */
+  async previewRenewal(companyId, targetInterval = "MONTHLY") {
+    const current = await this.getCurrentSubscription(companyId);
+    const { getPlanPrice, isPlanPurchasable } = require("../config/pricing.config");
+    const { calculateNextBillingPeriod } = require("../utils/date.util");
+
+    const plan = current.plan;
+    const priceConfig = getPlanPrice(plan, targetInterval);
+    const purchasable = isPlanPurchasable(plan, targetInterval);
+
+    const now = new Date();
+    const periodEnd = new Date(current.currentPeriodEnd);
+    const { start: nextPeriodStart, end: nextPeriodEnd } = calculateNextBillingPeriod(
+      current.currentPeriodEnd,
+      targetInterval,
+      now
+    );
+
+    const diffMs = periodEnd.getTime() - now.getTime();
+    const daysUntilExpiry = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const isExpired = current.status === SUBSCRIPTION_STATUSES.EXPIRED || diffMs <= 0;
+
+    const isEligible =
+      current.status === SUBSCRIPTION_STATUSES.ACTIVE ||
+      current.status === SUBSCRIPTION_STATUSES.EXPIRED ||
+      current.status === SUBSCRIPTION_STATUSES.TRIALING;
+
+    return {
+      companyId,
+      plan,
+      planDisplayName: PLANS[plan]?.displayName || plan,
+      currentStatus: current.status,
+      billingInterval: targetInterval,
+      currentPeriodStart: current.currentPeriodStart,
+      currentPeriodEnd: current.currentPeriodEnd,
+      nextPeriodStart,
+      nextPeriodEnd,
+      daysUntilExpiry,
+      isExpired,
+      isEligible,
+      isPurchasable: purchasable,
+      hasPendingDowngrade: Boolean(current.pendingPlan),
+      pendingPlan: current.pendingPlan || null,
+      pendingPlanEffectiveAt: current.pendingPlanEffectiveAt || null,
+      price: priceConfig
+        ? {
+            amount: priceConfig.amount,
+            displayAmount: priceConfig.displayAmount,
+            formatted: priceConfig.formatted,
+          }
+        : null,
+    };
+  }
+
+  /**
+   * Renew subscription period using accurate UTC calendar calculation
    */
   async renewSubscriptionPeriod(companyId, options = {}) {
     const {
-      periodDays = SUBSCRIPTION_DEFAULTS.PERIOD_DAYS,
-      source = SUBSCRIPTION_SOURCES.SYSTEM,
+      billingInterval = "MONTHLY",
+      source = SUBSCRIPTION_SOURCES.PAYMENT,
+      performedBy = null,
+      reason = "Subscription period renewed",
     } = options;
 
     const current = await this.getCurrentSubscription(companyId);
+    const { calculateNextBillingPeriod } = require("../utils/date.util");
+
     const now = new Date();
-    const currentEnd = new Date(current.currentPeriodEnd);
-    const newStart = currentEnd > now ? currentEnd : now;
-    const newEnd = this.addDays(newStart, periodDays);
+    const { start: newStart, end: newEnd } = calculateNextBillingPeriod(
+      current.currentPeriodEnd,
+      billingInterval,
+      now
+    );
+
+    const prevStatus = current.status;
 
     const updated = await subscriptionRepository.updateSubscription(current, {
       status: SUBSCRIPTION_STATUSES.ACTIVE,
       currentPeriodStart: newStart,
       currentPeriodEnd: newEnd,
       cancelAtPeriodEnd: false,
+      cancelledAt: null,
+      endedAt: null,
+      pendingPlan: null,
+      pendingBillingInterval: null,
+      pendingPlanEffectiveAt: null,
     });
+
+    // Ensure Company.plan is synchronized
+    const company = await Company.findByPk(companyId);
+    if (company && company.plan !== current.plan) {
+      await company.update({ plan: current.plan });
+    }
 
     await this.safeRecordHistory({
       companyId,
       subscriptionId: updated.id,
       previousPlan: current.plan,
       newPlan: current.plan,
-      previousStatus: current.status,
+      previousStatus: prevStatus,
       newStatus: SUBSCRIPTION_STATUSES.ACTIVE,
       action: SUBSCRIPTION_ACTIONS.RENEWED,
       source,
-      reason: "Subscription period renewed",
+      performedBy,
+      reason,
     });
 
     return updated;
