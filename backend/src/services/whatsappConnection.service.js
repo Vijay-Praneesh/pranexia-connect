@@ -2,6 +2,8 @@ const axios = require("axios");
 const AppError = require("../utils/appError");
 const whatsappRepository = require("../repositories/whatsapp.repository");
 const { encryptSecret } = require("../utils/secret.crypto");
+const planService = require("./plan.service");
+const { METRIC_KEYS } = require("../config/plans.config");
 
 class WhatsAppConnectionService {
   get apiVersion() {
@@ -30,6 +32,17 @@ class WhatsAppConnectionService {
         "A valid Meta onboarding code, WABA ID, and phone number ID are required",
         400,
       );
+
+    // Enforce Plan WhatsApp Connections Limit if not already connected
+    const existingConnection = await whatsappRepository.findByCompanyId(companyId);
+    if (!existingConnection || existingConnection.status !== "CONNECTED") {
+      await planService.assertWithinLimit(
+        companyId,
+        METRIC_KEYS.WHATSAPP_CONNECTIONS,
+        1
+      );
+    }
+
     if (
       !process.env.META_APP_ID ||
       !process.env.META_APP_SECRET ||

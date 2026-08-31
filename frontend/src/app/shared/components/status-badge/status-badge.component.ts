@@ -29,6 +29,13 @@ export class StatusBadgeComponent {
       BLOCKED: 'danger',
       FAILED: 'danger',
       REJECTED: 'danger',
+      NORMAL: 'success',
+      SYNCED: 'success',
+      WARNING: 'warning',
+      CRITICAL: 'warning',
+      EXHAUSTED: 'danger',
+      OVER_LIMIT: 'danger',
+      NOT_CONFIGURED: 'secondary',
       CANCELLED: 'secondary',
       DRAFT: 'secondary',
     };

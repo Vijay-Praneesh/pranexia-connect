@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const sequelize = require("../config/database");
 const companyRepository = require("../repositories/company.repository");
 const authRepository = require("../repositories/auth.repository");
+const { PLAN_NAMES } = require("../config/plans.config");
 const AppError = require("../utils/appError");
 
 class CompanyService {
@@ -58,8 +59,13 @@ class CompanyService {
         password,
         firstName,
         lastName,
-        plan = "STARTER",
+        plan = PLAN_NAMES.STARTER,
+        customLimits = null,
       } = data;
+
+      if (plan && !PLAN_NAMES[plan]) {
+        throw new AppError(`Invalid plan: ${plan}`, 400);
+      }
 
       // Check company email
       const existingCompany =
@@ -157,6 +163,10 @@ class CompanyService {
 
     if (!company) {
       throw new AppError("Company not found", 404);
+    }
+
+    if (data.plan && !PLAN_NAMES[data.plan]) {
+      throw new AppError(`Invalid plan: ${data.plan}`, 400);
     }
 
     return await companyRepository.update(id, data);

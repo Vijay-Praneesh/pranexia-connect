@@ -46,6 +46,12 @@ const Company = sequelize.define(
       ),
       defaultValue: "ACTIVE",
     },
+
+    customLimits: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      field: "custom_limits",
+    },
   },
   {
     tableName: "companies",

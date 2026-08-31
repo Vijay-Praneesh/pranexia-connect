@@ -3,12 +3,19 @@ const path = require("path");
 const mediaRepository = require("../repositories/media.repository");
 const storageService = require("./storage.service");
 const usageService = require("./usage.service");
+const planService = require("./plan.service");
+const { METRIC_KEYS } = require("../config/plans.config");
 const { validateMediaFile } = require("../utils/media.validation");
 const AppError = require("../utils/appError");
 
 class MediaService {
   async upload(companyId, file) {
     const validation = validateMediaFile(file);
+
+    // Enforce Plan Media Storage & Monthly Upload Limits
+    await planService.assertWithinLimit(companyId, METRIC_KEYS.MEDIA_STORAGE_BYTES, file.size);
+    await planService.assertWithinLimit(companyId, METRIC_KEYS.MONTHLY_MEDIA_UPLOADS, 1);
+
     const id = randomUUID();
     const storedName = `${id}${validation.extension}`;
     const storageKey = path.posix.join("company", companyId, "media", storedName);

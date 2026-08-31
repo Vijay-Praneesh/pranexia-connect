@@ -10,6 +10,8 @@ import { ErrorStateComponent } from '../../shared/components/error-state/error-s
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { KpiCardComponent } from '../dashboard/components/kpi-card/kpi-card.component';
+import { CompanyPlanOverview, MetricOverviewItem, WarningThresholdStatus } from '../plans/plan.model';
+import { PlanService } from '../plans/plan.service';
 import { UsageHistoryItem, UsageSummary } from './usage.model';
 import { UsageService } from './usage.service';
 
@@ -32,10 +34,13 @@ import { UsageService } from './usage.service';
 })
 export class UsageComponent implements OnInit {
   private readonly usageService = inject(UsageService);
+  private readonly planService = inject(PlanService);
   private readonly httpErrors = inject(HttpErrorService);
   readonly auth = inject(AuthService);
+  readonly Math = Math;
 
   summary: UsageSummary | null = null;
+  planOverview: CompanyPlanOverview | null = null;
   history: UsageHistoryItem[] = [];
   selectedPeriod = '';
   availablePeriods: string[] = [];
@@ -46,6 +51,7 @@ export class UsageComponent implements OnInit {
   errorMessage = '';
   metaFeedbackMessage = '';
   metaFeedbackTone: 'success' | 'info' | 'warning' = 'info';
+  showPlanComparison = false;
 
   get isSuperAdmin(): boolean {
     return this.auth.getCurrentUser()?.role === 'SUPER_ADMIN';
@@ -98,6 +104,10 @@ export class UsageComponent implements OnInit {
     this.loadData(true);
   }
 
+  togglePlanComparison(): void {
+    this.showPlanComparison = !this.showPlanComparison;
+  }
+
   syncMeta(): void {
     if (this.syncingMeta) return;
 
@@ -115,7 +125,6 @@ export class UsageComponent implements OnInit {
         next: (result) => {
           this.metaFeedbackMessage = result.message;
           this.metaFeedbackTone = result.status === 'SYNCED' ? 'success' : 'warning';
-          // Reload summary to reflect newly synced data
           this.loadData(true);
         },
         error: (error: unknown) => {
@@ -125,7 +134,7 @@ export class UsageComponent implements OnInit {
       });
   }
 
-  formatBytes(bytes: number): string {
+  formatBytes(bytes: number | null | undefined): string {
     if (!bytes || bytes <= 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -141,6 +150,33 @@ export class UsageComponent implements OnInit {
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
+  getProgressBarClass(status: WarningThresholdStatus): string {
+    switch (status) {
+      case 'OVER_LIMIT':
+      case 'EXHAUSTED':
+        return 'bg-danger';
+      case 'CRITICAL':
+        return 'bg-warning text-dark';
+      case 'WARNING':
+        return 'bg-info text-dark';
+      default:
+        return 'bg-primary';
+    }
+  }
+
+  getStatusBadgeTone(status: WarningThresholdStatus): 'success' | 'warning' | 'danger' | 'info' {
+    switch (status) {
+      case 'OVER_LIMIT':
+      case 'EXHAUSTED':
+        return 'danger';
+      case 'CRITICAL':
+      case 'WARNING':
+        return 'warning';
+      default:
+        return 'success';
+    }
+  }
+
   private loadData(refresh = false): void {
     if (refresh) this.refreshing = true;
     else this.loading = true;
@@ -148,6 +184,7 @@ export class UsageComponent implements OnInit {
 
     forkJoin({
       summary: this.usageService.getSummary(this.selectedPeriod),
+      planOverview: this.planService.getCurrentPlanOverview(this.selectedPeriod),
       history: this.usageService.getHistory(12),
     })
       .pipe(
@@ -157,8 +194,9 @@ export class UsageComponent implements OnInit {
         })
       )
       .subscribe({
-        next: ({ summary, history }) => {
+        next: ({ summary, planOverview, history }) => {
           this.summary = summary;
+          this.planOverview = planOverview;
           this.history = history;
         },
         error: (error: unknown) => {

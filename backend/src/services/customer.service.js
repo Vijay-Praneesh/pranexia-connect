@@ -1,12 +1,18 @@
+const XLSX = require("xlsx");
 const customerRepository = require("../repositories/customer.repository");
 const { readExcel, writeExcel } = require("../utils/excel.utils");
 const AppError = require("../utils/appError");
+const planService = require("./plan.service");
+const { METRIC_KEYS } = require("../config/plans.config");
 
 class CustomerService {
   // =====================================
   // Create Customer
   // =====================================
   async createCustomer(companyId, customerData) {
+    // Enforce Plan Customer Limit
+    await planService.assertWithinLimit(companyId, METRIC_KEYS.CUSTOMERS, 1);
+
     // Check duplicate mobile number within the company
     const existingCustomer = await customerRepository.findByMobile(
       companyId,
@@ -120,25 +126,17 @@ class CustomerService {
       }
     }
 
-    // Update customer
-    await customerRepository.update(
+    return await customerRepository.update(
+      companyId,
       customerId,
-      companyId,
       customerData
-    );
-
-    // Return updated customer
-    return await customerRepository.findById(
-      companyId,
-      customerId
     );
   }
 
   // =====================================
-  // Delete Customer
+  // Delete Customer (Soft Delete)
   // =====================================
   async deleteCustomer(companyId, customerId) {
-    // Check if customer exists
     const customer = await customerRepository.findById(
       companyId,
       customerId
@@ -149,8 +147,8 @@ class CustomerService {
     }
 
     await customerRepository.delete(
-      customerId,
-      companyId
+      companyId,
+      customerId
     );
 
     return {
@@ -159,35 +157,64 @@ class CustomerService {
   }
 
   // =====================================
-  // Restore Customer
+  // Restore Soft-Deleted Customer
   // =====================================
   async restoreCustomer(companyId, customerId) {
-    // Find customer including soft deleted records
-    const customer = await customerRepository.findDeletedById(
-      customerId,
-      companyId
+    const customer =
+      await customerRepository.findDeletedById(
+        companyId,
+        customerId
+      );
+
+    if (!customer) {
+      throw new AppError("Deleted customer not found", 404);
+    }
+
+    // Check if restoring would violate active mobile uniqueness
+    const activeDuplicate = await customerRepository.findByMobile(
+      companyId,
+      customer.mobile
     );
+
+    if (activeDuplicate) {
+      throw new AppError(
+        "An active customer with this mobile number already exists",
+        409
+      );
+    }
+
+    await customerRepository.restore(
+      companyId,
+      customerId
+    );
+
+    return {
+      message: "Customer restored successfully",
+    };
+  }
+
+  // =====================================
+  // Permanently Delete Customer
+  // =====================================
+  async forceDeleteCustomer(companyId, customerId) {
+    const customer =
+      await customerRepository.findDeletedById(
+        companyId,
+        customerId
+      );
 
     if (!customer) {
       throw new AppError("Customer not found", 404);
     }
 
-    // Check if customer is already active
-    if (customer.deletedAt === null) {
-      throw new AppError("Customer is already active", 409);
-    }
-
-    // Restore customer
-    await customerRepository.restore(
-      customerId,
-      companyId
-    );
-
-    // Return restored customer
-    return await customerRepository.findById(
+    await customerRepository.forceDelete(
       companyId,
       customerId
     );
+
+    return {
+      message: "Customer permanently deleted",
+    };
   }
 
   // =====================================
@@ -299,23 +326,22 @@ class CustomerService {
   // Download Import Template
   // =====================================
   async downloadTemplate() {
-    const headers = [
-      [
-        "First Name",
-        "Last Name",
-        "Mobile",
-        "Email",
-        "Country",
-        "Status",
-        "Notes",
-      ],
+    const templateData = [
+      {
+        "First Name": "John",
+        "Last Name": "Doe",
+        Mobile: "9876543210",
+        Email: "john@example.com",
+        Country: "India",
+        Status: "ACTIVE",
+        Notes: "Sample Customer",
+      },
     ];
 
-    const XLSX = require("xlsx");
+    const worksheet =
+      XLSX.utils.json_to_sheet(templateData);
 
     const workbook = XLSX.utils.book_new();
-
-    const worksheet = XLSX.utils.aoa_to_sheet(headers);
 
     XLSX.utils.book_append_sheet(
       workbook,
@@ -455,6 +481,11 @@ class CustomerService {
     }
 
     if (customers.length > 0) {
+      await planService.assertWithinLimit(
+        companyId,
+        METRIC_KEYS.CUSTOMERS,
+        customers.length
+      );
       await customerRepository.bulkCreate(customers);
     }
 

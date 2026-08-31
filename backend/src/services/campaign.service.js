@@ -5,6 +5,8 @@ const campaignWorker = require("./campaign.worker");
 const whatsappRepository = require("../repositories/whatsapp.repository");
 const mediaService = require("./media.service");
 const usageService = require("./usage.service");
+const planService = require("./plan.service");
+const { METRIC_KEYS } = require("../config/plans.config");
 const AppError = require("../utils/appError");
 
 class CampaignService {
@@ -12,6 +14,9 @@ class CampaignService {
   // Create Campaign
   // =====================================
   async createCampaign(companyId, data) {
+    // Enforce Plan Monthly Campaign Limit
+    await planService.assertWithinLimit(companyId, METRIC_KEYS.MONTHLY_CAMPAIGNS, 1);
+
     const template = await templateRepository.findById(
       companyId,
       data.templateId,
@@ -217,6 +222,15 @@ class CampaignService {
       throw new AppError("WhatsApp Business is not connected", 409);
     if (campaign.mediaId)
       await mediaService.assertOwnedByCompany(companyId, campaign.mediaId);
+
+    // Enforce Plan Monthly WhatsApp Message Limit before launching send
+    const recipientCount = campaign.totalRecipients || 1;
+    await planService.assertWithinLimit(
+      companyId,
+      METRIC_KEYS.MONTHLY_MESSAGES,
+      recipientCount
+    );
+
     const claimed = await campaignRepository.claimForSending(
       campaign.id,
       companyId,

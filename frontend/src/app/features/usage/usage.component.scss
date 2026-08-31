@@ -1,50 +1,35 @@
-.usage-container {
-  .period-select-group {
-    min-width: 220px;
+.period-select-group {
+  min-width: 200px;
+}
+
+.limit-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
   }
+}
 
-  .usage-kpi-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+.meta-usage-card {
+  border-left: 4px solid #25d366 !important;
+}
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
-    }
-
-    .kpi-icon-pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      font-size: 1.1rem;
-    }
+.plan-comparison-card {
+  .active-plan-col {
+    background-color: var(--bs-primary-bg-subtle, #e7f1ff) !important;
   }
+}
 
-  .meta-container-card {
-    border-left: 4px solid #25d366 !important;
+.spin {
+  animation: spin-animation 1s linear infinite;
+}
 
-    .meta-stat-box {
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      transition: background-color 0.2s ease;
-
-      &:hover {
-        background-color: #f8fafc !important;
-      }
-    }
+@keyframes spin-animation {
+  from {
+    transform: rotate(0deg);
   }
-
-  .spin {
-    animation: spin-animation 1s linear infinite;
-  }
-
-  @keyframes spin-animation {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+  to {
+    transform: rotate(360deg);
   }
 }

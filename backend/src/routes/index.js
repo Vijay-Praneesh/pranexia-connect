@@ -13,6 +13,7 @@ const companyRoutes = require("./company.routes");
 const whatsappRoutes = require("./whatsapp.routes");
 const mediaRoutes = require("./media.routes");
 const usageRoutes = require("./usage.routes");
+const planRoutes = require("./plan.routes");
 
 router.use("/health", healthRoutes);
 router.use("/auth", authRoutes);
@@ -31,5 +32,8 @@ router.use("/media", mediaRoutes);
 
 // Usage & Cost Tracking
 router.use("/usage", usageRoutes);
+
+// Plans & Limits
+router.use("/plans", planRoutes);
 
 module.exports = router;

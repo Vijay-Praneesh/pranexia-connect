@@ -2,6 +2,8 @@ const templateRepository = require("../repositories/template.repository");
 const AppError = require("../utils/appError");
 const whatsappRepository = require("../repositories/whatsapp.repository");
 const metaTemplateService = require("./metaTemplate.service");
+const planService = require("./plan.service");
+const { METRIC_KEYS } = require("../config/plans.config");
 
 const statusMap = { APPROVED: "APPROVED", PENDING: "PENDING", REJECTED: "REJECTED", PAUSED: "PAUSED", DISABLED: "DISABLED" };
 const extractVariables = (body = "") => [...new Set((body.match(/\{\{\d+\}\}/g) || []))].map((value) => Number(value.slice(2, -2))).sort((a, b) => a - b);
@@ -21,6 +23,9 @@ class TemplateService {
     return connection;
   }
   async createTemplate(companyId, templateData) {
+    // Enforce Plan Template Limit
+    await planService.assertWithinLimit(companyId, METRIC_KEYS.TEMPLATES, 1);
+
     const connection = await this.connection(companyId);
     const existingTemplate = await templateRepository.findByName(
       companyId,
