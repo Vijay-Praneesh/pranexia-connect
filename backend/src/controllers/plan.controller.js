@@ -1,5 +1,5 @@
 const planService = require("../services/plan.service");
-const responseHelper = require("../helpers/response.helper");
+const ApiResponse = require("../helpers/apiResponse");
 const AppError = require("../utils/appError");
 
 class PlanController {
@@ -10,7 +10,7 @@ class PlanController {
   async getPlans(req, res, next) {
     try {
       const plans = planService.getPlanDefinitions();
-      return responseHelper.success(res, "Plans retrieved successfully", plans);
+      return ApiResponse.success(res, "Plans retrieved successfully", plans);
     } catch (error) {
       next(error);
     }
@@ -29,7 +29,7 @@ class PlanController {
 
       const { period } = req.query;
       const overview = await planService.getCompanyPlanOverview(companyId, period);
-      return responseHelper.success(res, "Current plan overview retrieved successfully", overview);
+      return ApiResponse.success(res, "Current plan overview retrieved successfully", overview);
     } catch (error) {
       next(error);
     }
@@ -49,7 +49,7 @@ class PlanController {
       }
 
       const overview = await planService.assignCompanyPlan(companyId, plan, customLimits);
-      return responseHelper.success(res, "Company plan updated successfully", overview);
+      return ApiResponse.success(res, "Company plan updated successfully", overview);
     } catch (error) {
       next(error);
     }

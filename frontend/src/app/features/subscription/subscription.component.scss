@@ -1,0 +1,38 @@
+.subscription-hero-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 1) 100%);
+  border-left: 4px solid var(--bs-primary) !important;
+}
+
+.limit-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+  }
+}
+
+.plan-comparison-card {
+  .active-plan-col {
+    background-color: var(--bs-primary-bg-subtle, #e7f1ff) !important;
+  }
+}
+
+.spin {
+  animation: spin-animation 1s linear infinite;
+}
+
+@keyframes spin-animation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 768px) {
+  .border-end-md {
+    border-right: 1px solid var(--bs-border-color) !important;
+  }
+}

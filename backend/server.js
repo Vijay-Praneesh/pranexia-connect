@@ -2,6 +2,7 @@ const app = require("./src/app");
 const env = require("./src/config/env");
 const db = require("./src/models");
 const startCampaignScheduler = require("./src/cron/campaign.cron");
+const startSubscriptionScheduler = require("./src/cron/subscription.cron");
 const logger = require("./src/config/logger");
 
 const containsSensitiveData = (value) => {
@@ -47,12 +48,11 @@ const startServer = async () => {
   try {
     env.validateEnvironment();
     await db.sequelize.authenticate();
-    await db.sequelize.sync(
-      env.NODE_ENV === "development" ? { alter: true } : {}
-    );
+    await db.sequelize.sync();
     
-    // Start Campaign Scheduler
+    // Start Schedulers
     startCampaignScheduler();
+    startSubscriptionScheduler();
 
     app.listen(env.PORT, () => {
       logger.info("Database connected successfully");

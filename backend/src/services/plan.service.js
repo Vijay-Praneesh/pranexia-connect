@@ -59,7 +59,10 @@ class PlanService {
       throw new AppError("Company not found", 404);
     }
 
-    const planName = company.plan || PLAN_NAMES.STARTER;
+    const subscriptionService = require("./subscription.service");
+    const subscription = await subscriptionService.ensureCompanySubscription(companyId);
+
+    const planName = (subscription && subscription.plan) || company.plan || PLAN_NAMES.STARTER;
     const basePlan = this.getPlan(planName);
 
     // Merge custom limits if configured (e.g. for ENTERPRISE)
@@ -80,6 +83,7 @@ class PlanService {
       tagline: basePlan.tagline,
       limits: effectiveLimits,
       customLimits: company.customLimits || null,
+      subscriptionStatus: subscription ? subscription.status : "ACTIVE",
     };
   }
 
@@ -267,14 +271,11 @@ class PlanService {
       throw new AppError(`Invalid plan: ${planName}`, 400);
     }
 
-    const company = await Company.findByPk(companyId);
-    if (!company) {
-      throw new AppError("Company not found", 404);
-    }
-
-    await company.update({
-      plan: planName,
-      customLimits: customLimits || null,
+    const subscriptionService = require("./subscription.service");
+    await subscriptionService.changePlan(companyId, planName, {
+      customLimits,
+      source: "ADMIN",
+      reason: "Plan assigned by administrator",
     });
 
     return await this.getCompanyPlanOverview(companyId);

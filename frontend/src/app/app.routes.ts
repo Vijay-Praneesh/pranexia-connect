@@ -108,6 +108,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'subscription',
+        loadComponent: () =>
+          import('./features/subscription/subscription.component').then(
+            (c) => c.SubscriptionComponent,
+          ),
+      },
+      {
         path: 'notifications',
         loadComponent: () =>
           import('./features/notifications/notifications.component').then(

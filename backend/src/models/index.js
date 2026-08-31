@@ -11,6 +11,8 @@ const Media = require("./media.model");
 const Usage = require("./usage.model");
 const UsageEvent = require("./usageEvent.model");
 const MetaUsage = require("./metaUsage.model");
+const Subscription = require("./subscription.model");
+const SubscriptionHistory = require("./subscriptionHistory.model");
 
 // Company -> Users
 Company.hasMany(User, {
@@ -148,6 +150,39 @@ MetaUsage.belongsTo(Company, {
   as: "company",
 });
 
+// Company → Subscriptions
+Company.hasMany(Subscription, {
+  foreignKey: "companyId",
+  as: "subscriptions",
+});
+
+Subscription.belongsTo(Company, {
+  foreignKey: "companyId",
+  as: "company",
+});
+
+// Company → SubscriptionHistories
+Company.hasMany(SubscriptionHistory, {
+  foreignKey: "companyId",
+  as: "subscriptionHistories",
+});
+
+SubscriptionHistory.belongsTo(Company, {
+  foreignKey: "companyId",
+  as: "company",
+});
+
+// Subscription → SubscriptionHistories
+Subscription.hasMany(SubscriptionHistory, {
+  foreignKey: "subscriptionId",
+  as: "histories",
+});
+
+SubscriptionHistory.belongsTo(Subscription, {
+  foreignKey: "subscriptionId",
+  as: "subscription",
+});
+
 const db = {
   sequelize,
   User,
@@ -161,6 +196,8 @@ const db = {
   Usage,
   UsageEvent,
   MetaUsage,
+  Subscription,
+  SubscriptionHistory,
 };
 
 module.exports = db;

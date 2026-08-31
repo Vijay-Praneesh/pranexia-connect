@@ -154,6 +154,7 @@ export class AppLayoutComponent {
     { path: '/media', label: 'Media', icon: 'bi-collection', roles: ['COMPANY_ADMIN'] },
     { path: '/reports', label: 'Reports', icon: 'bi-bar-chart', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
     { path: '/usage', label: 'Usage & Costs', icon: 'bi-pie-chart', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
+    { path: '/subscription', label: 'Subscription', icon: 'bi-credit-card', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
     { path: '/notifications', label: 'Activity', icon: 'bi-bell', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
     { path: '/settings', label: 'Settings', icon: 'bi-gear', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },
     { path: '/settings/whatsapp', label: 'WhatsApp', icon: 'bi-whatsapp', roles: ['COMPANY_ADMIN', 'MANAGER', 'EMPLOYEE'] },

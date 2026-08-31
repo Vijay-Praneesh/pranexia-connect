@@ -54,6 +54,7 @@ describe('AppLayoutComponent', () => {
       '/media',
       '/reports',
       '/usage',
+      '/subscription',
       '/notifications',
       '/settings',
       '/settings/whatsapp',

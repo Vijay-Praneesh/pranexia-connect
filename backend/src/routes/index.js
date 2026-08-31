@@ -14,6 +14,7 @@ const whatsappRoutes = require("./whatsapp.routes");
 const mediaRoutes = require("./media.routes");
 const usageRoutes = require("./usage.routes");
 const planRoutes = require("./plan.routes");
+const subscriptionRoutes = require("./subscription.routes");
 
 router.use("/health", healthRoutes);
 router.use("/auth", authRoutes);
@@ -35,5 +36,8 @@ router.use("/usage", usageRoutes);
 
 // Plans & Limits
 router.use("/plans", planRoutes);
+
+// Subscriptions
+router.use("/subscriptions", subscriptionRoutes);
 
 module.exports = router;
