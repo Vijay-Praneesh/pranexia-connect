@@ -13,6 +13,8 @@ const UsageEvent = require("./usageEvent.model");
 const MetaUsage = require("./metaUsage.model");
 const Subscription = require("./subscription.model");
 const SubscriptionHistory = require("./subscriptionHistory.model");
+const Payment = require("./payment.model");
+const PaymentWebhookEvent = require("./paymentWebhookEvent.model");
 
 // Company -> Users
 Company.hasMany(User, {
@@ -183,6 +185,39 @@ SubscriptionHistory.belongsTo(Subscription, {
   as: "subscription",
 });
 
+// Company → Payments
+Company.hasMany(Payment, {
+  foreignKey: "companyId",
+  as: "payments",
+});
+
+Payment.belongsTo(Company, {
+  foreignKey: "companyId",
+  as: "company",
+});
+
+// Subscription → Payments
+Subscription.hasMany(Payment, {
+  foreignKey: "subscriptionId",
+  as: "payments",
+});
+
+Payment.belongsTo(Subscription, {
+  foreignKey: "subscriptionId",
+  as: "subscription",
+});
+
+// Payment → PaymentWebhookEvents
+Payment.hasMany(PaymentWebhookEvent, {
+  foreignKey: "paymentId",
+  as: "webhookEvents",
+});
+
+PaymentWebhookEvent.belongsTo(Payment, {
+  foreignKey: "paymentId",
+  as: "payment",
+});
+
 const db = {
   sequelize,
   User,
@@ -198,6 +233,8 @@ const db = {
   MetaUsage,
   Subscription,
   SubscriptionHistory,
+  Payment,
+  PaymentWebhookEvent,
 };
 
 module.exports = db;

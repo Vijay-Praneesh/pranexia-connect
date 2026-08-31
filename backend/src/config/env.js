@@ -28,6 +28,10 @@ const env = {
   MEDIA_MAX_IMAGE_SIZE: process.env.MEDIA_MAX_IMAGE_SIZE,
   MEDIA_MAX_VIDEO_SIZE: process.env.MEDIA_MAX_VIDEO_SIZE,
   MEDIA_MAX_DOCUMENT_SIZE: process.env.MEDIA_MAX_DOCUMENT_SIZE,
+  PAYMENT_PROVIDER: process.env.PAYMENT_PROVIDER || "razorpay",
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || process.env.PAYMENT_KEY_ID || "",
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || process.env.PAYMENT_KEY_SECRET || "",
+  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || process.env.PAYMENT_WEBHOOK_SECRET || "",
 };
 
 const validateEnvironment = () => {

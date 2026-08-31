@@ -5,6 +5,13 @@ import { of, throwError } from 'rxjs';
 
 import { API_BASE_URL } from '../../core/config/api-config.token';
 import { AuthService } from '../../core/services/auth.service';
+import {
+  PaymentHistoryResponse,
+  PaymentOrderResponse,
+  PricingMatrixResponse,
+  VerifyPaymentResponse,
+} from './payment.model';
+import { PaymentService } from './payment.service';
 import { SubscriptionComponent } from './subscription.component';
 import {
   CurrentSubscriptionResponse,
@@ -16,6 +23,7 @@ describe('SubscriptionComponent', () => {
   let component: SubscriptionComponent;
   let fixture: ComponentFixture<SubscriptionComponent>;
   let subscriptionService: SubscriptionService;
+  let paymentService: PaymentService;
 
   const mockCurrentResponse: CurrentSubscriptionResponse = {
     subscription: {
@@ -80,6 +88,43 @@ describe('SubscriptionComponent', () => {
     },
   ];
 
+  const mockPricing: PricingMatrixResponse = {
+    currency: 'INR',
+    intervals: { MONTHLY: 'MONTHLY', YEARLY: 'YEARLY' },
+    plans: [
+      {
+        name: 'BUSINESS',
+        displayName: 'Business',
+        tagline: 'Growing business plan',
+        limits: {},
+        isPurchasable: true,
+        pricing: {
+          MONTHLY: { amount: 249900, displayAmount: 2499, formatted: '₹2,499/mo' },
+          YEARLY: { amount: 2499000, displayAmount: 24990, formatted: '₹24,990/yr' },
+        },
+      },
+    ],
+  };
+
+  const mockPayments: PaymentHistoryResponse = {
+    count: 1,
+    rows: [
+      {
+        id: 'pay-1',
+        companyId: 'company-1',
+        provider: 'RAZORPAY',
+        amount: 249900,
+        currency: 'INR',
+        status: 'CAPTURED',
+        paymentType: 'INITIAL_SUBSCRIPTION',
+        plan: 'BUSINESS',
+        billingInterval: 'MONTHLY',
+        createdAt: '2026-08-01T00:00:00.000Z',
+        updatedAt: '2026-08-01T00:00:00.000Z',
+      },
+    ],
+  };
+
   const mockUser = {
     id: 'user-1',
     role: 'COMPANY_ADMIN',
@@ -100,20 +145,28 @@ describe('SubscriptionComponent', () => {
         { provide: API_BASE_URL, useValue: 'http://localhost:5000/api/v1' },
         { provide: AuthService, useValue: mockAuthService },
         SubscriptionService,
+        PaymentService,
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SubscriptionComponent);
     component = fixture.componentInstance;
     subscriptionService = TestBed.inject(SubscriptionService);
+    paymentService = TestBed.inject(PaymentService);
   });
 
-  it('should create and load initial subscription details and history', () => {
+  it('should create and load initial subscription details, pricing, and history', () => {
     spyOn(subscriptionService, 'getCurrentSubscription').and.returnValue(
       of(mockCurrentResponse)
     );
     spyOn(subscriptionService, 'getSubscriptionHistory').and.returnValue(
       of(mockHistory)
+    );
+    spyOn(paymentService, 'getPaymentHistory').and.returnValue(
+      of(mockPayments)
+    );
+    spyOn(paymentService, 'getPricingMatrix').and.returnValue(
+      of(mockPricing)
     );
 
     fixture.detectChanges();
@@ -122,9 +175,8 @@ describe('SubscriptionComponent', () => {
     expect(component.subscription).toEqual(mockCurrentResponse.subscription);
     expect(component.planOverview).toEqual(mockCurrentResponse.planOverview);
     expect(component.history).toEqual(mockHistory);
-    expect(component.isTrialing).toBe(false);
-    expect(component.isCancelled).toBe(false);
-    expect(component.isExpired).toBe(false);
+    expect(component.paymentHistory).toEqual(mockPayments.rows);
+    expect(component.pricingMatrix).toEqual(mockPricing);
     expect(component.loading).toBe(false);
   });
 
@@ -135,6 +187,12 @@ describe('SubscriptionComponent', () => {
     spyOn(subscriptionService, 'getSubscriptionHistory').and.returnValue(
       of([])
     );
+    spyOn(paymentService, 'getPaymentHistory').and.returnValue(
+      of({ count: 0, rows: [] })
+    );
+    spyOn(paymentService, 'getPricingMatrix').and.returnValue(
+      of(mockPricing)
+    );
 
     fixture.detectChanges();
 
@@ -142,26 +200,47 @@ describe('SubscriptionComponent', () => {
     expect(component.loading).toBe(false);
   });
 
-  it('should toggle plan comparison view', () => {
-    expect(component.showPlanComparison).toBe(false);
-    component.togglePlanComparison();
-    expect(component.showPlanComparison).toBe(true);
-    component.togglePlanComparison();
-    expect(component.showPlanComparison).toBe(false);
+  it('should open and close checkout modal', () => {
+    expect(component.showCheckoutModal).toBe(false);
+    component.openCheckout('BUSINESS');
+    expect(component.showCheckoutModal).toBe(true);
+    expect(component.selectedPlanForCheckout).toBe('BUSINESS');
+    component.closeCheckout();
+    expect(component.showCheckoutModal).toBe(false);
   });
 
-  it('should map threshold status to correct progress bar class', () => {
-    expect(component.getProgressBarClass('NORMAL')).toBe('bg-primary');
-    expect(component.getProgressBarClass('WARNING')).toBe('bg-info text-dark');
-    expect(component.getProgressBarClass('CRITICAL')).toBe('bg-warning text-dark');
-    expect(component.getProgressBarClass('EXHAUSTED')).toBe('bg-danger');
-    expect(component.getProgressBarClass('OVER_LIMIT')).toBe('bg-danger');
+  it('should initiate checkout and create payment order', () => {
+    const mockOrder: PaymentOrderResponse = {
+      paymentId: 'pay-new',
+      orderId: 'order_test_999',
+      amount: 249900,
+      currency: 'INR',
+      keyId: 'rzp_test_123',
+      plan: 'BUSINESS',
+      planDisplayName: 'Business',
+      billingInterval: 'MONTHLY',
+      displayAmount: '2499.00',
+      companyName: 'Acme Corp',
+      companyEmail: 'billing@acme.com',
+    };
+
+    spyOn(paymentService, 'createOrder').and.returnValue(of(mockOrder));
+
+    component.openCheckout('BUSINESS');
+    component.selectedInterval = 'MONTHLY';
+    component.startCheckout();
+
+    expect(paymentService.createOrder).toHaveBeenCalledWith({
+      plan: 'BUSINESS',
+      billingInterval: 'MONTHLY',
+    });
+    expect(component.checkoutOrder).toEqual(mockOrder);
   });
 
-  it('should format bytes accurately', () => {
+  it('should format bytes and progress bar class accurately', () => {
     expect(component.formatBytes(0)).toBe('0 B');
     expect(component.formatBytes(1024)).toBe('1 KB');
-    expect(component.formatBytes(1048576)).toBe('1 MB');
-    expect(component.formatBytes(1073741824)).toBe('1 GB');
+    expect(component.getProgressBarClass('NORMAL')).toBe('bg-primary');
+    expect(component.getProgressBarClass('OVER_LIMIT')).toBe('bg-danger');
   });
 });

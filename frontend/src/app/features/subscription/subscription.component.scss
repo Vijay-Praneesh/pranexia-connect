@@ -18,6 +18,25 @@
   }
 }
 
+.plan-select-card {
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.btn-xs {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
 .spin {
   animation: spin-animation 1s linear infinite;
 }

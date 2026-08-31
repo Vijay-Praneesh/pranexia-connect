@@ -15,6 +15,7 @@ const mediaRoutes = require("./media.routes");
 const usageRoutes = require("./usage.routes");
 const planRoutes = require("./plan.routes");
 const subscriptionRoutes = require("./subscription.routes");
+const paymentRoutes = require("./payment.routes");
 
 router.use("/health", healthRoutes);
 router.use("/auth", authRoutes);
@@ -39,5 +40,8 @@ router.use("/plans", planRoutes);
 
 // Subscriptions
 router.use("/subscriptions", subscriptionRoutes);
+
+// Payments
+router.use("/payments", paymentRoutes);
 
 module.exports = router;
