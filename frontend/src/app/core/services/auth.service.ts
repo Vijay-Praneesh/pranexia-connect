@@ -6,7 +6,15 @@ import { BehaviorSubject, catchError, map, Observable, of, tap } from 'rxjs';
 
 import { API_BASE_URL } from '../config/api-config.token';
 import { ApiResponse } from '../models/api-response.model';
-import { AuthenticatedUser, AuthenticationJwtPayload, AuthSession, LoginRequest, LoginResponse } from '../models/auth.model';
+import {
+  AuthenticatedUser,
+  AuthenticationJwtPayload,
+  AuthSession,
+  GoogleAuthResponse,
+  GoogleOnboardRequest,
+  LoginRequest,
+  LoginResponse,
+} from '../models/auth.model';
 import { AuthStorageService } from './auth-storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -26,6 +34,56 @@ export class AuthService {
       map((response) => response.data),
       tap((session) => this.setSession(session)),
     );
+  }
+
+  googleAuth(credential: string): Observable<GoogleAuthResponse> {
+    return this.http
+      .post<ApiResponse<GoogleAuthResponse>>(`${this.apiBaseUrl}/auth/google`, { credential })
+      .pipe(
+        map((response) => response.data),
+        tap((data) => {
+          if ('token' in data && 'user' in data) {
+            this.setSession(data as AuthSession);
+          }
+        }),
+      );
+  }
+
+  googleOnboard(data: GoogleOnboardRequest): Observable<AuthSession> {
+    return this.http
+      .post<ApiResponse<AuthSession>>(`${this.apiBaseUrl}/auth/google/onboard`, data)
+      .pipe(
+        map((response) => response.data),
+        tap((session) => this.setSession(session)),
+      );
+  }
+
+  linkGoogle(credential: string): Observable<AuthenticatedUser> {
+    return this.http
+      .post<ApiResponse<AuthenticatedUser>>(`${this.apiBaseUrl}/auth/google/link`, { credential })
+      .pipe(
+        map((response) => response.data),
+        tap((user) => {
+          const current = this.sessionSubject.value;
+          if (current) {
+            this.setSession({ ...current, user });
+          }
+        }),
+      );
+  }
+
+  unlinkGoogle(): Observable<AuthenticatedUser> {
+    return this.http
+      .post<ApiResponse<AuthenticatedUser>>(`${this.apiBaseUrl}/auth/google/unlink`, {})
+      .pipe(
+        map((response) => response.data),
+        tap((user) => {
+          const current = this.sessionSubject.value;
+          if (current) {
+            this.setSession({ ...current, user });
+          }
+        }),
+      );
   }
 
   logout(): void {

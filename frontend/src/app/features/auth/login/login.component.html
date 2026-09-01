@@ -1,50 +1,203 @@
 <div class="login-card card border-0 shadow-sm">
   <div class="card-body p-4 p-sm-5">
-    <div class="mb-4">
-      <span class="brand-mark" aria-hidden="true">P</span>
-      <h1 class="h3 mt-3 mb-2">Sign in to Seyyon Connect</h1>
-      <p class="text-body-secondary mb-0">Access your customer engagement workspace.</p>
-    </div>
-
-    @if (errorMessage) {
-      <app-error-state title="Sign in failed" [message]="errorMessage" />
-    }
-
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="mb-3">
-        <label class="form-label" for="email">Email address</label>
-        <input id="email" class="form-control" [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid"
-          type="email" formControlName="email" autocomplete="username" inputmode="email" autofocus />
-        @if (form.controls.email.touched && form.controls.email.hasError('required')) {
-          <div class="invalid-feedback">Email address is required.</div>
-        } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
-          <div class="invalid-feedback">Enter a valid email address.</div>
-        }
+    @if (viewState === 'login') {
+      <div class="mb-4">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <h1 class="h3 mt-3 mb-2">Sign in to Seyyon Connect</h1>
+        <p class="text-body-secondary mb-0">Access your customer engagement workspace.</p>
       </div>
 
-      <div class="mb-4">
-        <label class="form-label" for="password">Password</label>
-        <div class="input-group has-validation">
-          <input id="password" class="form-control" [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid"
-            [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password" />
-          <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword"
-            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword">
-            <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword" aria-hidden="true"></i>
+      @if (errorMessage) {
+        <app-error-state title="Sign in failed" [message]="errorMessage" />
+      }
+
+      @if (linkingRequiredMessage) {
+        <div class="alert alert-warning d-flex align-items-start gap-2 mb-4 p-3 rounded-3" role="alert">
+          <i class="bi bi-shield-lock-fill text-warning fs-5 flex-shrink-0 mt-1" aria-hidden="true"></i>
+          <div>
+            <div class="fw-semibold mb-1">Account Linking Required</div>
+            <div class="small text-body-secondary">{{ linkingRequiredMessage }}</div>
+          </div>
+        </div>
+      }
+
+      <!-- Google Sign-In Option -->
+      <div class="google-auth-section mb-3">
+        <div #googleBtnContainer class="google-btn-container w-100 d-flex justify-content-center">
+          <button
+            type="button"
+            id="google-signin-btn"
+            class="btn btn-outline-secondary w-100 google-custom-btn d-flex align-items-center justify-content-center gap-3 py-2"
+            (click)="signInWithGoogle()"
+            [disabled]="googleSubmitting || submitting"
+            aria-label="Continue with Google"
+          >
+            @if (googleSubmitting) {
+              <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+              <span>Connecting to Google…</span>
+            } @else {
+              <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                />
+              </svg>
+              <span class="fw-medium text-dark">Continue with Google</span>
+            }
           </button>
-          @if (form.controls.password.touched && form.controls.password.hasError('required')) {
-            <div class="invalid-feedback">Password is required.</div>
-          }
         </div>
       </div>
 
-      <button class="btn btn-primary w-100" type="submit" [disabled]="submitting">
-        @if (submitting) {
-          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-          Signing in…
-        } @else {
-          Sign in
-        }
-      </button>
-    </form>
+      <div class="auth-divider my-4">
+        <span>or sign in with email</span>
+      </div>
+
+      <!-- Traditional Email + Password Form -->
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="email">Email address</label>
+          <input
+            id="email"
+            class="form-control"
+            [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid"
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            inputmode="email"
+            autofocus
+          />
+          @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+            <div class="invalid-feedback">Email address is required.</div>
+          } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
+            <div class="invalid-feedback">Enter a valid email address.</div>
+          }
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-group has-validation">
+            <input
+              id="password"
+              class="form-control"
+              [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showPassword"
+            >
+              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword" aria-hidden="true"></i>
+            </button>
+            @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+              <div class="invalid-feedback">Password is required.</div>
+            }
+          </div>
+        </div>
+
+        <button class="btn btn-primary w-100 py-2" type="submit" [disabled]="submitting || googleSubmitting">
+          @if (submitting) {
+            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            Signing in…
+          } @else {
+            Sign in
+          }
+        </button>
+      </form>
+    } @else {
+      <!-- Onboarding Step for New Google Accounts -->
+      <div class="onboard-header mb-4">
+        <span class="brand-mark mb-3" aria-hidden="true">P</span>
+        <h1 class="h4 mb-1">Complete your Workspace</h1>
+        <p class="text-body-secondary small mb-0">Set up your company details to activate your Seyyon Connect account.</p>
+      </div>
+
+      <!-- Google User Profile Card -->
+      <div class="card bg-light border-0 p-3 mb-4 rounded-3 d-flex flex-row align-items-center gap-3">
+        <div class="google-avatar-badge rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold">
+          {{ googleProfile?.firstName?.charAt(0) || 'U' }}
+        </div>
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="fw-semibold text-truncate">{{ googleProfile?.firstName }} {{ googleProfile?.lastName || '' }}</div>
+          <div class="text-body-secondary small text-truncate">{{ googleProfile?.email }}</div>
+        </div>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+          <i class="bi bi-patch-check-fill me-1" aria-hidden="true"></i>Verified
+        </span>
+      </div>
+
+      @if (errorMessage) {
+        <app-error-state title="Setup error" [message]="errorMessage" />
+      }
+
+      <form [formGroup]="onboardForm" (ngSubmit)="submitOnboard()" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="companyName">Company / Business Name</label>
+          <input
+            id="companyName"
+            class="form-control"
+            [class.is-invalid]="onboardForm.controls.companyName.touched && onboardForm.controls.companyName.invalid"
+            type="text"
+            formControlName="companyName"
+            placeholder="e.g. Acme Enterprises"
+            autofocus
+          />
+          @if (onboardForm.controls.companyName.touched && onboardForm.controls.companyName.hasError('required')) {
+            <div class="invalid-feedback">Company name is required.</div>
+          } @else if (onboardForm.controls.companyName.touched && onboardForm.controls.companyName.hasError('minlength')) {
+            <div class="invalid-feedback">Company name must be at least 3 characters.</div>
+          }
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" for="mobile">Mobile Number (10 digits)</label>
+          <input
+            id="mobile"
+            class="form-control"
+            [class.is-invalid]="onboardForm.controls.mobile.touched && onboardForm.controls.mobile.invalid"
+            type="tel"
+            formControlName="mobile"
+            placeholder="e.g. 9876543210"
+            maxlength="10"
+          />
+          @if (onboardForm.controls.mobile.touched && onboardForm.controls.mobile.hasError('required')) {
+            <div class="invalid-feedback">Mobile number is required.</div>
+          } @else if (onboardForm.controls.mobile.touched && onboardForm.controls.mobile.hasError('pattern')) {
+            <div class="invalid-feedback">Mobile number must be exactly 10 digits.</div>
+          }
+        </div>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary py-2" type="submit" [disabled]="submitting">
+            @if (submitting) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              Setting up workspace…
+            } @else {
+              <i class="bi bi-rocket-takeoff-fill me-2" aria-hidden="true"></i>Create Workspace
+            }
+          </button>
+
+          <button class="btn btn-outline-secondary py-2" type="button" (click)="cancelOnboard()" [disabled]="submitting">
+            Back to Sign In
+          </button>
+        </div>
+      </form>
+    }
   </div>
 </div>

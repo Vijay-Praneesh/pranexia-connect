@@ -92,6 +92,54 @@ class AuthValidator {
       allowUnknown: false,
     });
   }
+
+  googleAuth(data) {
+    const schema = Joi.object({
+      credential: Joi.string().trim().optional(),
+      idToken: Joi.string().trim().optional(),
+      token: Joi.string().trim().optional(),
+    }).or("credential", "idToken", "token");
+
+    return schema.validate(data, {
+      abortEarly: false,
+      allowUnknown: false,
+    });
+  }
+
+  googleOnboard(data) {
+    const schema = Joi.object({
+      onboardingToken: Joi.string().trim().optional(),
+      credential: Joi.string().trim().optional(),
+      companyName: Joi.string().trim().min(3).max(150).required(),
+      mobile: Joi.string()
+        .pattern(/^[0-9]{10}$/)
+        .required()
+        .messages({
+          "string.pattern.base": "Mobile number must be 10 digits",
+        }),
+      plan: Joi.string()
+        .valid("STARTER", "BUSINESS", "PROFESSIONAL", "ENTERPRISE")
+        .default("STARTER"),
+    }).or("onboardingToken", "credential");
+
+    return schema.validate(data, {
+      abortEarly: false,
+      allowUnknown: false,
+    });
+  }
+
+  googleLink(data) {
+    const schema = Joi.object({
+      credential: Joi.string().trim().optional(),
+      idToken: Joi.string().trim().optional(),
+      token: Joi.string().trim().optional(),
+    }).or("credential", "idToken", "token");
+
+    return schema.validate(data, {
+      abortEarly: false,
+      allowUnknown: false,
+    });
+  }
 }
 
-module.exports = new AuthValidator();
+module.exports = new AuthValidator();

@@ -40,16 +40,41 @@ class AuthRepository {
   }
 
   async findUserById(id) {
-  return await User.findByPk(id, {
-    include: [
-      {
-        model: Company,
-        as: "company",
-      },
-    ],
-  });
-}
-}
+    return await User.findByPk(id, {
+      include: [
+        {
+          model: Company,
+          as: "company",
+        },
+      ],
+    });
+  }
 
+  async findUserByGoogleId(googleId) {
+    if (!googleId) return null;
+    return await User.findOne({
+      where: { googleId },
+    });
+  }
+
+  async findUserWithCompanyByGoogleId(googleId) {
+    if (!googleId) return null;
+    return await User.findOne({
+      where: { googleId },
+      include: [
+        {
+          model: Company,
+          as: "company",
+        },
+      ],
+    });
+  }
+
+  async updateUser(user, updateData, transaction = null) {
+    if (!user) return null;
+    return await user.update(updateData, { transaction });
+  }
+}
 
 module.exports = new AuthRepository();
+

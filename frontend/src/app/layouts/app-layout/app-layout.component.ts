@@ -103,7 +103,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
       }
       img.brand-logo {
         height: 47px;
-        width: 250px;
+        width: 270px;
         object-fit: cover;
       }
       .primary-nav {

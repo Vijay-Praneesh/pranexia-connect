@@ -66,6 +66,54 @@ describe('AuthService', () => {
     expect(service.getToken()).toBeNull();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
+
+  it('authenticates with Google and stores session', () => {
+    service.googleAuth('google-jwt-credential').subscribe((res) => {
+      expect('token' in res).toBeTrue();
+    });
+
+    const req = http.expectOne(`${apiBaseUrl}/auth/google`);
+    expect(req.request.body).toEqual({ credential: 'google-jwt-credential' });
+    req.flush({ success: true, message: 'Google login successful', data: { token, user } });
+
+    expect(service.getToken()).toBe(token);
+    expect(service.getCurrentUser()).toEqual(user);
+  });
+
+  it('completes Google onboarding and stores new company session', () => {
+    const onboardPayload = {
+      onboardingToken: 'temp-token',
+      companyName: 'Acme Google Co',
+      mobile: '9876543210',
+    };
+
+    service.googleOnboard(onboardPayload).subscribe((session) => {
+      expect(session.user).toEqual(user);
+    });
+
+    const req = http.expectOne(`${apiBaseUrl}/auth/google/onboard`);
+    expect(req.request.body).toEqual(onboardPayload);
+    req.flush({ success: true, message: 'Onboarding completed', data: { token, user } });
+
+    expect(service.getToken()).toBe(token);
+  });
+
+  it('links Google account and updates current user in session', () => {
+    localStorage.setItem('pranexia-connect.auth-session', JSON.stringify({ token, user }));
+    service.restoreSession().subscribe();
+    http.expectOne(`${apiBaseUrl}/auth/me`).flush({ success: true, message: 'ok', data: user });
+
+    const linkedUser = { ...user, googleId: 'google-sub-linked', emailVerified: true };
+    service.linkGoogle('new-google-credential').subscribe((updated) => {
+      expect(updated.googleId).toBe('google-sub-linked');
+    });
+
+    const req = http.expectOne(`${apiBaseUrl}/auth/google/link`);
+    expect(req.request.body).toEqual({ credential: 'new-google-credential' });
+    req.flush({ success: true, message: 'Linked', data: linkedUser });
+
+    expect(service.getCurrentUser()?.googleId).toBe('google-sub-linked');
+  });
 });
 
 function createToken(expiresAt: number): string {
