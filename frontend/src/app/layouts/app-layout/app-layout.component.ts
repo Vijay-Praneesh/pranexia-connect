@@ -101,11 +101,11 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
         text-decoration: none;
         white-space: nowrap;
       }
-      img.brand-logo {
-        height: 47px;
-        width: 270px;
-        object-fit: cover;
-      }
+img.brand-logo{
+    height: 49px;
+    width: 272px;
+    object-fit: cover;
+}
       .primary-nav {
         display: flex;
         gap: 0.25rem;

@@ -1,49 +1,42 @@
 const cron = require("node-cron");
-
 const campaignRepository = require("../repositories/campaign.repository");
 const campaignService = require("../services/campaign.service");
+const logger = require("../config/logger");
 
 const startCampaignScheduler = () => {
-  console.log("🕒 Campaign Scheduler Started");
+  logger.info("🕒 Campaign Scheduler Initialized");
 
   // Runs every minute
   cron.schedule("* * * * *", async () => {
     try {
-      console.log("==================================");
-      console.log("Checking Scheduled Campaigns...");
-      console.log(new Date().toLocaleString());
-      console.log("==================================");
-
       const campaigns = await campaignRepository.findScheduledCampaigns();
 
-      if (!campaigns.length) {
-        console.log("No scheduled campaigns found.");
+      if (!campaigns || !campaigns.length) {
         return;
       }
 
-      console.log(`${campaigns.length} scheduled campaign(s) found.`);
+      logger.info(`[Campaign Scheduler] ${campaigns.length} scheduled campaign(s) due for dispatch.`);
 
       for (const campaign of campaigns) {
         try {
-          console.log(`Sending Campaign: ${campaign.name}`);
+          logger.info(`[Campaign Scheduler] Dispatching campaign: ${campaign.name} (${campaign.id}) for company: ${campaign.companyId}`);
 
           await campaignService.sendCampaign(
             campaign.companyId,
             campaign.id
           );
 
-          console.log(`✅ Campaign Sent: ${campaign.name}`);
+          logger.info(`[Campaign Scheduler] ✅ Campaign dispatch initiated: ${campaign.name} (${campaign.id})`);
         } catch (error) {
-          console.error(
-            `❌ Failed Campaign: ${campaign.name}`
+          logger.error(
+            `[Campaign Scheduler] ❌ Failed to dispatch campaign ${campaign.name} (${campaign.id}): ${error.message}`
           );
-          console.error(error.message);
         }
       }
     } catch (error) {
-      console.error("Cron Error:", error.message);
+      logger.error(`[Campaign Scheduler] Cron cycle error: ${error.message}`);
     }
   });
 };
 
-module.exports = startCampaignScheduler;
+module.exports = startCampaignScheduler;
