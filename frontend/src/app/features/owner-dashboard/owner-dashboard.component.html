@@ -1,144 +1,432 @@
-<section aria-labelledby="owner-dashboard-title">
-  <div
-    class="d-flex flex-column flex-lg-row align-items-lg-start justify-content-between gap-3 mb-4"
-  >
-    <div>
-      <h1 id="owner-dashboard-title" class="h3 mb-1">Owner Dashboard</h1>
-      <p class="text-body-secondary mb-0">
-        Manage your SaaS platform, clients and subscriptions.
-      </p>
-    </div>
-    <button
-      class="btn btn-outline-secondary"
-      type="button"
-      (click)="refresh()"
-      [disabled]="refreshing"
-    >
-      <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i
-      >{{ refreshing ? "Refreshing..." : "Refresh" }}
-    </button>
-  </div>
-  @if (loading && !summary) {
-    <app-loading-state message="Loading owner dashboard..." />
-  } @else if (errorMessage && !summary) {
-    <app-error-state
-      title="Owner dashboard unavailable"
-      [message]="errorMessage"
-      [retryable]="true"
-      (retry)="refresh()"
-    />
-  } @else if (summary) {
-    <div class="row g-3 mb-4">
-      <div class="col-sm-6 col-xl-3">
-        <app-kpi-card
-          label="Total Clients"
-          [value]="summary.companies.total"
-          icon="bi-buildings"
-          tone="primary"
+<div class="owner-dashboard-wrapper">
+  <div class="owner-dashboard-container">
+    <!-- DASHBOARD HERO HEADER -->
+    <header class="dashboard-hero-header">
+      <div class="hero-text-content">
+        <div class="header-eyebrow">
+          <span class="eyebrow-accent-bar" aria-hidden="true"></span>
+          <span>OWNER / SUPER ADMIN</span>
+        </div>
+        <h1 id="owner-dashboard-title" class="hero-title">
+          {{ getGreeting() }}, Admin
+        </h1>
+        <p class="hero-subtitle">
+          Owner Dashboard · Monitor your Seyyon Connect platform metrics, client subscriptions, and team accounts.
+        </p>
+      </div>
+
+      <div class="hero-actions">
+        <a
+          class="btn-hero-action"
+          [routerLink]="['/companies']"
+          aria-label="Manage all client companies"
+        >
+          <i class="bi bi-buildings" aria-hidden="true"></i>
+          <span>Manage Clients</span>
+        </a>
+
+        <button
+          class="btn-refresh"
+          type="button"
+          (click)="refresh()"
+          [disabled]="refreshing"
+          [attr.aria-busy]="refreshing"
+          aria-label="Refresh dashboard data"
+        >
+          <i
+            class="bi bi-arrow-clockwise"
+            [class.spin-icon]="refreshing"
+            aria-hidden="true"
+          ></i>
+          <span>{{ refreshing ? "Refreshing..." : "Refresh" }}</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- STATE RENDERING: SKELETON LOADING -->
+    @if (loading && !summary) {
+      <div class="dashboard-skeleton-grid" aria-label="Loading dashboard metrics">
+        <app-loading-state message="Loading owner dashboard..." class="d-none" />
+        <div class="skeleton-kpi-row">
+          <div class="skeleton-card skeleton-kpi"></div>
+          <div class="skeleton-card skeleton-kpi"></div>
+          <div class="skeleton-card skeleton-kpi"></div>
+          <div class="skeleton-card skeleton-kpi"></div>
+        </div>
+        <div class="skeleton-analytics-row">
+          <div class="skeleton-card skeleton-analytics"></div>
+          <div class="skeleton-card skeleton-analytics"></div>
+        </div>
+        <div class="skeleton-card skeleton-table"></div>
+      </div>
+    } @else if (errorMessage && !summary) {
+      <div class="state-card state-card-error">
+        <app-error-state
+          title="Owner dashboard unavailable"
+          [message]="errorMessage"
+          [retryable]="true"
+          (retry)="refresh()"
         />
       </div>
-      <div class="col-sm-6 col-xl-3">
-        <app-kpi-card
-          label="Active Clients"
-          [value]="summary.companies.active"
-          icon="bi-check-circle"
-          tone="success"
-        />
-      </div>
-      <div class="col-sm-6 col-xl-3">
-        <app-kpi-card
-          label="Inactive Clients"
-          [value]="summary.companies.inactive"
-          icon="bi-pause-circle"
-          tone="warning"
-        />
-      </div>
-      <div class="col-sm-6 col-xl-3">
-        <app-kpi-card
-          label="Total Users"
-          [value]="summary.overview.totalUsers"
-          icon="bi-people"
-          tone="info"
-        />
-      </div>
-    </div>
-    <div class="row g-4 mb-4">
-      <div class="col-lg-5">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body">
-            <h2 class="h5 mb-3">Plans Overview</h2>
-            <div class="plan-list">
-              @for (plan of plans; track plan) {
-                <div class="plan-row">
-                  <span>{{ plan }}</span
-                  ><strong>{{ summary.plans[plan] }}</strong>
+    } @else if (summary) {
+      <!-- ================================================================= -->
+      <!-- 01: TOP KPI COMMAND CARDS -->
+      <!-- ================================================================= -->
+      <section class="kpi-command-grid" aria-label="Key Performance Indicators">
+        <!-- 1. Total Clients -->
+        <article class="kpi-command-card kpi-card-blue">
+          <div class="kpi-card-header">
+            <span class="kpi-label">TOTAL CLIENTS</span>
+            <div class="kpi-icon-wrap kpi-icon-blue" aria-hidden="true">
+              <i class="bi bi-buildings"></i>
+            </div>
+          </div>
+          <div class="kpi-card-body">
+            <p class="kpi-value">{{ summary.companies.total }}</p>
+            <p class="kpi-subtext">
+              <i class="bi bi-check2 me-1" aria-hidden="true"></i>
+              Registered client companies
+            </p>
+          </div>
+        </article>
+
+        <!-- 2. Active Clients -->
+        <article class="kpi-command-card kpi-card-green">
+          <div class="kpi-card-header">
+            <span class="kpi-label">ACTIVE CLIENTS</span>
+            <div class="kpi-icon-wrap kpi-icon-green" aria-hidden="true">
+              <i class="bi bi-check-circle"></i>
+            </div>
+          </div>
+          <div class="kpi-card-body">
+            <p class="kpi-value">{{ summary.companies.active }}</p>
+            <p class="kpi-subtext kpi-subtext-active">
+              <span class="kpi-rate-badge">{{ getActiveClientPercentage() }}%</span>
+              active platform rate
+            </p>
+          </div>
+        </article>
+
+        <!-- 3. Inactive Clients -->
+        <article class="kpi-command-card kpi-card-gold">
+          <div class="kpi-card-header">
+            <span class="kpi-label">INACTIVE CLIENTS</span>
+            <div class="kpi-icon-wrap kpi-icon-gold" aria-hidden="true">
+              <i class="bi bi-pause-circle"></i>
+            </div>
+          </div>
+          <div class="kpi-card-body">
+            <p class="kpi-value">{{ summary.companies.inactive }}</p>
+            <p class="kpi-subtext">
+              <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+              Suspended or inactive accounts
+            </p>
+          </div>
+        </article>
+
+        <!-- 4. Total Users -->
+        <article class="kpi-command-card kpi-card-indigo">
+          <div class="kpi-card-header">
+            <span class="kpi-label">TOTAL USERS</span>
+            <div class="kpi-icon-wrap kpi-icon-indigo" aria-hidden="true">
+              <i class="bi bi-people"></i>
+            </div>
+          </div>
+          <div class="kpi-card-body">
+            <p class="kpi-value">{{ summary.overview.totalUsers }}</p>
+            <p class="kpi-subtext">
+              <span class="kpi-users-count">{{ summary.overview.activeUsers }} active</span>
+              across all clients
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- 02: MAIN ANALYTICS (PLANS OVERVIEW + USER OVERVIEW) -->
+      <!-- ================================================================= -->
+      <section class="analytics-command-grid" aria-label="Platform Analytics">
+        <!-- PLANS OVERVIEW -->
+        <article class="dashboard-panel plans-panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title-group">
+                <h2 class="panel-title">Plans Overview</h2>
+                <span class="badge-pill badge-pill-blue">
+                  {{ summary.companies.total }} Total
+                </span>
+              </div>
+              <p class="panel-subtitle">Client distribution by subscription tier</p>
+            </div>
+          </div>
+
+          <!-- Segmented Proportion Bar -->
+          <div class="segmented-plan-bar" aria-hidden="true">
+            @for (plan of plans; track plan) {
+              @if (getPlanPercentage(plan) > 0) {
+                <div
+                  class="plan-segment"
+                  [ngClass]="getPlanBadgeClass(plan)"
+                  [style.width.%]="getPlanPercentage(plan)"
+                  [title]="plan + ': ' + (summary.plans[plan] || 0) + ' (' + getPlanPercentage(plan) + '%)'"
+                ></div>
+              }
+            }
+          </div>
+
+          <!-- Plan Breakdown Rows -->
+          <div class="plans-distribution-list">
+            @for (plan of plans; track plan) {
+              <div class="plan-distribution-item">
+                <div class="plan-item-header">
+                  <div class="plan-identity">
+                    <span
+                      class="plan-indicator-dot"
+                      [ngClass]="getPlanBadgeClass(plan)"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="plan-name">{{ plan }}</span>
+                  </div>
+                  <div class="plan-metric-group">
+                    <span class="plan-count">
+                      {{ summary.plans[plan] || 0 }}
+                      <span class="count-unit">{{ (summary.plans[plan] || 0) === 1 ? 'client' : 'clients' }}</span>
+                    </span>
+                    <span class="plan-percentage-tag">
+                      {{ getPlanPercentage(plan) }}%
+                    </span>
+                  </div>
                 </div>
-              }
+
+                <div class="plan-progress-track">
+                  <div
+                    class="plan-progress-bar"
+                    [ngClass]="getPlanBadgeClass(plan)"
+                    [style.width.%]="getPlanPercentage(plan)"
+                    role="progressbar"
+                    [attr.aria-valuenow]="summary.plans[plan] || 0"
+                    aria-valuemin="0"
+                    [attr.aria-valuemax]="summary.companies.total || 1"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+
+        <!-- USER OVERVIEW -->
+        <article class="dashboard-panel user-panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title-group">
+                <h2 class="panel-title">User Overview</h2>
+                <span class="badge-pill badge-pill-green">
+                  {{ getActiveUserPercentage() }}% Active
+                </span>
+              </div>
+              <p class="panel-subtitle">Platform user engagement & activity</p>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="col-lg-7">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body">
-            <h2 class="h5 mb-3">User Overview</h2>
-            <div class="d-flex align-items-center gap-3">
-              <span class="display-6 fw-semibold">{{
-                summary.overview.activeUsers
-              }}</span
-              ><span class="text-body-secondary"
-                >active users of {{ summary.overview.totalUsers }} total</span
-              >
+
+          <div class="user-panel-body">
+            <!-- Hero User Metrics with Radial SVG Gauge -->
+            <div class="user-hero-container">
+              <div class="user-hero-metrics">
+                <div class="user-active-count-display">
+                  <span class="user-hero-number">{{ summary.overview.activeUsers }}</span>
+                  <span class="user-hero-total-label">/ {{ summary.overview.totalUsers }}</span>
+                </div>
+                <p class="user-hero-subtext">
+                  active users of {{ summary.overview.totalUsers }} total registered
+                </p>
+              </div>
+
+              <!-- Circular Ratio Visual Gauge -->
+              <div class="user-gauge-wrapper" aria-hidden="true">
+                <svg class="gauge-svg" viewBox="0 0 100 100">
+                  <circle
+                    class="gauge-circle-bg"
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke-width="9"
+                  />
+                  <circle
+                    class="gauge-circle-progress"
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke-width="9"
+                    stroke-dasharray="251.32"
+                    [style.strokeDashoffset]="251.32 - (251.32 * getActiveUserPercentage() / 100)"
+                  />
+                </svg>
+                <div class="gauge-center-content">
+                  <span class="gauge-center-value">{{ getActiveUserPercentage() }}%</span>
+                  <span class="gauge-center-label">Active</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Breakdown Stat Tiles -->
+            <div class="user-stats-strip">
+              <div class="user-stat-tile">
+                <div class="tile-label-row">
+                  <span class="stat-dot dot-active" aria-hidden="true"></span>
+                  <span class="tile-label">Active Users</span>
+                </div>
+                <span class="tile-val">{{ summary.overview.activeUsers }}</span>
+              </div>
+
+              <div class="user-stat-tile">
+                <div class="tile-label-row">
+                  <span class="stat-dot dot-inactive" aria-hidden="true"></span>
+                  <span class="tile-label">Inactive Users</span>
+                </div>
+                <span class="tile-val">{{ getInactiveUsers() }}</span>
+              </div>
+
+              <div class="user-stat-tile">
+                <div class="tile-label-row">
+                  <span class="stat-dot dot-ratio" aria-hidden="true"></span>
+                  <span class="tile-label">Avg / Client</span>
+                </div>
+                <span class="tile-val">{{ getAvgUsersPerClient() }}</span>
+              </div>
             </div>
           </div>
+        </article>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- 03: QUICK ACCESS COMMAND STRIP -->
+      <!-- ================================================================= -->
+      <section class="quick-access-strip" aria-label="Quick Platform Shortcuts">
+        <a class="quick-access-card" [routerLink]="['/companies']">
+          <div class="quick-card-icon" aria-hidden="true">
+            <i class="bi bi-buildings"></i>
+          </div>
+          <div class="quick-card-text">
+            <h3 class="quick-card-title">Manage Clients</h3>
+            <p class="quick-card-desc">View, filter, edit, or configure all client accounts</p>
+          </div>
+          <i class="bi bi-chevron-right quick-card-arrow" aria-hidden="true"></i>
+        </a>
+
+        <a class="quick-access-card" [routerLink]="['/companies']">
+          <div class="quick-card-icon quick-icon-green" aria-hidden="true">
+            <i class="bi bi-building-add"></i>
+          </div>
+          <div class="quick-card-text">
+            <h3 class="quick-card-title">Add Client</h3>
+            <p class="quick-card-desc">Register a new client company workspace</p>
+          </div>
+          <i class="bi bi-chevron-right quick-card-arrow" aria-hidden="true"></i>
+        </a>
+
+        <a class="quick-access-card" [routerLink]="['/notifications']">
+          <div class="quick-card-icon quick-icon-gold" aria-hidden="true">
+            <i class="bi bi-bell"></i>
+          </div>
+          <div class="quick-card-text">
+            <h3 class="quick-card-title">Platform Activity</h3>
+            <p class="quick-card-desc">Review system events, alerts and audit notifications</p>
+          </div>
+          <i class="bi bi-chevron-right quick-card-arrow" aria-hidden="true"></i>
+        </a>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- 04: RECENT CLIENTS DATA TABLE -->
+      <!-- ================================================================= -->
+      <section class="dashboard-panel table-panel" aria-label="Recent Client Companies">
+        <div class="panel-header table-panel-header">
+          <div>
+            <h2 class="panel-title">Recent Clients</h2>
+            <p class="panel-subtitle">Latest client companies added to the platform</p>
+          </div>
+          @if (summary.recentCompanies.length) {
+            <a
+              class="btn-view-all"
+              [routerLink]="['/companies']"
+              aria-label="View all client companies in Client Management"
+            >
+              <span>Manage Clients</span>
+              <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
+          }
         </div>
-      </div>
-    </div>
-    <div class="card border-0 shadow-sm">
-      <div class="card-body pb-0"><h2 class="h5 mb-3">Recent Clients</h2></div>
-      @if (summary.recentCompanies.length) {
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead>
-              <tr>
-                <th>Company</th>
-                <th>Email</th>
-                <th>Plan</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th class="text-end">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (company of summary.recentCompanies; track company.id) {
+
+        @if (summary.recentCompanies.length) {
+          <div class="table-container">
+            <table class="saas-table" aria-label="Recent clients table">
+              <thead>
                 <tr>
-                  <td>
-                    <strong>{{ company.companyName }}</strong>
-                  </td>
-                  <td>{{ company.email }}</td>
-                  <td>{{ company.plan }}</td>
-                  <td><app-status-badge [status]="company.status" /></td>
-                  <td>{{ company.createdAt | date: "mediumDate" }}</td>
-                  <td class="text-end">
-                    <a
-                      class="btn btn-sm btn-outline-primary"
-                      [routerLink]="['/companies']"
-                      >View</a
-                    >
-                  </td>
+                  <th scope="col" class="th-sno">S.No</th>
+                  <th scope="col" class="th-company">Company</th>
+                  <th scope="col" class="th-email">Email</th>
+                  <th scope="col" class="th-plan">Plan</th>
+                  <th scope="col" class="th-status">Status</th>
+                  <th scope="col" class="th-created">Created</th>
+                  <th scope="col" class="th-action text-end">Action</th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      } @else {
-        <div class="px-3 pb-3">
-          <app-empty-state
-            title="No recent clients"
-            message="Client companies will appear here after they are created."
-          />
-        </div>
-      }
-    </div>
-  }
-</section>
+              </thead>
+              <tbody>
+                @for (company of summary.recentCompanies; track company.id; let idx = $index) {
+                  <tr class="saas-table-row">
+                    <td class="td-sno">
+                      <span class="sno-text">{{ idx + 1 }}</span>
+                    </td>
+                    <td class="td-company">
+                      <span class="company-name" [title]="company.companyName">
+                        {{ company.companyName }}
+                      </span>
+                    </td>
+                    <td class="td-email">
+                      <span class="email-text" [title]="company.email">
+                        {{ company.email }}
+                      </span>
+                    </td>
+                    <td class="td-plan">
+                      <span
+                        class="plan-pill-badge"
+                        [ngClass]="getPlanBadgeClass(company.plan)"
+                      >
+                        {{ company.plan }}
+                      </span>
+                    </td>
+                    <td class="td-status">
+                      <app-status-badge [status]="company.status" />
+                    </td>
+                    <td class="td-created">
+                      <span class="date-text">
+                        {{ company.createdAt | date: "mediumDate" }}
+                      </span>
+                    </td>
+                    <td class="td-action text-end">
+                      <a
+                        class="btn-table-action"
+                        [routerLink]="['/companies']"
+                        [attr.aria-label]="'View details for ' + company.companyName"
+                      >
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                        <span>View Details</span>
+                      </a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="empty-state-wrapper">
+            <app-empty-state
+              title="No recent clients"
+              message="Client companies will appear here after they are created."
+            />
+          </div>
+        }
+      </section>
+    }
+  </div>
+</div>

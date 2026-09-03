@@ -47,6 +47,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   showPassword = false;
   errorMessage = '';
   linkingRequiredMessage = '';
+  readonly currentYear = new Date().getFullYear();
 
   // Stored for onboarding
   onboardingToken = '';

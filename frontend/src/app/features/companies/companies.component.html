@@ -1,339 +1,701 @@
-<section aria-labelledby="companies-title">
-  <div
-    class="d-flex flex-column flex-lg-row align-items-lg-start justify-content-between gap-3 mb-4"
-  >
-    <div>
-      <h1 id="companies-title" class="h3 mb-1">Client Management</h1>
-      <p class="text-body-secondary mb-0">
-        Manage your client companies, plans, accounts and access.
-      </p>
-    </div>
-    <button class="btn btn-primary" type="button" (click)="openCreate()">
-      <i class="bi bi-building-add me-1" aria-hidden="true"></i>Add Client
-    </button>
-  </div>
-  @if (successMessage) {
-    <div class="alert alert-success" role="status">{{ successMessage }}</div>
-  }
-  @if (errorMessage && companies.length) {
-    <div class="alert alert-warning" role="alert">{{ errorMessage }}</div>
-  }
-  <div class="card border-0 shadow-sm mb-3">
-    <div class="card-body">
-      <div class="row g-2 align-items-end">
-        <div class="col-lg-5">
-          <label class="form-label" for="company-search">Search company</label>
-          <div class="input-group">
-            <span class="input-group-text"
-              ><i class="bi bi-search" aria-hidden="true"></i></span
-            ><input
+<div class="companies-page-wrapper">
+  <div class="companies-container">
+    <!-- ===================================================================== -->
+    <!-- 01: PAGE HEADER -->
+    <!-- ===================================================================== -->
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-eyebrow">
+          <span class="eyebrow-accent-bar" aria-hidden="true"></span>
+          <span>CLIENT MANAGEMENT</span>
+        </div>
+        <h1 id="companies-title" class="header-title">Clients</h1>
+        <p class="header-subtitle">
+          Manage and monitor your connected client companies.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          class="btn-add-client"
+          type="button"
+          (click)="openCreate()"
+          aria-label="Add new client company"
+        >
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          <span>Add Client</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- NOTIFICATION BANNERS -->
+    @if (successMessage) {
+      <div class="custom-banner banner-success" role="status" aria-live="polite">
+        <div class="banner-content">
+          <i class="bi bi-check-circle-fill banner-icon" aria-hidden="true"></i>
+          <span>{{ successMessage }}</span>
+        </div>
+        <button
+          class="btn-banner-close"
+          type="button"
+          (click)="successMessage = ''"
+          aria-label="Dismiss notification"
+        >
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+    @if (errorMessage && companies.length) {
+      <div class="custom-banner banner-warning" role="alert">
+        <div class="banner-content">
+          <i class="bi bi-exclamation-triangle-fill banner-icon" aria-hidden="true"></i>
+          <span>{{ errorMessage }}</span>
+        </div>
+        <button
+          class="btn-banner-close"
+          type="button"
+          (click)="errorMessage = ''"
+          aria-label="Dismiss alert"
+        >
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+
+    <!-- ===================================================================== -->
+    <!-- 02: COMPACT CLIENT DIRECTORY SUMMARY STRIP -->
+    <!-- ===================================================================== -->
+    @if (companies.length || totalRecords > 0) {
+      <section class="summary-strip" aria-label="Client Directory Summary">
+        <div class="summary-item">
+          <div class="summary-label">
+            <span class="summary-dot dot-total" aria-hidden="true"></span>
+            <span>Total Clients</span>
+          </div>
+          <div class="summary-value">{{ totalRecords }}</div>
+        </div>
+
+        <div class="summary-divider" aria-hidden="true"></div>
+
+        <div class="summary-item">
+          <div class="summary-label">
+            <span class="summary-dot dot-active" aria-hidden="true"></span>
+            <span>Active</span>
+          </div>
+          <div class="summary-value text-success">{{ getActiveCount() }}</div>
+        </div>
+
+        <div class="summary-divider" aria-hidden="true"></div>
+
+        <div class="summary-item">
+          <div class="summary-label">
+            <span class="summary-dot dot-inactive" aria-hidden="true"></span>
+            <span>Inactive</span>
+          </div>
+          <div class="summary-value text-muted">{{ getInactiveCount() }}</div>
+        </div>
+      </section>
+    }
+
+    <!-- ===================================================================== -->
+    <!-- 03: SEARCH & FILTER TOOLBAR -->
+    <!-- ===================================================================== -->
+    <section class="filter-card" aria-label="Search and filter clients">
+      <div class="filter-grid">
+        <!-- 1. Search company -->
+        <div class="filter-group search-group">
+          <label class="filter-label" for="company-search">Search</label>
+          <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon" aria-hidden="true"></i>
+            <input
               id="company-search"
-              class="form-control"
+              class="filter-input search-input"
               type="search"
               [formControl]="searchForm.controls.search"
-              placeholder="Name, email, or mobile"
+              placeholder="Search clients..."
+              aria-label="Search clients by name, email, or mobile"
             />
+            @if (searchForm.controls.search.value) {
+              <button
+                class="btn-clear-search"
+                type="button"
+                (click)="clearSearch()"
+                aria-label="Clear search text"
+              >
+                <i class="bi bi-x" aria-hidden="true"></i>
+              </button>
+            }
           </div>
         </div>
-        <div class="col-sm-6 col-lg-3">
-          <label class="form-label" for="company-status">Status</label
-          ><select
-            id="company-status"
-            class="form-select"
-            [(ngModel)]="status"
-            (change)="applyFilters()"
-          >
-            <option value="">All statuses</option>
-            @for (item of statuses; track item) {
-              <option [value]="item">{{ item }}</option>
-            }
-          </select>
+
+        <!-- 2. Status dropdown -->
+        <div class="filter-group select-group">
+          <label class="filter-label" for="company-status">Status</label>
+          <div class="select-wrapper">
+            <select
+              id="company-status"
+              class="filter-select"
+              [(ngModel)]="status"
+              (change)="applyFilters()"
+              aria-label="Filter by account status"
+            >
+              <option value="">All statuses</option>
+              @for (item of statuses; track item) {
+                <option [value]="item">{{ getStatusLabel(item) }}</option>
+              }
+            </select>
+            <i class="bi bi-chevron-down select-arrow" aria-hidden="true"></i>
+          </div>
         </div>
-        <div class="col-sm-6 col-lg-3">
-          <label class="form-label" for="company-plan">Plan</label
-          ><select
-            id="company-plan"
-            class="form-select"
-            [(ngModel)]="plan"
-            (change)="applyFilters()"
-          >
-            <option value="">All plans</option>
-            @for (item of plans; track item) {
-              <option [value]="item">{{ item }}</option>
-            }
-          </select>
+
+        <!-- 3. Plan dropdown -->
+        <div class="filter-group select-group">
+          <label class="filter-label" for="company-plan">Plan</label>
+          <div class="select-wrapper">
+            <select
+              id="company-plan"
+              class="filter-select"
+              [(ngModel)]="plan"
+              (change)="applyFilters()"
+              aria-label="Filter by subscription plan"
+            >
+              <option value="">All plans</option>
+              @for (item of plans; track item) {
+                <option [value]="item">{{ getPlanLabel(item) }}</option>
+              }
+            </select>
+            <i class="bi bi-chevron-down select-arrow" aria-hidden="true"></i>
+          </div>
         </div>
+
+        <!-- 4. Reset Button -->
+        @if (hasActiveFilters()) {
+          <div class="filter-group reset-group">
+            <label class="filter-label d-none d-md-block">&nbsp;</label>
+            <button
+              class="btn-reset-filters"
+              type="button"
+              (click)="clearFilters()"
+              aria-label="Reset all search filters"
+            >
+              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+              <span>Reset</span>
+            </button>
+          </div>
+        }
       </div>
-    </div>
-  </div>
-  @if (loading && !companies.length) {
-    <app-loading-state message="Loading client companies..." />
-  } @else if (errorMessage && !companies.length) {
-    <app-error-state
-      title="Client companies unavailable"
-      [message]="errorMessage"
-      [retryable]="true"
-      (retry)="load()"
-    />
-  } @else if (!companies.length) {
-    <app-empty-state
-      [title]="
-        search || status || plan
-          ? 'No companies match your filters'
-          : 'No client companies found'
-      "
-      message="Add a client company to begin managing access."
-      ><button
-        class="btn btn-primary btn-sm"
-        type="button"
-        (click)="openCreate()"
-      >
-        Add Client
-      </button></app-empty-state
-    >
-  } @else {
-    <div class="card border-0 shadow-sm overflow-hidden">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Admin</th>
-              <th>Email</th>
-              <th>Mobile</th>
-              <th>Plan</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (company of companies; track company.id) {
-              <tr>
-                <td>
-                  <button
-                    class="btn btn-link p-0 text-start text-decoration-none"
-                    type="button"
-                    (click)="showDetail(company.id)"
-                  >
-                    <strong>{{ company.companyName }}</strong>
-                  </button>
-                </td>
-                <td>
-                  {{ admin(company)?.firstName || "—" }}
-                  {{ admin(company)?.lastName || "" }}
-                </td>
-                <td>{{ company.email }}</td>
-                <td>{{ company.mobile }}</td>
-                <td>
-                  <span class="badge text-bg-light">{{ company.plan }}</span>
-                </td>
-                <td><app-status-badge [status]="company.status" /></td>
-                <td>{{ company.createdAt | date: "mediumDate" }}</td>
-                <td class="text-end text-nowrap">
-                  <button
-                    class="btn btn-sm btn-link"
-                    type="button"
-                    (click)="showDetail(company.id)"
-                    aria-label="View company"
-                  >
-                    <i class="bi bi-eye"></i></button
-                  ><button
-                    class="btn btn-sm btn-link"
-                    type="button"
-                    (click)="openEdit(company)"
-                    aria-label="Edit company"
-                  >
-                    <i class="bi bi-pencil"></i></button
-                  ><button
-                    class="btn btn-sm btn-link"
-                    [class.text-success]="company.status === 'INACTIVE'"
-                    [class.text-warning]="company.status === 'ACTIVE'"
-                    type="button"
-                    (click)="toggleStatus(company)"
-                    [attr.aria-label]="
-                      company.status === 'ACTIVE'
-                        ? 'Deactivate company'
-                        : 'Activate company'
-                    "
-                  >
-                    <i
-                      class="bi"
-                      [class.bi-toggle-on]="company.status === 'ACTIVE'"
-                      [class.bi-toggle-off]="company.status === 'INACTIVE'"
-                    ></i>
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+
+      <!-- Active Filter Tags Indicator -->
+      @if (hasActiveFilters()) {
+        <div class="active-filter-tags-row">
+          <span class="active-filters-label">Active Filters:</span>
+          @if (search) {
+            <span class="filter-pill-tag">
+              <span>Search: "{{ search }}"</span>
+              <button
+                class="btn-remove-tag"
+                type="button"
+                (click)="clearSearch()"
+                aria-label="Remove search filter"
+              >
+                <i class="bi bi-x" aria-hidden="true"></i>
+              </button>
+            </span>
+          }
+          @if (status) {
+            <span class="filter-pill-tag">
+              <span>Status: {{ status }}</span>
+              <button
+                class="btn-remove-tag"
+                type="button"
+                (click)="clearStatusFilter()"
+                aria-label="Remove status filter"
+              >
+                <i class="bi bi-x" aria-hidden="true"></i>
+              </button>
+            </span>
+          }
+          @if (plan) {
+            <span class="filter-pill-tag">
+              <span>Plan: {{ plan }}</span>
+              <button
+                class="btn-remove-tag"
+                type="button"
+                (click)="clearPlanFilter()"
+                aria-label="Remove plan filter"
+              >
+                <i class="bi bi-x" aria-hidden="true"></i>
+              </button>
+            </span>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 04: DIRECTORY CONTENT & STATE RENDERING -->
+    <!-- ===================================================================== -->
+    @if (loading && !companies.length) {
+      <div class="state-card">
+        <app-loading-state message="Loading client companies..." />
       </div>
-      <div
-        class="card-footer bg-white d-flex justify-content-between align-items-center gap-3"
-      >
-        <small class="text-body-secondary"
-          >Page {{ page }} of {{ totalPages || 1 }} ·
-          {{ totalRecords }} companies</small
-        ><app-pagination
-          [page]="page"
-          [totalPages]="totalPages"
-          (pageChange)="changePage($event)"
+    } @else if (errorMessage && !companies.length) {
+      <div class="state-card state-card-error">
+        <app-error-state
+          title="Client companies unavailable"
+          [message]="errorMessage"
+          [retryable]="true"
+          (retry)="load()"
         />
       </div>
-    </div>
-  }
-</section>
+    } @else if (!companies.length) {
+      <div class="empty-state-card">
+        <app-empty-state
+          [title]="
+            hasActiveFilters()
+              ? 'No matching clients'
+              : 'No client companies found'
+          "
+          [message]="
+            hasActiveFilters()
+              ? 'Try changing your search keywords or clearing active filters.'
+              : 'Add your first client company to begin managing workspace access.'
+          "
+        >
+          @if (hasActiveFilters()) {
+            <button
+              class="btn-empty-reset"
+              type="button"
+              (click)="clearFilters()"
+            >
+              <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>
+              <span>Clear Filters</span>
+            </button>
+          } @else {
+            <button
+              class="btn-empty-add"
+              type="button"
+              (click)="openCreate()"
+            >
+              <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+              <span>Add Client</span>
+            </button>
+          }
+        </app-empty-state>
+      </div>
+    } @else {
+      <!-- CLIENT DATA DIRECTORY TABLE -->
+      <section class="table-card" aria-label="Client Companies Directory">
+        <div class="table-container">
+          <table class="saas-table" aria-label="Client companies table">
+            <thead>
+              <tr>
+                <th scope="col" class="th-sno">S.No</th>
+                <th scope="col" class="th-company">Company</th>
+                <th scope="col" class="th-admin">Admin</th>
+                <th scope="col" class="th-email">Email</th>
+                <th scope="col" class="th-mobile">Mobile</th>
+                <th scope="col" class="th-plan">Plan</th>
+                <th scope="col" class="th-status">Status</th>
+                <th scope="col" class="th-created">Created</th>
+                <th scope="col" class="th-actions text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (company of companies; track company.id; let idx = $index) {
+                <tr class="saas-table-row">
+                  <!-- S.No -->
+                  <td class="td-sno">
+                    <span class="sno-text">{{ (page - 1) * limit + idx + 1 }}</span>
+                  </td>
 
+                  <!-- Company Name with Initials Avatar & Email -->
+                  <td class="td-company">
+                    <button
+                      class="company-link-btn"
+                      type="button"
+                      (click)="showDetail(company.id)"
+                      [attr.aria-label]="'View details for ' + company.companyName"
+                      [title]="'View details for ' + company.companyName"
+                    >
+                      <div class="company-avatar" aria-hidden="true">
+                        {{ getCompanyInitials(company.companyName) }}
+                      </div>
+                      <div class="company-meta-wrap">
+                        <span class="company-name">{{ company.companyName }}</span>
+                        <span class="company-sub-email">{{ company.email }}</span>
+                      </div>
+                    </button>
+                  </td>
+
+                  <!-- Admin Name -->
+                  <td class="td-admin">
+                    <div class="admin-cell-wrap">
+                      <span class="admin-name" [title]="admin(company) ? (admin(company)?.firstName + ' ' + (admin(company)?.lastName || '')) : 'No admin'">
+                        @if (admin(company)) {
+                          {{ admin(company)?.firstName }} {{ admin(company)?.lastName || "" }}
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </span>
+                      @if (admin(company)) {
+                        <span class="admin-role-hint">Primary Admin</span>
+                      }
+                    </div>
+                  </td>
+
+                  <!-- Email -->
+                  <td class="td-email">
+                    <span class="email-text" [title]="company.email">{{ company.email }}</span>
+                  </td>
+
+                  <!-- Mobile -->
+                  <td class="td-mobile">
+                    <span class="mobile-text">{{ company.mobile }}</span>
+                  </td>
+
+                  <!-- Plan -->
+                  <td class="td-plan">
+                    <span
+                      class="plan-pill-badge"
+                      [ngClass]="getPlanBadgeClass(company.plan)"
+                    >
+                      {{ company.plan }}
+                    </span>
+                  </td>
+
+                  <!-- Status -->
+                  <td class="td-status">
+                    <app-status-badge [status]="company.status" />
+                  </td>
+
+                  <!-- Created Date -->
+                  <td class="td-created">
+                    <span class="date-text">
+                      {{ company.createdAt | date: "mediumDate" }}
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="td-actions text-end">
+                    <div class="action-buttons-group">
+                      <!-- View Button -->
+                      <button
+                        class="btn-icon-action btn-action-view"
+                        type="button"
+                        (click)="showDetail(company.id)"
+                        [attr.aria-label]="'View details for ' + company.companyName"
+                        title="View details"
+                      >
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                      </button>
+
+                      <!-- Edit Button -->
+                      <button
+                        class="btn-icon-action btn-action-edit"
+                        type="button"
+                        (click)="openEdit(company)"
+                        [attr.aria-label]="'Edit company ' + company.companyName"
+                        title="Edit company"
+                      >
+                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                      </button>
+
+                      <!-- Toggle Status Button -->
+                      <button
+                        class="btn-icon-action btn-action-toggle"
+                        [class.toggle-active]="company.status === 'ACTIVE'"
+                        [class.toggle-inactive]="company.status === 'INACTIVE'"
+                        type="button"
+                        (click)="toggleStatus(company)"
+                        [attr.aria-label]="
+                          company.status === 'ACTIVE'
+                            ? 'Deactivate ' + company.companyName
+                            : 'Activate ' + company.companyName
+                        "
+                        [title]="
+                          company.status === 'ACTIVE'
+                            ? 'Deactivate company'
+                            : 'Activate company'
+                        "
+                      >
+                        <i
+                          class="bi"
+                          [class.bi-toggle-on]="company.status === 'ACTIVE'"
+                          [class.bi-toggle-off]="company.status === 'INACTIVE'"
+                          aria-hidden="true"
+                        ></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TABLE FOOTER & PAGINATION -->
+        <div class="table-footer">
+          <span class="table-footer-meta">
+            Page {{ page }} of {{ totalPages || 1 }} · {{ totalRecords }} companies
+          </span>
+          <app-pagination
+            [page]="page"
+            [totalPages]="totalPages"
+            (pageChange)="changePage($event)"
+          />
+        </div>
+      </section>
+    }
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 1: ADD CLIENT COMPANY -->
+<!-- ========================================================================= -->
 @if (editorOpen) {
   <div
-    class="modal-layer"
+    class="modal-backdrop-layer create-modal-backdrop"
     role="dialog"
     aria-modal="true"
     aria-labelledby="create-company-title"
   >
-    <div class="modal-card card shadow-lg">
-      <form [formGroup]="companyForm" (ngSubmit)="save()">
-        <div
-          class="card-header d-flex justify-content-between align-items-center"
-        >
-          <h2 id="create-company-title" class="h5 mb-0">Add client company</h2>
+    <div class="modal-surface card">
+      <form [formGroup]="companyForm" (ngSubmit)="save()" class="modal-form">
+        <div class="modal-header">
+          <div class="modal-header-text">
+            <h2 id="create-company-title" class="modal-title">Add Client Company</h2>
+            <p class="modal-subtitle">Register a new client company and primary administrator.</p>
+          </div>
           <button
-            class="btn-close"
+            class="btn-modal-close"
             type="button"
-            aria-label="Close"
+            aria-label="Close add client modal"
             (click)="editorOpen = false"
-          ></button>
+          >
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
         </div>
-        <div class="card-body">
-          <h3 class="section-label">Company information</h3>
-          <div class="row g-3">
-            <div class="col-sm-6">
-              <label class="form-label" for="create-company-name"
-                >Company name</label
-              ><input
+
+        <div class="modal-body">
+          <!-- Section 1: Company Information -->
+          <div class="form-section-header">
+            <span class="section-indicator"></span>
+            <h3 class="section-title">Company Information</h3>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-field-label" for="create-company-name">
+                Company Name <span class="required-star">*</span>
+              </label>
+              <input
                 id="create-company-name"
-                class="form-control"
+                class="form-field-input"
                 formControlName="companyName"
+                placeholder="e.g. Acme Corporation"
                 [class.is-invalid]="
                   companyForm.controls.companyName.touched &&
                   companyForm.controls.companyName.invalid
                 "
               />
-              <div class="invalid-feedback">Company name is required.</div>
+              @if (companyForm.controls.companyName.touched && companyForm.controls.companyName.invalid) {
+                <div class="field-error-msg">Company name is required.</div>
+              }
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="create-company-email"
-                >Company email</label
-              ><input
+
+            <div class="form-field">
+              <label class="form-field-label" for="create-company-email">
+                Company Email <span class="required-star">*</span>
+              </label>
+              <input
                 id="create-company-email"
-                class="form-control"
+                class="form-field-input"
                 type="email"
                 formControlName="email"
+                placeholder="contact@company.com"
                 [class.is-invalid]="
                   companyForm.controls.email.touched &&
                   companyForm.controls.email.invalid
                 "
               />
-              <div class="invalid-feedback">Enter a valid email.</div>
+              @if (companyForm.controls.email.touched && companyForm.controls.email.invalid) {
+                <div class="field-error-msg">Enter a valid company email.</div>
+              }
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="create-company-mobile"
-                >Company mobile</label
-              ><input
+
+            <div class="form-field">
+              <label class="form-field-label" for="create-company-mobile">
+                Company Mobile <span class="required-star">*</span>
+              </label>
+              <input
                 id="create-company-mobile"
-                class="form-control"
+                class="form-field-input"
                 inputmode="numeric"
                 formControlName="mobile"
+                placeholder="10-digit mobile number"
                 [class.is-invalid]="
                   companyForm.controls.mobile.touched &&
                   companyForm.controls.mobile.invalid
                 "
               />
-              <div class="invalid-feedback">
-                Enter a 10-digit mobile number.
+              @if (companyForm.controls.mobile.touched && companyForm.controls.mobile.invalid) {
+                <div class="field-error-msg">Enter a valid 10-digit mobile number.</div>
+              }
+            </div>
+
+            <div class="form-field">
+              <label class="form-field-label" for="create-company-plan">
+                Subscription Plan <span class="required-star">*</span>
+              </label>
+              <div class="select-wrapper">
+                <select
+                  id="create-company-plan"
+                  class="form-field-select"
+                  formControlName="plan"
+                >
+                  @for (item of plans; track item) {
+                    <option [value]="item">{{ getPlanLabel(item) }}</option>
+                  }
+                </select>
+                <i class="bi bi-chevron-down select-arrow" aria-hidden="true"></i>
               </div>
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="create-company-plan">Plan</label
-              ><select
-                id="create-company-plan"
-                class="form-select"
-                formControlName="plan"
-              >
-                @for (item of plans; track item) {
-                  <option [value]="item">{{ item }}</option>
-                }
-              </select>
-            </div>
           </div>
-          <hr />
-          <h3 class="section-label">Admin information</h3>
-          <p class="form-text">
-            The backend uses the company email and mobile for the linked
-            COMPANY_ADMIN, so enter the same values below.
+
+          <div class="section-divider"></div>
+
+          <!-- Section 2: Administrator Information -->
+          <div class="form-section-header">
+            <span class="section-indicator"></span>
+            <h3 class="section-title">Administrator Information</h3>
+          </div>
+          <p class="section-hint">
+            The backend links the admin credentials to the company contacts. Ensure admin email and mobile match company details.
           </p>
-          <div class="row g-3">
-            <div class="col-sm-6">
-              <label class="form-label" for="admin-first-name">First name</label
-              ><input
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-field-label" for="admin-first-name">
+                First Name <span class="required-star">*</span>
+              </label>
+              <input
                 id="admin-first-name"
-                class="form-control"
+                class="form-field-input"
                 formControlName="firstName"
+                placeholder="Admin first name"
+                [class.is-invalid]="
+                  companyForm.controls.firstName.touched &&
+                  companyForm.controls.firstName.invalid
+                "
               />
+              @if (companyForm.controls.firstName.touched && companyForm.controls.firstName.invalid) {
+                <div class="field-error-msg">First name is required.</div>
+              }
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="admin-last-name">Last name</label
-              ><input
+
+            <div class="form-field">
+              <label class="form-field-label" for="admin-last-name">
+                Last Name <span class="required-star">*</span>
+              </label>
+              <input
                 id="admin-last-name"
-                class="form-control"
+                class="form-field-input"
                 formControlName="lastName"
+                placeholder="Admin last name"
+                [class.is-invalid]="
+                  companyForm.controls.lastName.touched &&
+                  companyForm.controls.lastName.invalid
+                "
               />
+              @if (companyForm.controls.lastName.touched && companyForm.controls.lastName.invalid) {
+                <div class="field-error-msg">Last name must have at least 2 characters.</div>
+              }
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="admin-email">Admin email</label
-              ><input
+
+            <div class="form-field">
+              <label class="form-field-label" for="admin-email">
+                Admin Email <span class="required-star">*</span>
+              </label>
+              <input
                 id="admin-email"
-                class="form-control"
+                class="form-field-input"
                 type="email"
                 formControlName="adminEmail"
+                placeholder="admin@company.com"
+                [class.is-invalid]="
+                  companyForm.controls.adminEmail.touched &&
+                  companyForm.controls.adminEmail.invalid
+                "
               />
+              @if (companyForm.controls.adminEmail.touched && companyForm.controls.adminEmail.invalid) {
+                <div class="field-error-msg">Enter a valid admin email.</div>
+              }
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="admin-mobile">Admin mobile</label
-              ><input
+
+            <div class="form-field">
+              <label class="form-field-label" for="admin-mobile">
+                Admin Mobile <span class="required-star">*</span>
+              </label>
+              <input
                 id="admin-mobile"
-                class="form-control"
+                class="form-field-input"
                 inputmode="numeric"
                 formControlName="adminMobile"
+                placeholder="10-digit mobile number"
+                [class.is-invalid]="
+                  companyForm.controls.adminMobile.touched &&
+                  companyForm.controls.adminMobile.invalid
+                "
               />
+              @if (companyForm.controls.adminMobile.touched && companyForm.controls.adminMobile.invalid) {
+                <div class="field-error-msg">Enter a valid 10-digit mobile number.</div>
+              }
             </div>
-            <div class="col-12">
-              <label class="form-label" for="admin-password">Password</label
-              ><input
+
+            <div class="form-field full-width">
+              <label class="form-field-label" for="admin-password">
+                Initial Admin Password <span class="required-star">*</span>
+              </label>
+              <input
                 id="admin-password"
-                class="form-control"
+                class="form-field-input"
                 type="password"
                 formControlName="password"
-                autocomplete="new-password"
+                placeholder="Minimum 8 characters"
+                [class.is-invalid]="
+                  companyForm.controls.password.touched &&
+                  companyForm.controls.password.invalid
+                "
               />
-              <div class="form-text">Minimum 8 characters.</div>
+              @if (companyForm.controls.password.touched && companyForm.controls.password.invalid) {
+                <div class="field-error-msg">Password must be at least 8 characters.</div>
+              }
             </div>
           </div>
         </div>
-        <div class="card-footer d-flex justify-content-end gap-2">
+
+        <div class="modal-footer">
           <button
-            class="btn btn-outline-secondary"
+            class="btn-modal-cancel"
             type="button"
             (click)="editorOpen = false"
+            [disabled]="actionLoading"
           >
-            Cancel</button
-          ><button
-            class="btn btn-primary"
+            Cancel
+          </button>
+          <button
+            class="btn-modal-submit"
             type="submit"
             [disabled]="actionLoading"
           >
-            {{ actionLoading ? "Creating..." : "Create client" }}
+            @if (actionLoading) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <span>Creating...</span>
+            } @else {
+              <i class="bi bi-check-lg me-1" aria-hidden="true"></i>
+              <span>Create Client</span>
+            }
           </button>
         </div>
       </form>
@@ -341,84 +703,132 @@
   </div>
 }
 
+<!-- ========================================================================= -->
+<!-- MODAL 2: EDIT CLIENT COMPANY -->
+<!-- ========================================================================= -->
 @if (editOpen && editing) {
   <div
-    class="modal-layer"
+    class="modal-backdrop-layer edit-modal-backdrop"
     role="dialog"
     aria-modal="true"
     aria-labelledby="edit-company-title"
   >
-    <div class="modal-card card shadow-lg">
-      <form [formGroup]="editForm" (ngSubmit)="update()">
-        <div
-          class="card-header d-flex justify-content-between align-items-center"
-        >
-          <h2 id="edit-company-title" class="h5 mb-0">Edit company</h2>
+    <div class="modal-surface card">
+      <form [formGroup]="editForm" (ngSubmit)="update()" class="modal-form">
+        <div class="modal-header">
+          <div class="modal-header-text">
+            <h2 id="edit-company-title" class="modal-title">Edit Client Company</h2>
+            <p class="modal-subtitle">Update company profile and subscription plan for {{ editing.companyName }}.</p>
+          </div>
           <button
-            class="btn-close"
+            class="btn-modal-close"
             type="button"
-            aria-label="Close"
+            aria-label="Close edit modal"
             (click)="editOpen = false"
-          ></button>
+          >
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
         </div>
-        <div class="card-body">
-          <div class="row g-3">
-            <div class="col-sm-6">
-              <label class="form-label" for="edit-company-name"
-                >Company name</label
-              ><input
+
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-field-label" for="edit-company-name">
+                Company Name <span class="required-star">*</span>
+              </label>
+              <input
                 id="edit-company-name"
-                class="form-control"
+                class="form-field-input"
                 formControlName="companyName"
+                [class.is-invalid]="
+                  editForm.controls.companyName.touched &&
+                  editForm.controls.companyName.invalid
+                "
               />
+              @if (editForm.controls.companyName.touched && editForm.controls.companyName.invalid) {
+                <div class="field-error-msg">Company name is required.</div>
+              }
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="edit-company-email"
-                >Company email</label
-              ><input
+
+            <div class="form-field">
+              <label class="form-field-label" for="edit-company-email">
+                Company Email <span class="required-star">*</span>
+              </label>
+              <input
                 id="edit-company-email"
-                class="form-control"
+                class="form-field-input"
                 type="email"
                 formControlName="email"
+                [class.is-invalid]="
+                  editForm.controls.email.touched &&
+                  editForm.controls.email.invalid
+                "
               />
+              @if (editForm.controls.email.touched && editForm.controls.email.invalid) {
+                <div class="field-error-msg">Enter a valid email address.</div>
+              }
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="edit-company-mobile"
-                >Company mobile</label
-              ><input
+
+            <div class="form-field">
+              <label class="form-field-label" for="edit-company-mobile">
+                Company Mobile <span class="required-star">*</span>
+              </label>
+              <input
                 id="edit-company-mobile"
-                class="form-control"
+                class="form-field-input"
                 inputmode="numeric"
                 formControlName="mobile"
+                [class.is-invalid]="
+                  editForm.controls.mobile.touched &&
+                  editForm.controls.mobile.invalid
+                "
               />
+              @if (editForm.controls.mobile.touched && editForm.controls.mobile.invalid) {
+                <div class="field-error-msg">Enter a valid 10-digit mobile number.</div>
+              }
             </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="edit-company-plan">Plan</label
-              ><select
-                id="edit-company-plan"
-                class="form-select"
-                formControlName="plan"
-              >
-                @for (item of plans; track item) {
-                  <option [value]="item">{{ item }}</option>
-                }
-              </select>
+
+            <div class="form-field">
+              <label class="form-field-label" for="edit-company-plan">
+                Subscription Plan <span class="required-star">*</span>
+              </label>
+              <div class="select-wrapper">
+                <select
+                  id="edit-company-plan"
+                  class="form-field-select"
+                  formControlName="plan"
+                >
+                  @for (item of plans; track item) {
+                    <option [value]="item">{{ getPlanLabel(item) }}</option>
+                  }
+                </select>
+                <i class="bi bi-chevron-down select-arrow" aria-hidden="true"></i>
+              </div>
             </div>
           </div>
         </div>
-        <div class="card-footer d-flex justify-content-end gap-2">
+
+        <div class="modal-footer">
           <button
-            class="btn btn-outline-secondary"
+            class="btn-modal-cancel"
             type="button"
             (click)="editOpen = false"
+            [disabled]="actionLoading"
           >
-            Cancel</button
-          ><button
-            class="btn btn-primary"
+            Cancel
+          </button>
+          <button
+            class="btn-modal-submit"
             type="submit"
             [disabled]="actionLoading"
           >
-            {{ actionLoading ? "Saving..." : "Save changes" }}
+            @if (actionLoading) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <span>Saving...</span>
+            } @else {
+              <i class="bi bi-check-lg me-1" aria-hidden="true"></i>
+              <span>Save Changes</span>
+            }
           </button>
         </div>
       </form>
@@ -426,60 +836,312 @@
   </div>
 }
 
+<!-- ========================================================================= -->
+<!-- MODAL 3: SEYYON CLIENT PROFILE V2 (CLIENT DETAILS MODAL) -->
+<!-- ========================================================================= -->
 @if (detail) {
   <div
-    class="modal-layer"
+    class="modal-backdrop-layer client-detail-backdrop"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="company-detail-title"
+    aria-labelledby="client-profile-header-title"
   >
-    <div class="modal-card card shadow-lg">
-      <div
-        class="card-header d-flex justify-content-between align-items-center"
-      >
-        <h2 id="company-detail-title" class="h5 mb-0">Company details</h2>
+    <div class="client-detail-modal">
+      <!-- 1. MODAL TOP BAR -->
+      <div class="client-detail-topbar">
+        <div class="topbar-left-meta">
+          <button
+            class="btn-topbar-back d-none d-sm-inline-flex"
+            type="button"
+            (click)="detail = null"
+            aria-label="Back to Client Management"
+            title="Back to Clients"
+          >
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+          </button>
+          <div class="topbar-identity">
+            <div class="topbar-badge">
+              <span class="topbar-dot" aria-hidden="true"></span>
+              <span>CLIENT PROFILE</span>
+            </div>
+            <span class="topbar-id-text">ID: {{ detail.id }}</span>
+          </div>
+        </div>
+
         <button
-          class="btn-close"
+          class="btn-modal-close"
           type="button"
-          aria-label="Close"
+          aria-label="Close client profile"
           (click)="detail = null"
-        ></button>
+        >
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
       </div>
-      <div class="card-body">
-        <h3 class="h5">{{ detail.companyName }}</h3>
-        <dl class="row mb-4">
-          <dt class="col-4">Email</dt>
-          <dd class="col-8">{{ detail.email }}</dd>
-          <dt class="col-4">Mobile</dt>
-          <dd class="col-8">{{ detail.mobile }}</dd>
-          <dt class="col-4">Plan</dt>
-          <dd class="col-8">{{ detail.plan }}</dd>
-          <dt class="col-4">Status</dt>
-          <dd class="col-8"><app-status-badge [status]="detail.status" /></dd>
-          <dt class="col-4">Created</dt>
-          <dd class="col-8">{{ detail.createdAt | date: "medium" }}</dd>
-        </dl>
-        <h3 class="h6">COMPANY_ADMIN</h3>
-        @if (admin(detail)) {
-          <dl class="row mb-0">
-            <dt class="col-4">Name</dt>
-            <dd class="col-8">
-              {{ admin(detail)?.firstName }} {{ admin(detail)?.lastName }}
-            </dd>
-            <dt class="col-4">Email</dt>
-            <dd class="col-8">{{ admin(detail)?.email }}</dd>
-            <dt class="col-4">Mobile</dt>
-            <dd class="col-8">{{ admin(detail)?.mobile }}</dd>
-            <dt class="col-4">Status</dt>
-            <dd class="col-8">
-              <app-status-badge [status]="admin(detail)?.status || ''" />
-            </dd>
-          </dl>
-        } @else {
-          <p class="text-body-secondary mb-0">
-            No company administrator found.
-          </p>
+
+      <!-- 2. SCROLLABLE PROFILE BODY -->
+      <div class="client-detail-body">
+        <!-- 2.1: CLIENT IDENTITY HERO -->
+        <section class="profile-hero-section">
+          <div class="hero-left-block">
+            <div class="client-hero-avatar" aria-hidden="true">
+              {{ getCompanyInitials(detail.companyName) }}
+            </div>
+            <div class="client-hero-info">
+              <div class="hero-title-row">
+                <h2 id="client-profile-header-title" class="client-hero-title">
+                  {{ detail.companyName }}
+                </h2>
+                <span class="plan-pill-badge" [ngClass]="getPlanBadgeClass(detail.plan)">
+                  {{ detail.plan }}
+                </span>
+                <app-status-badge [status]="detail.status" />
+              </div>
+              <p class="client-hero-meta">
+                <span class="meta-item"><i class="bi bi-envelope me-1" aria-hidden="true"></i>{{ detail.email }}</span>
+                <span class="meta-separator" aria-hidden="true">·</span>
+                <span class="meta-item"><i class="bi bi-phone me-1" aria-hidden="true"></i>{{ detail.mobile }}</span>
+                <span class="meta-separator" aria-hidden="true">·</span>
+                <span class="meta-item"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>Client since {{ detail.createdAt | date: "mediumDate" }}</span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2.2: 4-TILE COMPACT SUMMARY -->
+        <section class="profile-summary-grid" aria-label="Client Quick Summary">
+          <div class="summary-tile">
+            <div class="tile-icon-wrap icon-blue">
+              <i class="bi bi-box-seam" aria-hidden="true"></i>
+            </div>
+            <div class="tile-text-wrap">
+              <span class="tile-label">CURRENT PLAN</span>
+              <span class="tile-value">{{ detail.plan }}</span>
+            </div>
+          </div>
+
+          <div class="summary-tile">
+            <div class="tile-icon-wrap" [ngClass]="detail.status === 'ACTIVE' ? 'icon-green' : 'icon-amber'">
+              <i class="bi bi-check-circle" aria-hidden="true"></i>
+            </div>
+            <div class="tile-text-wrap">
+              <span class="tile-label">ACCOUNT STATUS</span>
+              <span class="tile-value text-capitalize">{{ detail.status.toLowerCase() }}</span>
+            </div>
+          </div>
+
+          <div class="summary-tile">
+            <div class="tile-icon-wrap icon-purple">
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+            </div>
+            <div class="tile-text-wrap">
+              <span class="tile-label">CREATED</span>
+              <span class="tile-value">{{ detail.createdAt | date: "mediumDate" }}</span>
+            </div>
+          </div>
+
+          <div class="summary-tile">
+            <div class="tile-icon-wrap icon-indigo">
+              <i class="bi bi-person" aria-hidden="true"></i>
+            </div>
+            <div class="tile-text-wrap">
+              <span class="tile-label">ADMINISTRATOR</span>
+              <span class="tile-value text-truncate" [title]="admin(detail) ? (admin(detail)?.firstName + ' ' + (admin(detail)?.lastName || '')) : '—'">
+                @if (admin(detail); as primaryAdmin) {
+                  {{ primaryAdmin.firstName }} {{ primaryAdmin.lastName || "" }}
+                } @else {
+                  —
+                }
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2.3: TWO-COLUMN INFORMATION GRID -->
+        <div class="profile-two-col-grid">
+          <!-- LEFT: COMPANY INFORMATION -->
+          <section class="profile-panel" aria-label="Company Information">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <i class="bi bi-building panel-icon" aria-hidden="true"></i>
+                <h3 class="panel-title">Company Information</h3>
+              </div>
+            </div>
+
+            <div class="panel-body info-list">
+              <div class="info-row">
+                <span class="info-label">Company Name</span>
+                <span class="info-value font-semibold">{{ detail.companyName }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Official Email</span>
+                <span class="info-value">{{ detail.email }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Mobile Number</span>
+                <span class="info-value">{{ detail.mobile }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Subscription Plan</span>
+                <span class="info-value">
+                  <span class="plan-pill-badge" [ngClass]="getPlanBadgeClass(detail.plan)">
+                    {{ detail.plan }}
+                  </span>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Account Status</span>
+                <span class="info-value">
+                  <app-status-badge [status]="detail.status" />
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Registered On</span>
+                <span class="info-value">{{ detail.createdAt | date: "medium" }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Last Updated</span>
+                <span class="info-value">{{ detail.updatedAt | date: "medium" }}</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- RIGHT: PRIMARY ADMINISTRATOR -->
+          <section class="profile-panel" aria-label="Primary Administrator">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <i class="bi bi-person-badge panel-icon" aria-hidden="true"></i>
+                <h3 class="panel-title">Primary Administrator</h3>
+              </div>
+            </div>
+
+            <div class="panel-body">
+              @if (admin(detail); as primaryAdmin) {
+                <div class="admin-profile-card">
+                  <div class="admin-avatar-lg">
+                    {{ getAdminInitials(primaryAdmin) }}
+                  </div>
+                  <div class="admin-profile-details">
+                    <h4 class="admin-name-lg">
+                      {{ primaryAdmin.firstName }} {{ primaryAdmin.lastName || "" }}
+                    </h4>
+                    <span class="admin-badge-pill">Primary Administrator</span>
+
+                    <div class="admin-contact-list">
+                      <div class="contact-item">
+                        <i class="bi bi-envelope" aria-hidden="true"></i>
+                        <span>{{ primaryAdmin.email }}</span>
+                      </div>
+                      <div class="contact-item">
+                        <i class="bi bi-phone" aria-hidden="true"></i>
+                        <span>{{ primaryAdmin.mobile }}</span>
+                      </div>
+                      <div class="contact-item">
+                        <i class="bi bi-shield-check" aria-hidden="true"></i>
+                        <span>Status: <strong class="text-capitalize">{{ primaryAdmin.status.toLowerCase() }}</strong></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="no-admin-box">
+                  <i class="bi bi-person-x no-admin-icon" aria-hidden="true"></i>
+                  <p class="no-admin-text">No primary administrator assigned.</p>
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+
+        <!-- 2.4: TEAM MEMBERS TABLE (WHEN AVAILABLE) -->
+        @if (detail.users.length) {
+          <section class="profile-panel full-width" aria-label="Team Members">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <i class="bi bi-people panel-icon" aria-hidden="true"></i>
+                <h3 class="panel-title">Team Members ({{ detail.users.length }})</h3>
+              </div>
+            </div>
+
+            <div class="panel-body p-0">
+              <div class="table-responsive">
+                <table class="saas-table detail-users-table" aria-label="Team members list">
+                  <thead>
+                    <tr>
+                      <th scope="col">User</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Mobile</th>
+                      <th scope="col">Role</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (user of detail.users; track user.id) {
+                      <tr>
+                        <td>
+                          <div class="table-user-cell">
+                            <div class="user-cell-avatar">
+                              {{ getAdminInitials(user) }}
+                            </div>
+                            <span class="user-cell-name">
+                              {{ user.firstName }} {{ user.lastName || "" }}
+                            </span>
+                          </div>
+                        </td>
+                        <td><span class="text-muted">{{ user.email }}</span></td>
+                        <td><span class="text-muted">{{ user.mobile }}</span></td>
+                        <td>
+                          <span class="role-pill-badge">{{ user.role }}</span>
+                        </td>
+                        <td>
+                          <app-status-badge [status]="user.status" />
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
         }
+      </div>
+
+      <!-- 3. STICKY MODAL FOOTER WITH ACTIONS -->
+      <div class="client-detail-footer">
+        <button
+          class="btn-footer-close"
+          type="button"
+          (click)="detail = null"
+        >
+          Close
+        </button>
+
+        <div class="footer-actions-group">
+          <button
+            class="btn-hero-action btn-edit-client"
+            type="button"
+            (click)="openEdit(detail)"
+          >
+            <i class="bi bi-pencil me-1" aria-hidden="true"></i>
+            <span>Edit Client</span>
+          </button>
+
+          <button
+            class="btn-hero-action btn-toggle-client"
+            [class.btn-toggle-deactivate]="detail.status === 'ACTIVE'"
+            [class.btn-toggle-activate]="detail.status === 'INACTIVE'"
+            type="button"
+            (click)="toggleStatus(detail)"
+            [disabled]="actionLoading"
+          >
+            <i
+              class="bi me-1"
+              [class.bi-power]="detail.status === 'ACTIVE'"
+              [class.bi-arrow-clockwise]="detail.status === 'INACTIVE'"
+              aria-hidden="true"
+            ></i>
+            <span>{{ detail.status === 'ACTIVE' ? 'Deactivate Client' : 'Activate Client' }}</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

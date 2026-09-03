@@ -20,8 +20,8 @@ import { AccountSettingsService } from './account-settings.service';
 })
 export class AccountSettingsComponent {
   private readonly api = inject(AccountSettingsService);
-  private readonly auth = inject(AuthService);
-  private readonly googleAuth = inject(GoogleAuthService);
+  readonly auth = inject(AuthService);
+  readonly googleAuth = inject(GoogleAuthService);
   private readonly errors = inject(HttpErrorService);
 
   user: AccountSettingsUser | null = this.auth.getCurrentUser();
@@ -41,6 +41,32 @@ export class AccountSettingsComponent {
 
   constructor() {
     if (this.user?.role === 'COMPANY_ADMIN') this.refresh();
+  }
+
+  getUserInitials(user: AccountSettingsUser | null): string {
+    if (!user || !user.firstName) return 'AD';
+    const first = user.firstName.charAt(0);
+    const last = user.lastName ? user.lastName.charAt(0) : '';
+    return (first + last).toUpperCase() || 'AD';
+  }
+
+  getRoleLabel(role: string): string {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'Owner / Super Admin';
+      case 'COMPANY_ADMIN':
+        return 'Company Administrator';
+      case 'MANAGER':
+        return 'Manager';
+      case 'EMPLOYEE':
+        return 'Team Member';
+      default:
+        return role ? role.replaceAll('_', ' ') : 'User';
+    }
+  }
+
+  logout(): void {
+    this.auth.logout();
   }
 
   refresh(): void {
@@ -129,4 +155,3 @@ export class AccountSettingsComponent {
     document.getElementById(`${tabs[next]}-tab`)?.focus();
   }
 }
-

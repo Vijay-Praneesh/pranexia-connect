@@ -62,7 +62,12 @@ describe('AppLayoutComponent', () => {
 
     currentUser$.next({ ...user, role: 'SUPER_ADMIN' });
     fixture.detectChanges();
-    expect(getHrefs()).toEqual(['/owner-dashboard', '/companies']);
+    expect(getHrefs()).toEqual([
+      '/owner-dashboard',
+      '/companies',
+      '/notifications',
+      '/settings',
+    ]);
   });
 
   it('labels the responsive navigation and keeps logout available', () => {
@@ -72,5 +77,16 @@ describe('AppLayoutComponent', () => {
       ),
     ).not.toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Logout');
+  });
+
+  it('toggles and closes mobile navigation drawer', () => {
+    const component = fixture.componentInstance;
+    expect(component.mobileNavOpen).toBeFalse();
+
+    component.toggleMobileNav();
+    expect(component.mobileNavOpen).toBeTrue();
+
+    component.closeMobileNav();
+    expect(component.mobileNavOpen).toBeFalse();
   });
 });

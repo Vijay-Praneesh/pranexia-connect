@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { Component, inject, OnDestroy } from '@angular/core';
 import {
   FormBuilder,
@@ -36,6 +36,7 @@ import { CompanyService } from './company.service';
   standalone: true,
   imports: [
     DatePipe,
+    NgClass,
     FormsModule,
     ReactiveFormsModule,
     EmptyStateComponent,
@@ -162,6 +163,43 @@ export class CompaniesComponent implements OnDestroy {
       page: 1,
     });
   }
+
+  hasActiveFilters(): boolean {
+    return !!(this.search || this.status || this.plan);
+  }
+
+  clearFilters(): void {
+    this.searchForm.controls.search.setValue('');
+    this.search = '';
+    this.status = '';
+    this.plan = '';
+    void this.updateQuery({ search: null, status: null, plan: null, page: 1 });
+  }
+
+  clearSearch(): void {
+    this.searchForm.controls.search.setValue('');
+    this.search = '';
+    void this.updateQuery({ search: null, page: 1 });
+  }
+
+  clearStatusFilter(): void {
+    this.status = '';
+    this.applyFilters();
+  }
+
+  clearPlanFilter(): void {
+    this.plan = '';
+    this.applyFilters();
+  }
+
+  getActiveCount(): number {
+    return this.companies.filter((c) => c.status === 'ACTIVE').length;
+  }
+
+  getInactiveCount(): number {
+    return this.companies.filter((c) => c.status === 'INACTIVE').length;
+  }
+
   changePage(page: number): void {
     void this.updateQuery({ page });
   }
@@ -185,10 +223,16 @@ export class CompaniesComponent implements OnDestroy {
   openEdit(company: CompanyRecord): void {
     this.editing = company;
     this.editForm.reset({
-      companyName: company.companyName,
-      email: company.email,
-      mobile: company.mobile,
-      plan: company.plan,
+      companyName: company.companyName ?? '',
+      email: company.email ?? '',
+      mobile: company.mobile ?? '',
+      plan: company.plan ?? 'STARTER',
+    });
+    this.editForm.patchValue({
+      companyName: company.companyName ?? '',
+      email: company.email ?? '',
+      mobile: company.mobile ?? '',
+      plan: company.plan ?? 'STARTER',
     });
     this.editOpen = true;
     this.errorMessage = '';
@@ -243,6 +287,15 @@ export class CompaniesComponent implements OnDestroy {
       'Client company updated successfully.',
       () => {
         this.editOpen = false;
+        if (this.detail && this.detail.id === this.editing?.id) {
+          this.detail = {
+            ...this.detail,
+            companyName: payload.companyName,
+            email: payload.email,
+            mobile: payload.mobile,
+            plan: payload.plan,
+          };
+        }
       },
     );
   }
@@ -273,12 +326,60 @@ export class CompaniesComponent implements OnDestroy {
     this.runAction(
       this.companiesApi.updateCompanyStatus(company.id, status),
       `Company ${status === 'ACTIVE' ? 'activated' : 'deactivated'} successfully.`,
-      () => undefined,
+      () => {
+        if (this.detail && this.detail.id === company.id) {
+          this.detail = { ...this.detail, status };
+        }
+      },
     );
   }
 
   admin(company: CompanyRecord): CompanyRecord['users'][number] | null {
     return company.users.find((user) => user.role === 'COMPANY_ADMIN') ?? null;
+  }
+
+  getCompanyInitials(name: string): string {
+    if (!name) return 'CO';
+    const words = name.trim().split(/\s+/);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  }
+
+  getAdminInitials(user: CompanyRecord['users'][number] | null | undefined): string {
+    if (!user) return 'AD';
+    const first = user.firstName ? user.firstName.trim().charAt(0) : '';
+    const last = user.lastName ? user.lastName.trim().charAt(0) : '';
+    return (first + last).toUpperCase() || 'AD';
+  }
+
+  getPlanBadgeClass(plan: CompanyPlan): string {
+    switch (plan) {
+      case 'STARTER': return 'plan-badge-starter';
+      case 'BUSINESS': return 'plan-badge-business';
+      case 'PROFESSIONAL': return 'plan-badge-professional';
+      case 'ENTERPRISE': return 'plan-badge-enterprise';
+      default: return 'plan-badge-default';
+    }
+  }
+
+  getPlanLabel(plan: CompanyPlan | string): string {
+    switch (plan) {
+      case 'STARTER': return 'Starter';
+      case 'BUSINESS': return 'Business';
+      case 'PROFESSIONAL': return 'Professional';
+      case 'ENTERPRISE': return 'Enterprise';
+      default: return plan;
+    }
+  }
+
+  getStatusLabel(status: AccountStatus | string): string {
+    switch (status) {
+      case 'ACTIVE': return 'Active';
+      case 'INACTIVE': return 'Inactive';
+      default: return status;
+    }
   }
 
   private runAction(
