@@ -1051,13 +1051,15 @@ $shadow-hover: 0 6px 20px rgba(15, 27, 61, 0.08);
   vertical-align: middle;
 
   thead {
-    background-color: #f8fafc;
+    background: linear-gradient(90deg,
+        #2563eb 0%,
+        #3730a3 100%);
     border-bottom: 1px solid $border;
 
     th {
       font-size: 0.75rem;
       font-weight: 700;
-      color: $text-muted;
+      color: #fff;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       padding: 0.875rem 1.5rem;

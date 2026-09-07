@@ -1,0 +1,58 @@
+@if (modalService.state$ | async; as state) {
+  @if (state.isOpen && state.config) {
+    <div
+      class="modal-backdrop-layer"
+      (click)="onBackdropClick($event)"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'modal-title'"
+      [attr.aria-describedby]="'modal-desc'"
+    >
+      <div
+        class="confirmation-dialog-card variant-{{ state.config.variant || 'primary' }}"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Modal Icon Badge -->
+        <div class="modal-icon-badge" aria-hidden="true">
+          <i class="bi" [class]="getIcon(state.config.variant, state.config.icon)"></i>
+        </div>
+
+        <!-- Header -->
+        <div class="modal-header-content">
+          <h3 id="modal-title" class="modal-title">{{ state.config.title }}</h3>
+          <p id="modal-desc" class="modal-message">{{ state.config.message }}</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="modal-actions-wrapper">
+          <button
+            type="button"
+            class="btn-cancel"
+            [disabled]="state.loading"
+            (click)="modalService.onCancel()"
+          >
+            {{ state.config.cancelText || 'Cancel' }}
+          </button>
+
+          <button
+            #confirmBtn
+            type="button"
+            class="btn-confirm"
+            [class.btn-danger-confirm]="state.config.variant === 'danger'"
+            [class.btn-warning-confirm]="state.config.variant === 'warning'"
+            [class.btn-primary-confirm]="state.config.variant === 'primary' || state.config.variant === 'info'"
+            [disabled]="state.loading"
+            (click)="modalService.onConfirm()"
+          >
+            @if (state.loading) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <span>Processing...</span>
+            } @else {
+              <span>{{ state.config.confirmText || 'Confirm' }}</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+}

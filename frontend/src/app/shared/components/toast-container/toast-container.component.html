@@ -1,0 +1,44 @@
+<aside
+  class="toast-container-wrapper"
+  aria-live="polite"
+  aria-atomic="false"
+  aria-label="Notifications"
+>
+  @for (toast of (toastService.toasts$ | async); track toast.id) {
+    <div
+      class="toast-card toast-{{ toast.type }}"
+      role="alert"
+      [attr.aria-label]="getTypeLabel(toast) + ': ' + toast.message"
+    >
+      <div class="toast-icon-wrapper" aria-hidden="true">
+        <i class="bi" [class]="getIconClass(toast.type)"></i>
+      </div>
+
+      <div class="toast-content">
+        @if (toast.title) {
+          <h4 class="toast-title">{{ toast.title }}</h4>
+        }
+        <p class="toast-message">{{ toast.message }}</p>
+      </div>
+
+      @if (toast.dismissible) {
+        <button
+          type="button"
+          class="toast-close-btn"
+          (click)="dismiss(toast.id)"
+          aria-label="Close notification"
+        >
+          <i class="bi bi-x" aria-hidden="true"></i>
+        </button>
+      }
+
+      @if (toast.duration && toast.duration > 0) {
+        <div
+          class="toast-progress-bar"
+          [style.animationDuration]="toast.duration + 'ms'"
+          aria-hidden="true"
+        ></div>
+      }
+    </div>
+  }
+</aside>

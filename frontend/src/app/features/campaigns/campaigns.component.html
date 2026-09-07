@@ -1,102 +1,212 @@
-<section aria-labelledby="campaigns-title">
-  <div
-    class="d-flex flex-column flex-lg-row align-items-lg-start justify-content-between gap-3 mb-4"
-  >
-    <div>
-      <h1 id="campaigns-title" class="h3 mb-1">Campaigns</h1>
-      <p class="text-body-secondary mb-0">
-        {{ totalRecords }} campaign{{ totalRecords === 1 ? "" : "s" }}
+<section class="campaigns-module" aria-labelledby="campaigns-title">
+  <!-- Page Header -->
+  <header class="page-header d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+    <div class="header-content">
+      <div class="header-badge-row mb-1">
+        <span class="badge-eyebrow">
+          <i class="bi bi-broadcast me-1" aria-hidden="true"></i>
+          {{ userCompanyName }} · Campaign Studio
+        </span>
+        @if (whatsappStatus === 'CONNECTED') {
+          <span class="badge-status-pill success ms-2" title="WhatsApp Business API is active">
+            <span class="status-dot"></span>
+            WhatsApp Connected
+          </span>
+        } @else if (whatsappStatus) {
+          <a routerLink="/settings/whatsapp" class="badge-status-pill warning text-decoration-none ms-2" title="Click to configure WhatsApp Business API">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            WhatsApp Setup Required
+          </a>
+        }
+      </div>
+      <h1 id="campaigns-title" class="page-title mb-1">Campaigns</h1>
+      <p class="page-subtitle mb-0">
+        Create, manage, and monitor your WhatsApp messaging broadcasts with real-time delivery telemetry.
       </p>
     </div>
-    <button
-      class="btn btn-primary btn-sm align-self-start"
-      type="button"
-      (click)="openCreate()"
-    >
-      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Create campaign
-    </button>
-  </div>
+
+    <div class="header-actions d-flex align-items-center gap-2">
+      <button
+        class="btn btn-refresh"
+        type="button"
+        (click)="load(); loadSummary()"
+        [disabled]="loading"
+        title="Refresh campaigns and metrics"
+        aria-label="Refresh campaigns"
+      >
+        <i class="bi bi-arrow-clockwise" [class.spin]="loading" aria-hidden="true"></i>
+      </button>
+
+      <button
+        class="btn btn-primary btn-create"
+        type="button"
+        (click)="openCreate()"
+        id="btn-create-campaign"
+      >
+        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+        <span>Create Campaign</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Notification Banners -->
   @if (successMessage) {
-    <div class="alert alert-success" role="status">{{ successMessage }}</div>
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" role="status">
+      <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+      <div>{{ successMessage }}</div>
+    </div>
   }
   @if (errorMessage && campaigns.length) {
-    <div class="alert alert-warning" role="alert">{{ errorMessage }}</div>
+    <div class="alert alert-warning d-flex align-items-center justify-content-between gap-2 mb-4" role="alert">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-circle-fill flex-shrink-0" aria-hidden="true"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+      <button class="btn btn-sm btn-outline-dark" type="button" (click)="load()">Retry</button>
+    </div>
   }
-  <div class="card border-0 shadow-sm mb-3">
-    <div class="card-body">
-      <form
-        [formGroup]="filtersForm"
-        class="row g-2 align-items-end"
-        role="search"
-      >
-        <div class="col-12 col-lg">
-          <label class="form-label" for="campaign-search"
-            >Search campaigns</label
-          >
-          <div class="input-group">
-            <span class="input-group-text"
-              ><i class="bi bi-search" aria-hidden="true"></i></span
-            ><input
-              id="campaign-search"
-              class="form-control"
-              type="search"
-              formControlName="keyword"
-              placeholder="Campaign name or description"
-            />
-          </div>
+
+  <!-- Summary KPI Cards -->
+  <section class="summary-grid mb-4" aria-label="Campaign overview statistics">
+    <div class="summary-card card-total">
+      <div class="card-body">
+        <div class="icon-wrapper">
+          <i class="bi bi-broadcast" aria-hidden="true"></i>
         </div>
-        <div class="col-6 col-md-3 col-lg-2">
-          <label class="form-label" for="campaign-status">Status</label
-          ><select
-            id="campaign-status"
-            class="form-select"
-            formControlName="status"
+        <div class="metric-data">
+          <span class="metric-label">Total Campaigns</span>
+          <h2 class="metric-value">{{ summary?.campaigns?.total ?? totalRecords }}</h2>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="subtext">All time broadcasts</span>
+      </div>
+    </div>
+
+    <div class="summary-card card-scheduled">
+      <div class="card-body">
+        <div class="icon-wrapper">
+          <i class="bi bi-clock-history" aria-hidden="true"></i>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Scheduled / Active</span>
+          <h2 class="metric-value">
+            {{ (summary?.campaigns?.scheduled ?? 0) + (summary?.campaigns?.running ?? 0) }}
+          </h2>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="subtext">
+          {{ summary?.campaigns?.scheduled ?? 0 }} scheduled · {{ summary?.campaigns?.running ?? 0 }} running
+        </span>
+      </div>
+    </div>
+
+    <div class="summary-card card-completed">
+      <div class="card-body">
+        <div class="icon-wrapper">
+          <i class="bi bi-check2-all" aria-hidden="true"></i>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Completed</span>
+          <h2 class="metric-value">{{ summary?.campaigns?.completed ?? 0 }}</h2>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="subtext">Delivered broadcasts</span>
+      </div>
+    </div>
+
+    <div class="summary-card card-issues">
+      <div class="card-body">
+        <div class="icon-wrapper">
+          <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Draft / Issues</span>
+          <h2 class="metric-value">
+            {{ (summary?.campaigns?.draft ?? 0) + (summary?.campaigns?.failed ?? 0) }}
+          </h2>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="subtext">
+          {{ summary?.campaigns?.draft ?? 0 }} drafts · {{ summary?.campaigns?.failed ?? 0 }} failed
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search & Filter Toolbar -->
+  <section class="toolbar-card mb-4" aria-label="Campaign filters">
+    <form [formGroup]="filtersForm" class="toolbar-form" role="search">
+      <div class="search-input-wrapper">
+        <i class="bi bi-search search-icon" aria-hidden="true"></i>
+        <input
+          id="campaign-search"
+          class="form-control toolbar-search-input"
+          type="search"
+          formControlName="keyword"
+          placeholder="Search campaigns by name or description…"
+          aria-label="Search campaigns"
+        />
+        @if (filtersForm.controls.keyword.value) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="filtersForm.controls.keyword.setValue('')"
+            aria-label="Clear search text"
           >
-            <option value="">All statuses</option>
+            <i class="bi bi-x"></i>
+          </button>
+        }
+      </div>
+
+      <div class="filters-row">
+        <div class="filter-group">
+          <label class="visually-hidden" for="campaign-status">Status</label>
+          <select id="campaign-status" class="form-select toolbar-select" formControlName="status">
+            <option value="">All Statuses</option>
             @for (item of statuses; track item) {
               <option [value]="item">{{ item }}</option>
             }
           </select>
         </div>
-        <div class="col-6 col-md-3 col-lg-2">
-          <label class="form-label" for="campaign-send-type">Send type</label
-          ><select
-            id="campaign-send-type"
-            class="form-select"
-            formControlName="sendType"
-          >
-            <option value="">All types</option>
-            <option value="NOW">Now</option>
+
+        <div class="filter-group">
+          <label class="visually-hidden" for="campaign-send-type">Send type</label>
+          <select id="campaign-send-type" class="form-select toolbar-select" formControlName="sendType">
+            <option value="">All Send Types</option>
+            <option value="NOW">Now / Draft</option>
             <option value="SCHEDULED">Scheduled</option>
           </select>
         </div>
-        <div class="col-8 col-md-4 col-lg-3">
-          <label class="form-label" for="campaign-template">Template</label
-          ><select
-            id="campaign-template"
-            class="form-select"
-            formControlName="templateId"
-          >
-            <option value="">All templates</option>
+
+        <div class="filter-group template-filter-group">
+          <label class="visually-hidden" for="campaign-template">Template</label>
+          <select id="campaign-template" class="form-select toolbar-select" formControlName="templateId">
+            <option value="">All Approved Templates</option>
             @for (template of approvedTemplates; track template.id) {
-              <option [value]="template.id">{{ template.name }}</option>
+              <option [value]="template.id">{{ template.name }} ({{ template.language }})</option>
             }
           </select>
         </div>
-        <div class="col-4 col-md-2">
-          @if (hasFilters()) {
-            <button
-              class="btn btn-link px-0"
-              type="button"
-              (click)="clearFilters()"
-            >
-              Clear
-            </button>
-          }
-        </div>
-      </form>
-    </div>
-  </div>
+
+        @if (hasFilters()) {
+          <button
+            class="btn btn-outline-secondary btn-clear-filters"
+            type="button"
+            (click)="clearFilters()"
+          >
+            <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+            Clear Filters
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+
+  <!-- Campaigns List / Content State -->
   @if (loading && !campaigns.length) {
     <app-loading-state message="Loading campaigns…" />
   } @else if (errorMessage && !campaigns.length) {
@@ -108,15 +218,11 @@
     />
   } @else if (!campaigns.length) {
     <app-empty-state
-      [title]="
-        hasFilters()
-          ? 'No campaigns match these criteria'
-          : 'No campaigns found'
-      "
+      [title]="hasFilters() ? 'No campaigns match your filters' : 'No campaigns yet'"
       [message]="
         hasFilters()
-          ? 'Clear or change the search and filters.'
-          : 'Create a campaign using an approved template.'
+          ? 'Try adjusting your search keyword or clearing selected filters.'
+          : 'Create your first messaging broadcast to engage your customers on WhatsApp.'
       "
     >
       @if (!hasFilters()) {
@@ -125,659 +231,963 @@
           type="button"
           (click)="openCreate()"
         >
-          Create campaign
+          <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+          Create Campaign
         </button>
       }
     </app-empty-state>
   } @else {
-    <div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-card card border-0 shadow-sm">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table studio-table align-middle mb-0">
           <thead>
             <tr>
-              <th>
+              <th scope="col" class="th-campaign">
                 <button
                   class="sort-button"
                   type="button"
                   (click)="sort('name')"
+                  [class.sorted]="sortBy === 'name'"
                 >
-                  Campaign
+                  <span>Campaign</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-up]="sortBy === 'name' && order === 'ASC'"
+                    [class.bi-arrow-down]="sortBy === 'name' && order === 'DESC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'name'"
+                    aria-hidden="true"
+                  ></i>
                 </button>
               </th>
-              <th>Template</th>
-              <th>
+              <th scope="col" class="th-template">Template</th>
+              <th scope="col" class="th-status">
                 <button
                   class="sort-button"
                   type="button"
                   (click)="sort('status')"
+                  [class.sorted]="sortBy === 'status'"
                 >
-                  Status
+                  <span>Status</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-up]="sortBy === 'status' && order === 'ASC'"
+                    [class.bi-arrow-down]="sortBy === 'status' && order === 'DESC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'status'"
+                    aria-hidden="true"
+                  ></i>
                 </button>
               </th>
-              <th>Recipients</th>
-              <th>Progress</th>
-              <th>
+              <th scope="col" class="th-audience">Audience</th>
+              <th scope="col" class="th-progress">Delivery</th>
+              <th scope="col" class="th-schedule">
                 <button
                   class="sort-button"
                   type="button"
                   (click)="sort('scheduled_at')"
+                  [class.sorted]="sortBy === 'scheduled_at'"
                 >
-                  Schedule
+                  <span>Schedule</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-up]="sortBy === 'scheduled_at' && order === 'ASC'"
+                    [class.bi-arrow-down]="sortBy === 'scheduled_at' && order === 'DESC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'scheduled_at'"
+                    aria-hidden="true"
+                  ></i>
                 </button>
               </th>
-              <th>
+              <th scope="col" class="th-created">
                 <button
                   class="sort-button"
                   type="button"
                   (click)="sort('created_at')"
+                  [class.sorted]="sortBy === 'created_at'"
                 >
-                  Created
+                  <span>Created</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-up]="sortBy === 'created_at' && order === 'ASC'"
+                    [class.bi-arrow-down]="sortBy === 'created_at' && order === 'DESC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'created_at'"
+                    aria-hidden="true"
+                  ></i>
                 </button>
               </th>
-              <th class="text-end">Actions</th>
+              <th scope="col" class="th-actions text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
             @for (campaign of campaigns; track campaign.id) {
-              <tr>
+              <tr class="campaign-row">
                 <td>
-                  <button
-                    class="btn btn-link p-0 text-start text-decoration-none"
-                    type="button"
-                    (click)="showDetail(campaign.id)"
-                  >
-                    <strong>{{ campaign.name }}</strong>
-                  </button>
-                  @if (campaign.description) {
-                    <small class="description d-block text-body-secondary">{{
-                      campaign.description
-                    }}</small>
-                  }
-                </td>
-                <td>{{ campaign.template?.name || "—" }}</td>
-                <td><app-status-badge [status]="campaign.status" /></td>
-                <td>{{ campaign.totalRecipients }}</td>
-                <td>
-                  <span class="visually-hidden"
-                    >{{ campaign.progress }} percent</span
-                  >
-                  <div class="progress" aria-hidden="true">
-                    <div
-                      class="progress-bar"
-                      [style.width.%]="campaign.progress"
-                    ></div>
+                  <div class="campaign-cell">
+                    <div class="campaign-icon-badge" [class]="'status-' + (campaign.status.toLowerCase())">
+                      <i class="bi bi-megaphone-fill" aria-hidden="true"></i>
+                    </div>
+                    <div class="campaign-info">
+                      <button
+                        class="btn-campaign-name"
+                        type="button"
+                        (click)="showDetail(campaign.id)"
+                      >
+                        {{ campaign.name }}
+                      </button>
+                      @if (campaign.description) {
+                        <p class="campaign-desc mb-0" [title]="campaign.description">
+                          {{ campaign.description }}
+                        </p>
+                      }
+                    </div>
                   </div>
-                  <small>{{ campaign.progress }}%</small>
                 </td>
+
                 <td>
-                  {{
-                    campaign.scheduledAt
-                      ? (campaign.scheduledAt | date: "medium")
-                      : "Immediate"
-                  }}
+                  @if (campaign.template) {
+                    <span class="template-pill" [title]="campaign.template.name">
+                      <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>
+                      {{ campaign.template.name }}
+                    </span>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
                 </td>
-                <td>{{ campaign.createdAt | date: "mediumDate" }}</td>
+
+                <td>
+                  <app-status-badge [status]="campaign.status" />
+                </td>
+
+                <td>
+                  <div class="recipient-badge">
+                    <i class="bi bi-people-fill me-1" aria-hidden="true"></i>
+                    <strong>{{ campaign.totalRecipients }}</strong>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="delivery-cell">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="rate-label">
+                        {{ campaign.deliveredCount || 0 }}/{{ campaign.totalRecipients }} delivered
+                      </span>
+                      <span class="rate-value">{{ campaign.progress }}%</span>
+                    </div>
+                    <div class="progress progress-compact" aria-hidden="true">
+                      <div
+                        class="progress-bar"
+                        [class.bg-success]="campaign.status === 'COMPLETED'"
+                        [class.bg-danger]="campaign.status === 'FAILED'"
+                        [class.bg-warning]="campaign.status === 'RUNNING'"
+                        [style.width.%]="campaign.progress"
+                      ></div>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  @if (campaign.scheduledAt) {
+                    <div class="schedule-badge scheduled">
+                      <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>
+                      <span>{{ campaign.scheduledAt | date: "mediumDate" }}</span>
+                      <small class="time d-block">{{ campaign.scheduledAt | date: "shortTime" }}</small>
+                    </div>
+                  } @else {
+                    <div class="schedule-badge immediate">
+                      <i class="bi bi-lightning-fill me-1" aria-hidden="true"></i>
+                      <span>Immediate</span>
+                    </div>
+                  }
+                </td>
+
+                <td>
+                  <span class="date-text">{{ campaign.createdAt | date: "mediumDate" }}</span>
+                </td>
+
                 <td class="text-end text-nowrap">
-                  <button
-                    class="btn btn-sm btn-link"
-                    type="button"
-                    (click)="showDetail(campaign.id)"
-                    [attr.aria-label]="'View ' + campaign.name"
-                  >
-                    <i class="bi bi-eye"></i>
-                  </button>
-                  @if (canEdit(campaign)) {
+                  <div class="action-buttons-group">
                     <button
-                      class="btn btn-sm btn-link"
+                      class="btn-action btn-view"
                       type="button"
-                      (click)="openEdit(campaign)"
-                      [attr.aria-label]="'Edit ' + campaign.name"
+                      (click)="showDetail(campaign.id)"
+                      [attr.aria-label]="'View details of ' + campaign.name"
+                      title="View Details"
                     >
-                      <i class="bi bi-pencil"></i>
+                      <i class="bi bi-eye"></i>
                     </button>
-                  }
-                  @if (canSend(campaign)) {
+
+                    @if (canEdit(campaign)) {
+                      <button
+                        class="btn-action btn-edit"
+                        type="button"
+                        (click)="openEdit(campaign)"
+                        [attr.aria-label]="'Edit ' + campaign.name"
+                        title="Edit Campaign"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                    }
+
+                    @if (canSend(campaign)) {
+                      <button
+                        class="btn-action btn-send"
+                        type="button"
+                        (click)="send(campaign)"
+                        [disabled]="actionLoading"
+                        [attr.aria-label]="'Send ' + campaign.name"
+                        title="Send Campaign Now"
+                      >
+                        <i class="bi bi-send-fill"></i>
+                      </button>
+                    }
+
+                    @if (canCancel(campaign)) {
+                      <button
+                        class="btn-action btn-cancel"
+                        type="button"
+                        (click)="cancel(campaign)"
+                        [disabled]="actionLoading"
+                        [attr.aria-label]="'Cancel schedule for ' + campaign.name"
+                        title="Cancel Scheduled Send"
+                      >
+                        <i class="bi bi-x-circle-fill"></i>
+                      </button>
+                    }
+
                     <button
-                      class="btn btn-sm btn-link text-success"
+                      class="btn-action btn-delete"
                       type="button"
-                      (click)="send(campaign)"
+                      (click)="remove(campaign)"
                       [disabled]="actionLoading"
-                      [attr.aria-label]="'Send ' + campaign.name"
+                      [attr.aria-label]="'Delete ' + campaign.name"
+                      title="Delete Campaign"
                     >
-                      <i class="bi bi-send"></i>
+                      <i class="bi bi-trash3-fill"></i>
                     </button>
-                  }
-                  @if (canCancel(campaign)) {
-                    <button
-                      class="btn btn-sm btn-link text-warning"
-                      type="button"
-                      (click)="cancel(campaign)"
-                      [disabled]="actionLoading"
-                      [attr.aria-label]="'Cancel ' + campaign.name"
-                    >
-                      <i class="bi bi-x-circle"></i>
-                    </button>
-                  }
-                  <button
-                    class="btn btn-sm btn-link text-danger"
-                    type="button"
-                    (click)="remove(campaign)"
-                    [disabled]="actionLoading"
-                    [attr.aria-label]="'Delete ' + campaign.name"
-                  >
-                    <i class="bi bi-trash"></i>
-                  </button>
+                  </div>
                 </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
+
       @if (!keyword) {
-        <div
-          class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-3"
-        >
-          <small class="text-body-secondary"
-            >Page {{ page }} of {{ totalPages || 1 }}</small
-          ><app-pagination
+        <footer class="table-footer card-footer d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div class="footer-info">
+            Showing {{ campaigns.length }} of {{ totalRecords }} campaign{{ totalRecords === 1 ? "" : "s" }}
+            (Page {{ page }} of {{ totalPages || 1 }})
+          </div>
+          <app-pagination
             [page]="page"
             [totalPages]="totalPages"
             (pageChange)="changePage($event)"
           />
-        </div>
+        </footer>
       }
     </div>
   }
 </section>
 
+<!-- ========================================== -->
+<!-- CREATE / EDIT CAMPAIGN MODAL               -->
+<!-- ========================================== -->
 @if (editorOpen) {
   <div
-    class="modal-layer"
+    class="modal-backdrop-layer"
     role="dialog"
     aria-modal="true"
     aria-labelledby="campaign-editor-title"
   >
-    <div class="modal-card card shadow-lg">
-      <form [formGroup]="campaignForm" (ngSubmit)="save()">
-        <div class="card-header d-flex justify-content-between">
-          <h2 id="campaign-editor-title" class="h5 mb-0">
-            {{ editing ? "Edit campaign" : "Create campaign" }}
-          </h2>
-          <button
-            class="btn-close"
-            type="button"
-            aria-label="Close"
-            (click)="editorOpen = false"
-          ></button>
-        </div>
-        <div class="card-body">
-          <div class="row g-3">
-            @if (formError) {
-              <div class="col-12">
-                <div class="alert alert-danger mb-0" role="alert">
-                  {{ formError }}
-                </div>
+    <div class="modal-dialog-container modal-editor-dialog">
+      <div class="modal-surface-card">
+        <form [formGroup]="campaignForm" (ngSubmit)="save()" class="editor-form">
+          <!-- Modal Header -->
+          <header class="modal-head d-flex justify-content-between align-items-center">
+            <div class="head-title-wrap">
+              <div class="modal-eyebrow">
+                <i class="bi bi-broadcast me-1" aria-hidden="true"></i>
+                {{ editing ? "CAMPAIGN MANAGEMENT" : "NEW BROADCAST" }}
               </div>
-            }
-            <div class="col-md-7">
-              <label class="form-label" for="campaign-name">Campaign name</label
-              ><input
-                id="campaign-name"
-                class="form-control"
-                formControlName="name"
-                [class.is-invalid]="
-                  campaignForm.controls.name.touched &&
-                  campaignForm.controls.name.invalid
-                "
-              />
-              <div class="invalid-feedback">
-                A name up to 150 characters is required.
-              </div>
+              <h2 id="campaign-editor-title" class="modal-title mb-0">
+                {{ editing ? "Edit Campaign" : "Create Campaign" }}
+              </h2>
             </div>
-            <div class="col-md-5">
-              <label class="form-label" for="campaign-form-template"
-                >Approved template</label
-              ><select
-                id="campaign-form-template"
-                class="form-select"
-                formControlName="templateId"
-                [class.is-invalid]="
-                  campaignForm.controls.templateId.touched &&
-                  campaignForm.controls.templateId.invalid
-                "
-              >
-                <option value="">Select a template</option>
-                @for (template of approvedTemplates; track template.id) {
-                  <option [value]="template.id">
-                    {{ template.name }} · {{ template.language }}
-                  </option>
+            <button
+              class="btn-modal-close"
+              type="button"
+              aria-label="Close modal"
+              (click)="editorOpen = false"
+            >
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </header>
+
+          <!-- WhatsApp Notice if not configured -->
+          @if (whatsappStatus && whatsappStatus !== 'CONNECTED') {
+            <div class="connection-warning-strip">
+              <i class="bi bi-info-circle-fill text-warning flex-shrink-0" aria-hidden="true"></i>
+              <div class="strip-text">
+                <strong>WhatsApp connection required:</strong> Connect your Meta WhatsApp Business API account in Settings before launching live broadcasts.
+              </div>
+              <a routerLink="/settings/whatsapp" class="btn btn-sm btn-outline-warning text-nowrap">
+                Configure
+              </a>
+            </div>
+          }
+
+          <!-- Modal Body with 2-Column Split -->
+          <div class="modal-body-scrollable">
+            <div class="editor-layout-grid">
+              <!-- Left Form Column -->
+              <div class="form-column">
+                @if (formError) {
+                  <div class="alert alert-danger d-flex align-items-center gap-2 mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
+                    <div>{{ formError }}</div>
+                  </div>
                 }
-              </select>
-              <div class="invalid-feedback">Select an approved template.</div>
-            </div>
-            <div class="col-12">
-              <label class="form-label" for="campaign-description"
-                >Description</label
-              ><textarea
-                id="campaign-description"
-                class="form-control"
-                rows="2"
-                formControlName="description"
-              ></textarea>
-            </div>
-            <div class="col-md-5">
-              <label class="form-label" for="campaign-form-type">Delivery</label
-              ><select
-                id="campaign-form-type"
-                class="form-select"
-                formControlName="sendType"
-              >
-                <option value="NOW">Save as draft for manual send</option>
-                <option value="SCHEDULED">Schedule</option>
-              </select>
-            </div>
-            @if (campaignForm.controls.sendType.value === "SCHEDULED") {
-              <div class="col-md-7">
-                <label class="form-label" for="campaign-schedule"
-                  >Schedule date and time</label
-                ><input
-                  id="campaign-schedule"
-                  class="form-control"
-                  type="datetime-local"
-                  formControlName="scheduledAt"
-                />
-              </div>
-            }
-            <div class="col-12">
-              <label class="form-label" for="campaign-media"
-                >Media (optional)</label
-              ><select
-                id="campaign-media"
-                class="form-select"
-                formControlName="mediaId"
-              >
-                <option value="">No media</option>
-                @for (item of media; track item.id) {
-                  <option [value]="item.id">
-                    {{ item.originalName }} · {{ item.mediaType }}
-                  </option>
-                }
-              </select>
-            </div>
-            @if (templateVariables().length) {
-              <fieldset class="col-12">
-                <legend class="form-label">Variable mapping</legend>
-                <p class="small text-body-secondary">
-                  Map each approved template variable to a customer field.
-                  Required values are checked again before delivery.
-                </p>
-                @for (
-                  variable of templateVariables();
-                  track variable;
-                  let index = $index
-                ) {
-                  <div class="row g-2 align-items-center mb-2">
-                    <div class="col-sm-5">
-                      <label
-                        class="form-label mb-0"
-                        [for]="'variable-' + index"
-                        >{{ variable }}</label
-                      >
+
+                <!-- Section 1: Campaign Details -->
+                <div class="form-section mb-4">
+                  <h3 class="section-title">1. Campaign Identity</h3>
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label" for="campaign-name">
+                        Campaign Name <span class="text-danger">*</span>
+                      </label>
+                      <input
+                        id="campaign-name"
+                        class="form-control premium-input"
+                        formControlName="name"
+                        placeholder="e.g. Summer Festival Launch Announcement"
+                        [class.is-invalid]="
+                          campaignForm.controls.name.touched &&
+                          campaignForm.controls.name.invalid
+                        "
+                      />
+                      <div class="invalid-feedback">
+                        A campaign name (up to 150 characters) is required.
+                      </div>
                     </div>
-                    <div class="col-sm-7">
+
+                    <div class="col-12">
+                      <label class="form-label" for="campaign-description">Description (Optional)</label>
+                      <textarea
+                        id="campaign-description"
+                        class="form-control premium-input"
+                        rows="2"
+                        formControlName="description"
+                        placeholder="Internal campaign objective or reference notes…"
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section 2: Template & Media -->
+                <div class="form-section mb-4">
+                  <h3 class="section-title">2. WhatsApp Message Template</h3>
+                  <div class="row g-3">
+                    <div class="col-md-7">
+                      <label class="form-label" for="campaign-form-template">
+                        Approved Template <span class="text-danger">*</span>
+                      </label>
                       <select
-                        class="form-select"
-                        [id]="'variable-' + index"
-                        [value]="mappingValue(variable, index)"
-                        (change)="
-                          setMapping(variable, index, $any($event.target).value)
+                        id="campaign-form-template"
+                        class="form-select premium-select"
+                        formControlName="templateId"
+                        [class.is-invalid]="
+                          campaignForm.controls.templateId.touched &&
+                          campaignForm.controls.templateId.invalid
                         "
                       >
-                        <option value="">Select customer field</option>
-                        @for (field of customerFields; track field) {
-                          <option [value]="field">{{ field }}</option>
+                        <option value="">Choose an approved template…</option>
+                        @for (template of approvedTemplates; track template.id) {
+                          <option [value]="template.id">
+                            {{ template.name }} · {{ template.category }} ({{ template.language }})
+                          </option>
+                        }
+                      </select>
+                      <div class="invalid-feedback">Please select an approved WhatsApp template.</div>
+                    </div>
+
+                    <div class="col-md-5">
+                      <label class="form-label" for="campaign-media">Media Asset (Optional)</label>
+                      <select
+                        id="campaign-media"
+                        class="form-select premium-select"
+                        formControlName="mediaId"
+                      >
+                        <option value="">No media attached</option>
+                        @for (item of media; track item.id) {
+                          <option [value]="item.id">
+                            {{ item.originalName }} ({{ item.mediaType }})
+                          </option>
                         }
                       </select>
                     </div>
                   </div>
-                }
-              </fieldset>
-            }
-            @if (!editing) {
-              <fieldset class="col-12">
-                <legend class="form-label">Recipients</legend>
-                <div
-                  class="d-flex justify-content-between align-items-center mb-2"
-                >
-                  <p class="small text-body-secondary mb-0">
-                    Select active customers
-                  </p>
-                  <label class="small"
-                    ><input
-                      class="form-check-input me-1"
-                      type="checkbox"
-                      [checked]="
-                        selectedCustomers.size === customers.length &&
-                        customers.length > 0
-                      "
-                      (change)="toggleAllCustomers($any($event.target).checked)"
-                    />Select all</label
-                  >
                 </div>
-                <div class="recipient-picker border rounded">
-                  @for (customer of customers; track customer.id) {
-                    <label class="recipient-option"
-                      ><input
-                        class="form-check-input"
-                        type="checkbox"
-                        [checked]="selectedCustomers.has(customer.id)"
-                        (change)="
-                          toggleCustomer(
-                            customer.id,
-                            $any($event.target).checked
-                          )
-                        "
-                      /><span
-                        ><strong
-                          >{{ customer.firstName }}
-                          {{ customer.lastName }}</strong
-                        ><small>{{ customer.mobile }}</small></span
-                      ></label
-                    >
-                  }
-                  @if (!customers.length) {
-                    <p class="text-body-secondary p-3 mb-0">
-                      No active customers available.
+
+                <!-- Dynamic Variable Mapping -->
+                @if (templateVariables().length) {
+                  <fieldset class="form-section variable-mapping-section mb-4">
+                    <legend class="section-title mb-1">3. Dynamic Variable Mappings</legend>
+                    <p class="section-help text-muted small mb-3">
+                      Map each template placeholder variable to a customer record field.
                     </p>
-                  }
+                    <div class="mapping-table-wrap border rounded p-3 bg-light">
+                      @for (
+                        variable of templateVariables();
+                        track variable;
+                        let index = $index
+                      ) {
+                        <div class="row g-2 align-items-center mb-2">
+                          <div class="col-sm-5">
+                            <label
+                              class="form-label variable-tag mb-0"
+                              [for]="'variable-' + index"
+                            >
+                              <code>{{ '{{' + variable + '}}' }}</code>
+                            </label>
+                          </div>
+                          <div class="col-sm-7">
+                            <select
+                              class="form-select premium-select form-select-sm"
+                              [id]="'variable-' + index"
+                              [value]="mappingValue(variable, index)"
+                              (change)="
+                                setMapping(variable, index, $any($event.target).value)
+                              "
+                            >
+                              <option value="">Select customer attribute…</option>
+                              @for (field of customerFields; track field) {
+                                <option [value]="field">{{ field }}</option>
+                              }
+                            </select>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </fieldset>
+                }
+
+                <!-- Section 3: Schedule & Delivery -->
+                <div class="form-section mb-4">
+                  <h3 class="section-title">4. Delivery Mode</h3>
+                  <div class="row g-3">
+                    <div class="col-md-5">
+                      <label class="form-label" for="campaign-form-type">Send Timing</label>
+                      <select
+                        id="campaign-form-type"
+                        class="form-select premium-select"
+                        formControlName="sendType"
+                      >
+                        <option value="NOW">Save as draft (Send manually)</option>
+                        <option value="SCHEDULED">Schedule for future date</option>
+                      </select>
+                    </div>
+
+                    @if (campaignForm.controls.sendType.value === "SCHEDULED") {
+                      <div class="col-md-7">
+                        <label class="form-label" for="campaign-schedule">
+                          Schedule Date & Time <span class="text-danger">*</span>
+                        </label>
+                        <input
+                          id="campaign-schedule"
+                          class="form-control premium-input"
+                          type="datetime-local"
+                          formControlName="scheduledAt"
+                        />
+                      </div>
+                    }
+                  </div>
                 </div>
-                <small class="text-body-secondary"
-                  >Selected: {{ selectedCustomers.size }} customer{{
-                    selectedCustomers.size === 1 ? "" : "s"
-                  }}</small
-                >
-              </fieldset>
-            }
-            @if (!editing) {
-              <aside class="col-12 preview-panel" aria-label="Campaign preview">
-                <h3 class="h6">Preview</h3>
-                <p class="mb-1">
-                  <strong>{{
-                    campaignForm.controls.name.value || "Campaign name"
-                  }}</strong>
-                </p>
-                <p class="small text-body-secondary mb-1">
-                  {{ selectedTemplateName() }} ·
-                  {{ selectedCustomers.size }} recipients ·
-                  {{
-                    campaignForm.controls.sendType.value === "SCHEDULED"
-                      ? campaignForm.controls.scheduledAt.value || "Scheduled"
-                      : "Send now"
-                  }}
-                </p>
-                <p class="small mb-0">{{ selectedMediaName() }}</p>
+
+                <!-- Section 4: Recipients Picker (When creating new) -->
+                @if (!editing) {
+                  <fieldset class="form-section mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <legend class="section-title mb-0">5. Target Audience</legend>
+                      <span class="badge-audience-count">
+                        {{ selectedCustomers.size }} selected
+                      </span>
+                    </div>
+
+                    <div class="recipient-controls d-flex gap-2 mb-2">
+                      <div class="search-wrap flex-grow-1">
+                        <i class="bi bi-search me-1 text-muted" aria-hidden="true"></i>
+                        <input
+                          class="form-control form-control-sm"
+                          type="text"
+                          [(ngModel)]="recipientSearch"
+                          [ngModelOptions]="{ standalone: true }"
+                          placeholder="Search recipients by name, phone, or email…"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary text-nowrap"
+                        (click)="toggleAllCustomers(!isAllFilteredSelected())"
+                      >
+                        {{ isAllFilteredSelected() ? 'Deselect All' : 'Select All' }}
+                      </button>
+                    </div>
+
+                    <div class="recipient-picker-scrollable border rounded">
+                      @for (customer of filteredCustomers(); track customer.id) {
+                        <label class="recipient-row-card">
+                          <input
+                            class="form-check-input recipient-checkbox"
+                            type="checkbox"
+                            [checked]="selectedCustomers.has(customer.id)"
+                            (change)="
+                              toggleCustomer(
+                                customer.id,
+                                $any($event.target).checked
+                              )
+                            "
+                          />
+                          <div
+                            class="recipient-avatar"
+                            [style.background]="getAvatarGradient(customer.firstName + ' ' + (customer.lastName || ''))"
+                          >
+                            {{ getInitials(customer.firstName, customer.lastName) }}
+                          </div>
+                          <div class="recipient-meta">
+                            <span class="recipient-name">
+                              {{ customer.firstName }} {{ customer.lastName }}
+                            </span>
+                            <span class="recipient-sub">
+                              {{ customer.mobile }} · {{ customer.email || 'No email' }}
+                            </span>
+                          </div>
+                        </label>
+                      }
+
+                      @if (!filteredCustomers().length) {
+                        <div class="p-3 text-center text-muted small">
+                          No active customer records match your filter.
+                        </div>
+                      }
+                    </div>
+                  </fieldset>
+                }
+              </div>
+
+              <!-- Right Preview Column -->
+              <aside class="preview-column" aria-label="WhatsApp live preview">
+                <div class="preview-sticky-card">
+                  <div class="preview-card-header">
+                    <span class="preview-label">
+                      <i class="bi bi-whatsapp text-success me-1"></i>
+                      WhatsApp Live Preview
+                    </span>
+                    <span class="badge bg-secondary-subtle text-secondary small">Simulated</span>
+                  </div>
+
+                  <!-- WhatsApp Chat Bubble -->
+                  <div class="whatsapp-mockup-frame">
+                    <div class="whatsapp-chat-surface">
+                      <div class="whatsapp-bubble">
+                        @if (selectedTemplateObj()?.headerText) {
+                          <div class="bubble-header">
+                            {{ selectedTemplateObj()?.headerText }}
+                          </div>
+                        }
+
+                        <div class="bubble-body">
+                          {{ selectedTemplateObj()?.body || "Select an approved template on the left to preview WhatsApp message content." }}
+                        </div>
+
+                        @if (selectedTemplateObj()?.footer) {
+                          <div class="bubble-footer">
+                            {{ selectedTemplateObj()?.footer }}
+                          </div>
+                        }
+
+                        <div class="bubble-timestamp">
+                          12:00 PM <i class="bi bi-check2-all text-primary ms-1"></i>
+                        </div>
+                      </div>
+
+                      @if (selectedTemplateObj()?.buttons?.length) {
+                        <div class="bubble-actions">
+                          @for (btn of selectedTemplateObj()?.buttons; track $index) {
+                            <div class="whatsapp-btn-pill">
+                              <i class="bi bi-reply me-1"></i> {{ btn.text || 'Action Button' }}
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Campaign Summary Pill Panel -->
+                  <div class="preview-summary-panel mt-3">
+                    <h4 class="summary-head">Broadcast Summary</h4>
+                    <div class="summary-line">
+                      <span class="key">Campaign Name:</span>
+                      <strong class="val">{{ campaignForm.controls.name.value || 'Untitled' }}</strong>
+                    </div>
+                    <div class="summary-line">
+                      <span class="key">Template:</span>
+                      <span class="val">{{ selectedTemplateName() }}</span>
+                    </div>
+                    @if (!editing) {
+                      <div class="summary-line">
+                        <span class="key">Recipients:</span>
+                        <span class="val badge bg-primary-subtle text-primary">{{ selectedCustomers.size }} customers</span>
+                      </div>
+                    }
+                    <div class="summary-line">
+                      <span class="key">Send Mode:</span>
+                      <span class="val">
+                        {{ campaignForm.controls.sendType.value === 'SCHEDULED' ? 'Scheduled' : 'Draft / Send Now' }}
+                      </span>
+                    </div>
+                    @if (campaignForm.controls.mediaId.value) {
+                      <div class="summary-line">
+                        <span class="key">Media:</span>
+                        <span class="val">{{ selectedMediaName() }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
               </aside>
-            }
+            </div>
           </div>
-        </div>
-        <div class="card-footer d-flex justify-content-end gap-2">
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            (click)="editorOpen = false"
-          >
-            Cancel</button
-          ><button
-            class="btn btn-primary"
-            type="submit"
-            [disabled]="actionLoading"
-          >
-            {{
-              actionLoading
-                ? "Saving…"
-                : editing
-                  ? "Save changes"
-                  : "Create campaign"
-            }}
-          </button>
-        </div>
-      </form>
+
+          <!-- Modal Footer -->
+          <footer class="modal-foot d-flex justify-content-end gap-2">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="editorOpen = false"
+            >
+              Cancel
+            </button>
+            <button
+              class="btn btn-primary"
+              type="submit"
+              [disabled]="actionLoading"
+            >
+              @if (actionLoading) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Saving…
+              } @else {
+                <i class="bi" [class.bi-check-lg]="editing" [class.bi-plus-lg]="!editing" aria-hidden="true"></i>
+                {{ editing ? "Save Changes" : "Create Campaign" }}
+              }
+            </button>
+          </footer>
+        </form>
+      </div>
     </div>
   </div>
 }
 
+<!-- ========================================== -->
+<!-- CAMPAIGN DETAILS & REPORT MODAL            -->
+<!-- ========================================== -->
 @if (detailLoading && !detail) {
-  <div class="modal-layer" role="status">
-    <div class="card p-4 shadow">
-      <span class="spinner-border text-primary"></span
-      ><span class="visually-hidden">Loading campaign details</span>
+  <div class="modal-backdrop-layer" role="status">
+    <div class="loading-box card p-4 shadow text-center">
+      <div class="spinner-border text-primary mx-auto mb-2" role="status"></div>
+      <p class="text-muted small mb-0">Loading campaign details…</p>
     </div>
   </div>
 }
+
 @if (detail) {
   <div
-    class="modal-layer"
+    class="modal-backdrop-layer"
     role="dialog"
     aria-modal="true"
     aria-labelledby="campaign-detail-title"
   >
-    <div class="detail-card card shadow-lg">
-      <div class="card-header d-flex justify-content-between align-items-start">
-        <div>
-          <h2 id="campaign-detail-title" class="h5 mb-1">{{ detail.name }}</h2>
-          <div class="d-flex gap-2 align-items-center">
-            <app-status-badge [status]="detail.status" /><span
-              class="small text-body-secondary"
-              >{{ detail.template?.name }}</span
-            >
+    <div class="modal-dialog-container modal-detail-dialog">
+      <div class="modal-surface-card">
+        <!-- Detail Header -->
+        <header class="modal-head d-flex justify-content-between align-items-start">
+          <div class="head-info">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <app-status-badge [status]="detail.status" />
+              @if (detail.status === 'RUNNING' || detail.status === 'SCHEDULED') {
+                <span class="live-pulse-badge">
+                  <span class="pulse-dot"></span> Live Syncing
+                </span>
+              }
+              <span class="template-tag">
+                <i class="bi bi-file-earmark-text me-1"></i>
+                {{ detail.template?.name || 'Template' }}
+              </span>
+            </div>
+            <h2 id="campaign-detail-title" class="modal-title mb-0">{{ detail.name }}</h2>
           </div>
-        </div>
-        <button
-          class="btn-close"
-          type="button"
-          aria-label="Close"
-          (click)="closeDetail()"
-        ></button>
-      </div>
-      <div class="card-body">
-        <div class="d-flex flex-wrap gap-2 mb-4">
           <button
-            class="btn btn-outline-secondary btn-sm"
+            class="btn-modal-close"
+            type="button"
+            aria-label="Close modal"
+            (click)="closeDetail()"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </header>
+
+        <!-- Detail Actions Ribbon -->
+        <div class="detail-actions-ribbon d-flex flex-wrap align-items-center gap-2">
+          <button
+            class="btn btn-sm btn-outline-secondary"
             type="button"
             (click)="refreshDetail()"
             [disabled]="detailLoading"
           >
-            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+            <i class="bi bi-arrow-clockwise me-1" [class.spin]="detailLoading" aria-hidden="true"></i>
+            Refresh
           </button>
+
           @if (canEdit(detail)) {
             <button
-              class="btn btn-outline-primary btn-sm"
+              class="btn btn-sm btn-outline-primary"
               type="button"
               (click)="openEdit(detail)"
             >
-              Edit
+              <i class="bi bi-pencil me-1" aria-hidden="true"></i>
+              Edit Campaign
             </button>
           }
+
           @if (canSend(detail)) {
             <button
-              class="btn btn-success btn-sm"
+              class="btn btn-sm btn-success"
               type="button"
               (click)="send(detail)"
               [disabled]="actionLoading"
             >
-              <i class="bi bi-send me-1"></i>Send now
+              <i class="bi bi-send-fill me-1" aria-hidden="true"></i>
+              Send Now
             </button>
           }
+
           @if (canCancel(detail)) {
             <button
-              class="btn btn-outline-warning btn-sm"
+              class="btn btn-sm btn-outline-warning"
               type="button"
               (click)="cancel(detail)"
               [disabled]="actionLoading"
             >
-              Cancel schedule
+              <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+              Cancel Schedule
             </button>
           }
+
           <button
-            class="btn btn-outline-danger btn-sm ms-auto"
+            class="btn btn-sm btn-outline-danger ms-auto"
             type="button"
             (click)="remove(detail)"
             [disabled]="actionLoading"
           >
+            <i class="bi bi-trash3-fill me-1" aria-hidden="true"></i>
             Delete
           </button>
         </div>
-        <div class="row g-2 mb-4">
-          <div class="col-6 col-md">
-            <div class="metric">
-              <strong>{{ detail.totalRecipients }}</strong
-              ><span>Recipients</span>
+
+        <!-- Detail Scrollable Body -->
+        <div class="modal-body-scrollable">
+          <!-- 5-Metric Telemetry KPI Strip -->
+          <div class="telemetry-grid mb-4">
+            <div class="telemetry-tile tile-recipients">
+              <span class="telemetry-num">{{ detail.totalRecipients }}</span>
+              <span class="telemetry-lbl">Audience</span>
+            </div>
+            <div class="telemetry-tile tile-sent">
+              <span class="telemetry-num">{{ detail.sentCount }}</span>
+              <span class="telemetry-lbl">Sent</span>
+            </div>
+            <div class="telemetry-tile tile-delivered">
+              <span class="telemetry-num">{{ detail.deliveredCount }}</span>
+              <span class="telemetry-lbl">Delivered</span>
+            </div>
+            <div class="telemetry-tile tile-read">
+              <span class="telemetry-num">{{ detail.readCount }}</span>
+              <span class="telemetry-lbl">Read</span>
+            </div>
+            <div class="telemetry-tile tile-failed">
+              <span class="telemetry-num text-danger">{{ detail.failedCount }}</span>
+              <span class="telemetry-lbl">Failed</span>
             </div>
           </div>
-          <div class="col-6 col-md">
-            <div class="metric">
-              <strong>{{ detail.sentCount }}</strong
-              ><span>Sent</span>
+
+          <!-- Overall Delivery Progress Bar -->
+          <div class="progress-section mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small fw-semibold text-secondary">Delivery Telemetry Progress</span>
+              <span class="small fw-bold">{{ detail.progress }}%</span>
+            </div>
+            <div
+              class="progress progress-lg"
+              role="progressbar"
+              [attr.aria-valuenow]="detail.progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <div
+                class="progress-bar progress-bar-striped"
+                [class.progress-bar-animated]="detail.status === 'RUNNING'"
+                [class.bg-success]="detail.status === 'COMPLETED'"
+                [class.bg-danger]="detail.status === 'FAILED'"
+                [style.width.%]="detail.progress"
+              ></div>
             </div>
           </div>
-          <div class="col-4 col-md">
-            <div class="metric">
-              <strong>{{ detail.deliveredCount }}</strong
-              ><span>Delivered</span>
+
+          <!-- Campaign Key Information Grid -->
+          <div class="metadata-grid card p-3 mb-4 bg-light border-0">
+            <dl class="row mb-0 small">
+              <dt class="col-sm-4 text-secondary">Description</dt>
+              <dd class="col-sm-8 mb-2">{{ detail.description || "No description provided." }}</dd>
+
+              <dt class="col-sm-4 text-secondary">Send Mode</dt>
+              <dd class="col-sm-8 mb-2">{{ detail.sendType }}</dd>
+
+              <dt class="col-sm-4 text-secondary">Scheduled Date</dt>
+              <dd class="col-sm-8 mb-2">
+                {{ detail.scheduledAt ? (detail.scheduledAt | date: "medium") : "Immediate" }}
+              </dd>
+
+              <dt class="col-sm-4 text-secondary">Execution Started</dt>
+              <dd class="col-sm-8 mb-2">
+                {{ detail.startedAt ? (detail.startedAt | date: "medium") : "Not started" }}
+              </dd>
+
+              <dt class="col-sm-4 text-secondary">Execution Completed</dt>
+              <dd class="col-sm-8 mb-2">
+                {{ detail.completedAt ? (detail.completedAt | date: "medium") : "—" }}
+              </dd>
+
+              <dt class="col-sm-4 text-secondary">Created At</dt>
+              <dd class="col-sm-8 mb-0">{{ detail.createdAt | date: "medium" }}</dd>
+            </dl>
+          </div>
+
+          <!-- Delivery Report Section -->
+          <section class="report-section" aria-labelledby="report-title">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 id="report-title" class="section-title mb-0">Recipient Delivery Telemetry</h3>
+              <button
+                class="btn btn-sm btn-outline-primary"
+                type="button"
+                (click)="loadReport()"
+                [disabled]="reportLoading"
+              >
+                @if (reportLoading) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  Loading…
+                } @else {
+                  <i class="bi bi-file-earmark-bar-graph me-1" aria-hidden="true"></i>
+                  {{ report ? 'Refresh Report' : 'Load Recipient Logs' }}
+                }
+              </button>
             </div>
-          </div>
-          <div class="col-4 col-md">
-            <div class="metric">
-              <strong>{{ detail.readCount }}</strong
-              ><span>Read</span>
-            </div>
-          </div>
-          <div class="col-4 col-md">
-            <div class="metric">
-              <strong class="text-danger">{{ detail.failedCount }}</strong
-              ><span>Failed</span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="progress mb-1"
-          role="progressbar"
-          [attr.aria-valuenow]="detail.progress"
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          <div class="progress-bar" [style.width.%]="detail.progress">
-            {{ detail.progress }}%
-          </div>
-        </div>
-        <p class="small text-body-secondary mb-4">
-          Campaign processing progress
-        </p>
-        <dl class="row small">
-          <dt class="col-5">Description</dt>
-          <dd class="col-7">{{ detail.description || "—" }}</dd>
-          <dt class="col-5">Send type</dt>
-          <dd class="col-7">{{ detail.sendType }}</dd>
-          <dt class="col-5">Scheduled</dt>
-          <dd class="col-7">
-            {{
-              detail.scheduledAt ? (detail.scheduledAt | date: "medium") : "—"
-            }}
-          </dd>
-          <dt class="col-5">Started</dt>
-          <dd class="col-7">
-            {{ detail.startedAt ? (detail.startedAt | date: "medium") : "—" }}
-          </dd>
-          <dt class="col-5">Completed</dt>
-          <dd class="col-7">
-            {{
-              detail.completedAt ? (detail.completedAt | date: "medium") : "—"
-            }}
-          </dd>
-          <dt class="col-5">Created</dt>
-          <dd class="col-7">{{ detail.createdAt | date: "medium" }}</dd>
-        </dl>
-        <button
-          class="btn btn-outline-primary w-100"
-          type="button"
-          (click)="loadReport()"
-          [disabled]="reportLoading"
-        >
-          {{ reportLoading ? "Loading report…" : "Load recipient report" }}
-        </button>
-        @if (report) {
-          <section class="mt-4" aria-labelledby="report-title">
-            <h3 id="report-title" class="h6">Delivery report</h3>
-            <div class="row g-2 mb-3">
-              <div class="col-4">
-                <div class="rate">
-                  {{ report.deliveryRate }}%<small>Delivered</small>
+
+            @if (report) {
+              <!-- Rate Summary Tiles -->
+              <div class="row g-2 mb-3">
+                <div class="col-4">
+                  <div class="rate-card rate-delivered">
+                    <span class="rate-percent">{{ report.deliveryRate }}%</span>
+                    <span class="rate-name">Delivered Rate</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="rate-card rate-read">
+                    <span class="rate-percent">{{ report.readRate }}%</span>
+                    <span class="rate-name">Read Rate</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="rate-card rate-failed">
+                    <span class="rate-percent">{{ report.failureRate }}%</span>
+                    <span class="rate-name">Failure Rate</span>
+                  </div>
                 </div>
               </div>
-              <div class="col-4">
-                <div class="rate">
-                  {{ report.readRate }}%<small>Read</small>
+
+              <!-- Recipient Table -->
+              @if (!recipients.length) {
+                <div class="empty-recipients-box p-3 text-center border rounded text-muted small">
+                  No recipient delivery records are logged for this campaign.
                 </div>
-              </div>
-              <div class="col-4">
-                <div class="rate">
-                  {{ report.failureRate }}%<small>Failed</small>
-                </div>
-              </div>
-            </div>
-            @if (!recipients.length) {
-              <app-empty-state
-                title="No recipients"
-                message="No recipient records are assigned to this campaign."
-              />
-            } @else {
-              <div class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead>
-                    <tr>
-                      <th>Customer</th>
-                      <th>Mobile</th>
-                      <th>Status</th>
-                      <th>Updated</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (recipient of recipients; track recipient.id) {
+              } @else {
+                <div class="table-responsive border rounded mb-2">
+                  <table class="table table-sm studio-table align-middle mb-0">
+                    <thead>
                       <tr>
-                        <td>
-                          {{ recipient.customer?.firstName }}
-                          {{ recipient.customer?.lastName }}
-                        </td>
-                        <td>{{ recipient.customer?.mobile || "—" }}</td>
-                        <td>
-                          <app-status-badge [status]="recipient.status" />
-                          @if (recipient.failureReason) {
-                            <small class="d-block text-danger">{{
-                              recipient.failureReason
-                            }}</small>
-                          }
-                        </td>
-                        <td>
-                          {{
-                            recipient.readAt ||
-                              recipient.deliveredAt ||
-                              recipient.sentAt ||
-                              recipient.updatedAt | date: "short"
-                          }}
-                        </td>
+                        <th scope="col">Recipient</th>
+                        <th scope="col">Mobile</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Timestamp</th>
                       </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-              <app-pagination
-                [page]="recipientPage"
-                [totalPages]="recipientTotalPages"
-                (pageChange)="changeRecipientPage($event)"
-              />
+                    </thead>
+                    <tbody>
+                      @for (recipient of recipients; track recipient.id) {
+                        <tr>
+                          <td>
+                            <div class="d-flex align-items-center gap-2">
+                              <div
+                                class="recipient-avatar-sm"
+                                [style.background]="getAvatarGradient(recipient.customer?.firstName + ' ' + (recipient.customer?.lastName || ''))"
+                              >
+                                {{ getInitials(recipient.customer?.firstName, recipient.customer?.lastName) }}
+                              </div>
+                              <span class="fw-semibold">
+                                {{ recipient.customer?.firstName }} {{ recipient.customer?.lastName }}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <code>{{ recipient.customer?.mobile || "—" }}</code>
+                          </td>
+                          <td>
+                            <app-status-badge [status]="recipient.status" />
+                            @if (recipient.failureReason) {
+                              <small class="d-block text-danger mt-1">{{ recipient.failureReason }}</small>
+                            }
+                          </td>
+                          <td>
+                            <small class="text-secondary">
+                              {{
+                                recipient.readAt ||
+                                  recipient.deliveredAt ||
+                                  recipient.sentAt ||
+                                  recipient.updatedAt | date: "short"
+                              }}
+                            </small>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center py-2">
+                  <small class="text-muted">Page {{ recipientPage }} of {{ recipientTotalPages || 1 }}</small>
+                  <app-pagination
+                    [page]="recipientPage"
+                    [totalPages]="recipientTotalPages"
+                    (pageChange)="changeRecipientPage($event)"
+                  />
+                </div>
+              }
             }
           </section>
-        }
+        </div>
+
+        <!-- Detail Modal Footer -->
+        <footer class="modal-foot d-flex justify-content-end">
+          <button class="btn btn-outline-secondary" type="button" (click)="closeDetail()">
+            Close
+          </button>
+        </footer>
       </div>
     </div>
   </div>

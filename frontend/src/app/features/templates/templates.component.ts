@@ -4,7 +4,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, finalize, Observable, Subject, takeUntil } from 'rxjs';
 
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
 import { HttpErrorService } from '../../core/services/http-error.service';
+import { ToastService } from '../../core/services/toast.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
@@ -21,6 +23,8 @@ import { TemplateService } from './template.service';
 export class TemplatesComponent implements OnDestroy {
   private readonly api = inject(TemplateService);
   private readonly errors = inject(HttpErrorService);
+  private readonly modalService = inject(ConfirmationModalService);
+  private readonly toastService = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
@@ -114,21 +118,54 @@ export class TemplatesComponent implements OnDestroy {
   sync(): void {
     if (this.actionLoading) return;
     this.actionLoading = true; this.errorMessage = '';
-    this.api.syncTemplates().pipe(finalize(() => { this.actionLoading = false; })).subscribe({ next: (result) => { this.notify(`${result.synchronized} template${result.synchronized === 1 ? '' : 's'} synchronized.`); this.load(); }, error: (error) => { this.errorMessage = this.errors.map(error).message; } });
+    this.api.syncTemplates().pipe(finalize(() => { this.actionLoading = false; })).subscribe({
+      next: (result) => { this.notify(`${result.synchronized} template${result.synchronized === 1 ? '' : 's'} synchronized.`); this.load(); },
+      error: (error) => {
+        const msg = this.errors.map(error).message;
+        this.errorMessage = msg;
+        this.toastService.error(msg);
+      }
+    });
   }
 
   showDetail(id: string): void {
     this.detailLoading = true; this.errorMessage = '';
-    this.api.getTemplate(id).pipe(finalize(() => { this.detailLoading = false; })).subscribe({ next: (template) => { this.detail = template; }, error: (error) => { this.errorMessage = this.errors.map(error).message; } });
+    this.api.getTemplate(id).pipe(finalize(() => { this.detailLoading = false; })).subscribe({
+      next: (template) => { this.detail = template; },
+      error: (error) => {
+        const msg = this.errors.map(error).message;
+        this.errorMessage = msg;
+        this.toastService.error(msg);
+      }
+    });
   }
 
   remove(template: Template): void {
-    if (!confirm(`Delete template “${template.name}”? This cannot be undone.`) || this.actionLoading) return;
-    this.actionLoading = true;
-    this.api.deleteTemplate(template.id).pipe(finalize(() => { this.actionLoading = false; })).subscribe({
-      next: () => { this.notify('Template deleted successfully.'); if (!this.keyword && this.templates.length === 1 && this.page > 1) void this.updateQuery({ page: this.page - 1 }); else this.load(); },
-      error: (error) => { this.errorMessage = this.errors.map(error).message; },
-    });
+    if (this.actionLoading) return;
+    this.modalService
+      .confirm({
+        title: 'Delete Template?',
+        message: `Are you sure you want to delete template "${template.name}"? This cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger',
+        icon: 'bi-trash3-fill',
+        action: () => this.api.deleteTemplate(template.id),
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.toastService.success('Template deleted successfully.');
+          if (!this.keyword && this.templates.length === 1 && this.page > 1) {
+            void this.updateQuery({ page: this.page - 1 });
+          } else {
+            this.load();
+          }
+        }
+      })
+      .catch((error) => {
+        const msg = this.errors.map(error).message || 'Failed to delete template.';
+        this.toastService.error(msg);
+      });
   }
 
   placeholders(text: string | null): string[] { return text?.match(/\{\{\d+\}\}/g) ?? []; }
@@ -138,6 +175,10 @@ export class TemplatesComponent implements OnDestroy {
   private applySearchFilters(templates: Template[]): Template[] {
     return templates.filter((item) => (!this.category || item.category === this.category) && (!this.status || item.status === this.status) && (!this.language || item.language === this.language));
   }
-  private notify(message: string): void { this.successMessage = message; setTimeout(() => { this.successMessage = ''; }, 4000); }
+  private notify(message: string): void {
+    this.successMessage = message;
+    this.toastService.success(message);
+    setTimeout(() => { this.successMessage = ''; }, 4000);
+  }
   private updateQuery(query: Record<string, string | number | null>): Promise<boolean> { return this.router.navigate([], { relativeTo: this.route, queryParams: query, queryParamsHandling: 'merge' }); }
 }

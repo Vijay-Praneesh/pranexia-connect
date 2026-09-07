@@ -1,9 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
 import { AuthenticatedUser } from '../../core/models/auth.model';
 import { AuthService } from '../../core/services/auth.service';
+import { Campaign, CampaignListData } from '../campaigns/campaign.model';
+import { CampaignService } from '../campaigns/campaign.service';
+import { CustomerDashboardStatistics } from '../customers/customer.model';
+import { CustomerService } from '../customers/customer.service';
 import { DistributionChartComponent } from './components/distribution-chart/distribution-chart.component';
 import { DashboardComponent } from './dashboard.component';
 import { DashboardSummary } from './dashboard.model';
@@ -23,17 +28,78 @@ const user: AuthenticatedUser = {
   company: { id: 'tenant-from-session', companyName: 'Acme Connect', email: 'acme@example.com', mobile: '9999999999', plan: 'STARTER', status: 'ACTIVE', createdAt: '', updatedAt: '' },
 };
 
+const mockRecentCampaigns: Campaign[] = [
+  {
+    id: 'camp-1',
+    name: 'Spring Sale 2026',
+    description: 'Spring promo campaign',
+    templateId: 'tmpl-1',
+    template: {
+      id: 'tmpl-1',
+      name: 'spring_promo',
+      metaTemplateName: 'spring_promo',
+      metaTemplateId: 'meta-tmpl-1',
+      category: 'MARKETING',
+      language: 'en_US',
+      headerType: 'NONE',
+      headerText: null,
+      body: 'Welcome to our spring promo!',
+      footer: null,
+      buttons: null,
+      status: 'APPROVED',
+      rejectionReason: null,
+      createdAt: '2026-03-01T09:00:00Z',
+      updatedAt: '2026-03-01T09:00:00Z',
+    },
+    sendType: 'NOW',
+    scheduledAt: null,
+    status: 'COMPLETED',
+    totalRecipients: 100,
+    sentCount: 100,
+    deliveredCount: 95,
+    readCount: 70,
+    failedCount: 5,
+    progress: 100,
+    startedAt: '2026-03-01T10:00:00Z',
+    completedAt: '2026-03-01T10:05:00Z',
+    createdAt: '2026-03-01T10:00:00Z',
+    updatedAt: '2026-03-01T11:00:00Z',
+  },
+];
+
+const mockCustomerStats: CustomerDashboardStatistics = {
+  totalCustomers: 450,
+  activeCustomers: 420,
+  blockedCustomers: 30,
+  countries: 3,
+  newThisMonth: 25,
+};
+
 describe('DashboardComponent', () => {
   let fixture: ComponentFixture<DashboardComponent>;
-  let service: jasmine.SpyObj<DashboardService>;
+  let dashboardService: jasmine.SpyObj<DashboardService>;
+  let campaignService: jasmine.SpyObj<CampaignService>;
+  let customerService: jasmine.SpyObj<CustomerService>;
   const currentUser = new BehaviorSubject<AuthenticatedUser | null>(user);
 
   beforeEach(async () => {
-    service = jasmine.createSpyObj<DashboardService>('DashboardService', ['getSummary']);
+    dashboardService = jasmine.createSpyObj<DashboardService>('DashboardService', ['getSummary']);
+    campaignService = jasmine.createSpyObj<CampaignService>('CampaignService', ['getCampaigns']);
+    customerService = jasmine.createSpyObj<CustomerService>('CustomerService', ['getDashboardStats']);
+
+    campaignService.getCampaigns.and.returnValue(of({
+      campaigns: mockRecentCampaigns,
+      pagination: { total: 1, page: 1, limit: 5, totalPages: 1, hasNext: false, hasPrev: false },
+    } as unknown as CampaignListData));
+    customerService.getDashboardStats.and.returnValue(of(mockCustomerStats));
+
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
-        { provide: DashboardService, useValue: service },
+        provideRouter([]),
+        { provide: DashboardService, useValue: dashboardService },
+        { provide: CampaignService, useValue: campaignService },
+        { provide: CustomerService, useValue: customerService },
         { provide: AuthService, useValue: { currentUser$: currentUser.asObservable() } },
       ],
     }).overrideComponent(DashboardComponent, {
@@ -43,41 +109,45 @@ describe('DashboardComponent', () => {
   });
 
   it('renders the loading state while the API request is pending', () => {
-    service.getSummary.and.returnValue(new Subject<DashboardSummary>());
+    dashboardService.getSummary.and.returnValue(new Subject<DashboardSummary>());
     createComponent();
     expect(fixture.nativeElement.querySelector('app-loading-state')).toBeTruthy();
   });
 
-  it('renders real dashboard values', () => {
-    service.getSummary.and.returnValue(of(createSummary()));
+  it('renders real dashboard values and child panel data', () => {
+    dashboardService.getSummary.and.returnValue(of(createSummary()));
     createComponent();
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Total campaigns');
     expect(text).toContain('Total recipients');
     expect(text).toContain('Delivery rate');
+    expect(text).toContain('Spring Sale 2026');
+    expect(text).toContain('Audience Overview');
+    expect(text).toContain('450');
   });
 
   it('renders a valid zero-data response as an empty state', () => {
-    service.getSummary.and.returnValue(of(createSummary({
+    dashboardService.getSummary.and.returnValue(of(createSummary({
       campaigns: { total: 0, draft: 0, scheduled: 0, running: 0, completed: 0, failed: 0, cancelled: 0 },
       messages: { totalRecipients: 0, sent: 0, delivered: 0, read: 0, failed: 0 },
       performance: { deliveryRate: 0, readRate: 0, failureRate: 0 },
     })));
     createComponent();
     expect(fixture.nativeElement.textContent).toContain('No campaign activity yet');
+    expect(fixture.nativeElement.textContent).toContain('Add Contacts');
   });
 
   it('retries after an initial API error', () => {
-    service.getSummary.and.returnValues(throwError(() => new Error('offline')), of(createSummary()));
+    dashboardService.getSummary.and.returnValues(throwError(() => new Error('offline')), of(createSummary()));
     createComponent();
     const retry = fixture.nativeElement.querySelector('app-error-state button') as HTMLButtonElement;
     retry.click();
     fixture.detectChanges();
-    expect(service.getSummary).toHaveBeenCalledTimes(2);
+    expect(dashboardService.getSummary).toHaveBeenCalledTimes(2);
   });
 
   it('displays authenticated user and company context', () => {
-    service.getSummary.and.returnValue(of(createSummary()));
+    dashboardService.getSummary.and.returnValue(of(createSummary()));
     createComponent();
     expect(fixture.nativeElement.textContent).toContain('Welcome, Asha · Acme Connect');
   });

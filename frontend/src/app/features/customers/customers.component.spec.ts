@@ -1,27 +1,61 @@
 import { HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
-import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 
-import { Customer, CustomerListData } from './customer.model';
+import { AuthenticatedUser } from '../../core/models/auth.model';
+import { AuthService } from '../../core/services/auth.service';
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
+import { ToastService } from '../../core/services/toast.service';
+import { Customer, CustomerDashboardStatistics, CustomerListData } from './customer.model';
 import { CustomerService } from './customer.service';
 import { CustomersComponent } from './customers.component';
+
+const user: AuthenticatedUser = {
+  id: 'user', companyId: 'tenant-from-session', firstName: 'Asha', lastName: null, email: 'asha@example.com', mobile: '9999999999',
+  role: 'COMPANY_ADMIN', status: 'ACTIVE', createdAt: '', updatedAt: '',
+  company: { id: 'tenant-from-session', companyName: 'Acme Connect', email: 'acme@example.com', mobile: '9999999999', plan: 'STARTER', status: 'ACTIVE', createdAt: '', updatedAt: '' },
+};
+
+const mockCustomerStats: CustomerDashboardStatistics = {
+  totalCustomers: 120,
+  activeCustomers: 110,
+  blockedCustomers: 10,
+  countries: 2,
+  newThisMonth: 15,
+};
 
 describe('CustomersComponent', () => {
   let fixture: ComponentFixture<CustomersComponent>;
   let component: CustomersComponent;
   let service: jasmine.SpyObj<CustomerService>;
   let router: jasmine.SpyObj<Router>;
+  let modalService: jasmine.SpyObj<ConfirmationModalService>;
+  let toastService: jasmine.SpyObj<ToastService>;
   const params$ = new BehaviorSubject(convertToParamMap({}));
+  const currentUser = new BehaviorSubject<AuthenticatedUser | null>(user);
 
   beforeEach(async () => {
     params$.next(convertToParamMap({}));
     service = jasmine.createSpyObj<CustomerService>('CustomerService', [
       'getCustomers', 'searchCustomers', 'getCustomer', 'createCustomer', 'updateCustomer', 'deleteCustomer',
-      'bulkDelete', 'bulkStatus', 'importCustomers', 'exportCustomers', 'downloadImportTemplate',
+      'bulkDelete', 'bulkStatus', 'importCustomers', 'exportCustomers', 'downloadImportTemplate', 'getDashboardStats',
     ]);
     router = jasmine.createSpyObj<Router>('Router', ['navigate']); router.navigate.and.resolveTo(true);
+    modalService = jasmine.createSpyObj<ConfirmationModalService>('ConfirmationModalService', ['confirm']);
+    modalService.confirm.and.callFake(async (config) => {
+      if (config.action) {
+        const res = config.action();
+        if (res && 'subscribe' in res) {
+          (res as Observable<unknown>).subscribe();
+        }
+      }
+      return true;
+    });
+    toastService = jasmine.createSpyObj<ToastService>('ToastService', ['success', 'error', 'warning', 'info']);
+
     service.getCustomers.and.returnValue(of(listData([customer])));
+    service.getDashboardStats.and.returnValue(of(mockCustomerStats));
     service.searchCustomers.and.returnValue(of([customer]));
     service.createCustomer.and.returnValue(of(customer)); service.updateCustomer.and.returnValue(of(customer));
     service.deleteCustomer.and.returnValue(of(undefined)); service.bulkDelete.and.returnValue(of(undefined)); service.bulkStatus.and.returnValue(of(undefined));
@@ -32,7 +66,11 @@ describe('CustomersComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CustomersComponent],
       providers: [
-        { provide: CustomerService, useValue: service }, { provide: Router, useValue: router },
+        { provide: CustomerService, useValue: service },
+        { provide: AuthService, useValue: { currentUser$: currentUser.asObservable() } },
+        { provide: Router, useValue: router },
+        { provide: ConfirmationModalService, useValue: modalService },
+        { provide: ToastService, useValue: toastService },
         { provide: ActivatedRoute, useValue: { queryParamMap: params$.asObservable(), snapshot: {}, } },
       ],
     }).compileComponents();
@@ -46,6 +84,14 @@ describe('CustomersComponent', () => {
   it('renders customer fields returned by the API', () => {
     create(); const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Asha Rao'); expect(text).toContain('9999999999'); expect(text).toContain('asha@example.com');
+  });
+
+  it('renders summary statistics from the real dashboard API', () => {
+    create(); const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Total Contacts');
+    expect(text).toContain('120');
+    expect(text).toContain('Active Contacts');
+    expect(text).toContain('110');
   });
 
   it('renders an empty state for an empty list', () => {
@@ -73,6 +119,11 @@ describe('CustomersComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({ queryParams: { sortBy: 'firstName', order: 'ASC', page: 1 } }));
   });
 
+  it('filters by status through URL state', () => {
+    create(); component.filterStatus('ACTIVE');
+    expect(router.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({ queryParams: { status: 'ACTIVE', page: 1 } }));
+  });
+
   it('validates required fields before creating', () => {
     create(); component.openCreate(); component.customerForm.controls.firstName.setValue(''); component.customerForm.controls.mobile.setValue(''); component.save();
     expect(service.createCustomer).not.toHaveBeenCalled(); expect(component.customerForm.controls.firstName.touched).toBeTrue();
@@ -88,10 +139,16 @@ describe('CustomersComponent', () => {
     expect(service.updateCustomer).toHaveBeenCalledWith('customer-id', jasmine.objectContaining({ firstName: 'Anika', mobile: '9999999999' }));
   });
 
-  it('requires confirmation before deleting and reloads after success', () => {
-    create(); spyOn(window, 'confirm').and.returnValue(true); component.remove(customer);
-    expect(window.confirm).toHaveBeenCalled(); expect(service.deleteCustomer).toHaveBeenCalledWith('customer-id'); expect(service.getCustomers).toHaveBeenCalledTimes(2);
-  });
+  it('requires confirmation before deleting and reloads after success', fakeAsync(() => {
+    create(); component.remove(customer); tick();
+    expect(modalService.confirm).toHaveBeenCalledWith(jasmine.objectContaining({
+      title: 'Delete Customer?',
+      variant: 'danger',
+    }));
+    expect(service.deleteCustomer).toHaveBeenCalledWith('customer-id');
+    expect(service.getCustomers).toHaveBeenCalledTimes(2);
+    expect(toastService.success).toHaveBeenCalledWith('Customer deleted successfully.');
+  }));
 
   it('validates and uploads the selected Excel file', () => {
     create(); const file = new File(['sheet'], 'customers.xlsx');

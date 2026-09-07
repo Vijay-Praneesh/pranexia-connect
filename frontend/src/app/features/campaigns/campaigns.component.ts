@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, OnDestroy } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   concatMap,
   debounceTime,
@@ -14,18 +14,25 @@ import {
   takeUntil,
 } from 'rxjs';
 
+import { AuthService } from '../../core/services/auth.service';
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
 import { HttpErrorService } from '../../core/services/http-error.service';
+import { ToastService } from '../../core/services/toast.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
+import { DashboardSummary } from '../dashboard/dashboard.model';
+import { DashboardService } from '../dashboard/dashboard.service';
 import { Customer } from '../customers/customer.model';
 import { CustomerService } from '../customers/customer.service';
-import { Template } from '../templates/template.model';
-import { TemplateService } from '../templates/template.service';
 import { Media } from '../media/media.model';
 import { MediaService } from '../media/media.service';
+import { WhatsAppConnectionStatus } from '../settings/whatsapp/whatsapp-settings.model';
+import { WhatsAppSettingsService } from '../settings/whatsapp/whatsapp-settings.service';
+import { Template } from '../templates/template.model';
+import { TemplateService } from '../templates/template.service';
 import {
   Campaign,
   CampaignListData,
@@ -44,7 +51,9 @@ import { CampaignService } from './campaign.service';
   standalone: true,
   imports: [
     DatePipe,
+    FormsModule,
     ReactiveFormsModule,
+    RouterLink,
     EmptyStateComponent,
     ErrorStateComponent,
     LoadingStateComponent,
@@ -59,10 +68,15 @@ export class CampaignsComponent implements OnDestroy {
   private readonly templatesApi = inject(TemplateService);
   private readonly customersApi = inject(CustomerService);
   private readonly errors = inject(HttpErrorService);
+  private readonly modalService = inject(ConfirmationModalService);
+  private readonly toastService = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly mediaApi = inject(MediaService, { optional: true });
+  private readonly dashboardApi = inject(DashboardService, { optional: true });
+  private readonly auth = inject(AuthService, { optional: true });
+  private readonly whatsappApi = inject(WhatsAppSettingsService, { optional: true });
   private readonly destroy$ = new Subject<void>();
   private pollHandle?: ReturnType<typeof setInterval>;
 
@@ -74,6 +88,9 @@ export class CampaignsComponent implements OnDestroy {
   recipients: CampaignRecipient[] = [];
   report: CampaignReport | null = null;
   detail: Campaign | null = null;
+  summary: DashboardSummary | null = null;
+  whatsappStatus: WhatsAppConnectionStatus | null = null;
+  recipientSearch = '';
   page = 1;
   limit = 10;
   totalRecords = 0;
@@ -88,6 +105,7 @@ export class CampaignsComponent implements OnDestroy {
   actionLoading = false;
   detailLoading = false;
   reportLoading = false;
+  summaryLoading = false;
   errorMessage = '';
   formError = '';
   successMessage = '';
@@ -141,6 +159,8 @@ export class CampaignsComponent implements OnDestroy {
           (value) => void this.updateQuery({ [key]: value || null, page: 1 }),
         );
     this.loadOptions();
+    this.loadSummary();
+    this.loadWhatsAppStatus();
     this.route.queryParamMap
       .pipe(takeUntil(this.destroy$))
       .subscribe((params) => {
@@ -177,6 +197,7 @@ export class CampaignsComponent implements OnDestroy {
         this.load();
       });
   }
+
   ngOnDestroy(): void {
     this.stopPolling();
     this.destroy$.next();
@@ -225,6 +246,7 @@ export class CampaignsComponent implements OnDestroy {
         },
       });
   }
+
   loadOptions(): void {
     forkJoin({
       templates: this.templatesApi.getTemplates({
@@ -257,9 +279,45 @@ export class CampaignsComponent implements OnDestroy {
       error: () => undefined,
     });
   }
+
+  loadSummary(): void {
+    if (!this.dashboardApi) return;
+    this.summaryLoading = true;
+    this.dashboardApi
+      .getSummary()
+      .pipe(
+        finalize(() => {
+          this.summaryLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          this.summary = res;
+        },
+        error: () => undefined,
+      });
+  }
+
+  loadWhatsAppStatus(): void {
+    if (!this.whatsappApi) return;
+    this.whatsappApi.getStatus().subscribe({
+      next: (res) => {
+        this.whatsappStatus = res.status;
+      },
+      error: () => {
+        this.whatsappStatus = 'DISCONNECTED';
+      },
+    });
+  }
+
+  get userCompanyName(): string {
+    return this.auth?.getCurrentUser()?.company?.companyName || 'Seyyon Connect';
+  }
+
   changePage(page: number): void {
     void this.updateQuery({ page });
   }
+
   sort(field: CampaignSortField): void {
     void this.updateQuery({
       sortBy: field,
@@ -267,6 +325,7 @@ export class CampaignsComponent implements OnDestroy {
       page: 1,
     });
   }
+
   clearFilters(): void {
     void this.router.navigate([], {
       relativeTo: this.route,
@@ -280,6 +339,7 @@ export class CampaignsComponent implements OnDestroy {
       queryParamsHandling: 'merge',
     });
   }
+
   hasFilters(): boolean {
     return Boolean(
       this.keyword || this.status || this.sendType || this.templateId,
@@ -289,6 +349,7 @@ export class CampaignsComponent implements OnDestroy {
   openCreate(): void {
     this.editing = null;
     this.selectedCustomers.clear();
+    this.recipientSearch = '';
     this.formError = '';
     this.campaignForm.reset({
       name: '',
@@ -301,9 +362,11 @@ export class CampaignsComponent implements OnDestroy {
     });
     this.editorOpen = true;
   }
+
   openEdit(campaign: Campaign): void {
     this.editing = campaign;
     this.selectedCustomers.clear();
+    this.recipientSearch = '';
     this.formError = '';
     this.campaignForm.reset({
       name: campaign.name,
@@ -318,18 +381,39 @@ export class CampaignsComponent implements OnDestroy {
     });
     this.editorOpen = true;
   }
+
   toggleCustomer(id: string, checked: boolean): void {
     checked
       ? this.selectedCustomers.add(id)
       : this.selectedCustomers.delete(id);
   }
+
   toggleAllCustomers(checked: boolean): void {
-    this.selectedCustomers.clear();
-    if (checked)
-      this.customers.forEach((customer) =>
-        this.selectedCustomers.add(customer.id),
-      );
+    const list = this.filteredCustomers();
+    if (checked) {
+      list.forEach((customer) => this.selectedCustomers.add(customer.id));
+    } else {
+      list.forEach((customer) => this.selectedCustomers.delete(customer.id));
+    }
   }
+
+  isAllFilteredSelected(): boolean {
+    const list = this.filteredCustomers();
+    return list.length > 0 && list.every((c) => this.selectedCustomers.has(c.id));
+  }
+
+  filteredCustomers(): Customer[] {
+    if (!this.recipientSearch.trim()) return this.customers;
+    const q = this.recipientSearch.trim().toLowerCase();
+    return this.customers.filter(
+      (c) =>
+        c.firstName?.toLowerCase().includes(q) ||
+        c.lastName?.toLowerCase().includes(q) ||
+        c.mobile?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q),
+    );
+  }
+
   templateVariables(): string[] {
     const template = this.approvedTemplates.find(
       (item) => item.id === this.campaignForm.controls.templateId.value,
@@ -341,11 +425,13 @@ export class CampaignsComponent implements OnDestroy {
         : variable.key || variable.name || String(index + 1),
     );
   }
+
   mappingValue(variable: string, index: number): string {
     const mappings = this.campaignForm.controls.variableMappings
       .value as Record<string, string>;
     return mappings[variable] || mappings[String(index + 1)] || '';
   }
+
   setMapping(variable: string, index: number, field: string): void {
     const mappings = {
       ...this.campaignForm.controls.variableMappings.value,
@@ -354,14 +440,17 @@ export class CampaignsComponent implements OnDestroy {
     mappings[variable] = field;
     this.campaignForm.controls.variableMappings.setValue(mappings);
   }
-  selectedTemplateName(): string {
-    return (
-      this.approvedTemplates.find(
-        (template) =>
-          template.id === this.campaignForm.controls.templateId.value,
-      )?.name || 'Template'
+
+  selectedTemplateObj(): Template | undefined {
+    return this.approvedTemplates.find(
+      (t) => t.id === this.campaignForm.controls.templateId.value,
     );
   }
+
+  selectedTemplateName(): string {
+    return this.selectedTemplateObj()?.name || 'No template selected';
+  }
+
   selectedMediaName(): string {
     return (
       this.media.find(
@@ -449,10 +538,12 @@ export class CampaignsComponent implements OnDestroy {
         },
       });
   }
+
   private afterSave(message: string): void {
     this.editorOpen = false;
     this.notify(message);
     this.load();
+    this.loadSummary();
   }
 
   showDetail(id: string): void {
@@ -478,12 +569,14 @@ export class CampaignsComponent implements OnDestroy {
         },
       });
   }
+
   closeDetail(): void {
     this.detail = null;
     this.report = null;
     this.recipients = [];
     this.stopPolling();
   }
+
   refreshDetail(silent = false): void {
     if (!this.detail || (!silent && this.detailLoading)) return;
     if (!silent) this.detailLoading = true;
@@ -504,6 +597,7 @@ export class CampaignsComponent implements OnDestroy {
         },
       });
   }
+
   loadReport(): void {
     if (!this.detail) return;
     this.reportLoading = true;
@@ -532,82 +626,137 @@ export class CampaignsComponent implements OnDestroy {
         },
       });
   }
+
   changeRecipientPage(page: number): void {
     this.recipientPage = page;
     this.loadReport();
   }
+
   private setRecipients(data: CampaignRecipientListData): void {
     this.recipients = data.recipients;
     this.recipientTotalPages = data.pagination.totalPages;
   }
 
   send(campaign: Campaign): void {
-    if (
-      !this.canSend(campaign) ||
-      !confirm(
-        `Send “${campaign.name}” to ${campaign.totalRecipients} recipient${campaign.totalRecipients === 1 ? '' : 's'} using ${campaign.template?.name ?? 'the selected template'}? Sending cannot be undone.`,
-      )
-    )
-      return;
-    this.runAction(
-      this.api.sendCampaign(campaign.id),
-      'Campaign send completed. Check the report for delivery status.',
-    );
+    if (!this.canSend(campaign)) return;
+    this.modalService
+      .confirm({
+        title: 'Send Campaign?',
+        message: `Send "${campaign.name}" to ${campaign.totalRecipients} recipient${campaign.totalRecipients === 1 ? '' : 's'} using ${campaign.template?.name ?? 'the selected template'}? Sending cannot be undone.`,
+        confirmText: 'Send Campaign',
+        cancelText: 'Cancel',
+        variant: 'primary',
+        icon: 'bi-send-fill',
+        action: () => this.api.sendCampaign(campaign.id),
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.notify('Campaign send completed. Check the report for delivery status.');
+          this.load();
+          this.loadSummary();
+          if (this.detail) this.refreshDetail();
+        }
+      })
+      .catch((error) => {
+        const msg = this.errors.map(error).message;
+        this.errorMessage = msg;
+        this.toastService.error(msg);
+      });
   }
+
   cancel(campaign: Campaign): void {
-    if (
-      !this.canCancel(campaign) ||
-      !confirm(`Cancel scheduled campaign “${campaign.name}”?`)
-    )
-      return;
-    this.runAction(
-      this.api.cancelCampaign(campaign.id),
-      'Campaign cancelled successfully.',
-    );
+    if (!this.canCancel(campaign)) return;
+    this.modalService
+      .confirm({
+        title: 'Cancel Campaign?',
+        message: `Are you sure you want to cancel scheduled campaign "${campaign.name}"?`,
+        confirmText: 'Cancel Campaign',
+        cancelText: 'Keep Campaign',
+        variant: 'warning',
+        icon: 'bi-x-circle-fill',
+        action: () => this.api.cancelCampaign(campaign.id),
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.notify('Campaign cancelled successfully.');
+          this.load();
+          this.loadSummary();
+          if (this.detail) this.refreshDetail();
+        }
+      })
+      .catch((error) => {
+        const msg = this.errors.map(error).message;
+        this.errorMessage = msg;
+        this.toastService.error(msg);
+      });
   }
+
   remove(campaign: Campaign): void {
-    if (!confirm(`Delete campaign “${campaign.name}”? This cannot be undone.`))
-      return;
-    this.runAction(
-      this.api.deleteCampaign(campaign.id),
-      'Campaign deleted successfully.',
-      true,
-    );
+    this.modalService
+      .confirm({
+        title: 'Delete Campaign?',
+        message: `Are you sure you want to delete campaign "${campaign.name}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger',
+        icon: 'bi-trash3-fill',
+        action: () => this.api.deleteCampaign(campaign.id),
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.closeDetail();
+          this.notify('Campaign deleted successfully.');
+          this.load();
+          this.loadSummary();
+        }
+      })
+      .catch((error) => {
+        const msg = this.errors.map(error).message;
+        this.errorMessage = msg;
+        this.toastService.error(msg);
+      });
   }
+
   canSend(campaign: Campaign): boolean {
     return campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED';
   }
+
   canCancel(campaign: Campaign): boolean {
     return campaign.status === 'SCHEDULED';
   }
+
   canEdit(campaign: Campaign): boolean {
     return campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED';
   }
-  private runAction(
-    request: Observable<unknown>,
-    message: string,
-    closes = false,
-  ): void {
-    if (this.actionLoading) return;
-    this.actionLoading = true;
-    request
-      .pipe(
-        finalize(() => {
-          this.actionLoading = false;
-        }),
-      )
-      .subscribe({
-        next: () => {
-          if (closes) this.closeDetail();
-          this.notify(message);
-          this.load();
-          if (!closes && this.detail) this.refreshDetail();
-        },
-        error: (error) => {
-          this.errorMessage = this.errors.map(error).message;
-        },
-      });
+
+  getInitials(firstName?: string | null, lastName?: string | null): string {
+    const f = (firstName || '').trim().charAt(0).toUpperCase();
+    const l = (lastName || '').trim().charAt(0).toUpperCase();
+    return f || l ? `${f}${l}` : 'U';
   }
+
+  getAvatarGradient(name: string): string {
+    const gradients = [
+      'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
+      'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+      'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+      'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
+      'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+      'linear-gradient(135deg, #e11d48 0%, #f43f5e 100%)',
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % gradients.length;
+    return gradients[index];
+  }
+
+  getDeliveryRate(c: Campaign): number {
+    if (!c.totalRecipients || c.totalRecipients <= 0) return 0;
+    return Math.min(100, Math.round(((c.deliveredCount || 0) / c.totalRecipients) * 100));
+  }
+
   private configurePolling(): void {
     this.stopPolling();
     if (
@@ -616,21 +765,26 @@ export class CampaignsComponent implements OnDestroy {
     )
       this.pollHandle = setInterval(() => this.refreshDetail(true), 15000);
   }
+
   private stopPolling(): void {
     if (this.pollHandle) clearInterval(this.pollHandle);
     this.pollHandle = undefined;
   }
+
   private toLocalInput(iso: string): string {
     const date = new Date(iso);
     const offset = date.getTimezoneOffset() * 60000;
     return new Date(date.getTime() - offset).toISOString().slice(0, 16);
   }
+
   private notify(message: string): void {
     this.successMessage = message;
+    this.toastService.success(message);
     setTimeout(() => {
       this.successMessage = '';
     }, 4000);
   }
+
   private updateQuery(
     query: Record<string, string | number | null>,
   ): Promise<boolean> {
@@ -641,3 +795,4 @@ export class CampaignsComponent implements OnDestroy {
     });
   }
 }
+

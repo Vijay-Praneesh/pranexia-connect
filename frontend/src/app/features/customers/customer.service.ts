@@ -5,12 +5,16 @@ import { map, Observable } from 'rxjs';
 import { API_BASE_URL } from '../../core/config/api-config.token';
 import { ApiResponse } from '../../core/models/api-response.model';
 import { CustomerStatus } from '../../core/models/domain-status.model';
-import { CreateCustomerRequest, Customer, CustomerImportResult, CustomerListData, CustomerListQuery, UpdateCustomerRequest } from './customer.model';
+import { CreateCustomerRequest, Customer, CustomerDashboardStatistics, CustomerImportResult, CustomerListData, CustomerListQuery, UpdateCustomerRequest } from './customer.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
   private readonly http = inject(HttpClient);
   private readonly endpoint = `${inject(API_BASE_URL)}/customers`;
+
+  getDashboardStats(): Observable<CustomerDashboardStatistics> {
+    return this.http.get<ApiResponse<CustomerDashboardStatistics>>(`${this.endpoint}/dashboard`).pipe(map((response) => response.data));
+  }
 
   getCustomers(query: CustomerListQuery = {}): Observable<CustomerListData> {
     let params = new HttpParams();

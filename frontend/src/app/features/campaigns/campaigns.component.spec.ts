@@ -6,9 +6,12 @@ import {
 } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
+import { AuthService } from '../../core/services/auth.service';
+import { DashboardService } from '../dashboard/dashboard.service';
 import { CustomerService } from '../customers/customer.service';
 import { TemplateService } from '../templates/template.service';
 import { MediaService } from '../media/media.service';
+import { WhatsAppSettingsService } from '../settings/whatsapp/whatsapp-settings.service';
 import { Campaign, CampaignListData, CampaignReport } from './campaign.model';
 import { CampaignService } from './campaign.service';
 import { CampaignsComponent } from './campaigns.component';
@@ -18,6 +21,10 @@ describe('CampaignsComponent', () => {
   let component: CampaignsComponent;
   let api: jasmine.SpyObj<CampaignService>;
   let mediaApi: jasmine.SpyObj<MediaService>;
+  let dashboardApi: jasmine.SpyObj<DashboardService>;
+  let whatsappApi: jasmine.SpyObj<WhatsAppSettingsService>;
+  let authService: jasmine.SpyObj<AuthService>;
+
   const campaign: Campaign = {
     id: 'c1',
     templateId: 't1',
@@ -54,6 +61,7 @@ describe('CampaignsComponent', () => {
       updatedAt: '',
     },
   };
+
   beforeEach(async () => {
     api = jasmine.createSpyObj('CampaignService', [
       'getCampaigns',
@@ -76,6 +84,7 @@ describe('CampaignsComponent', () => {
     );
     api.searchCampaigns.and.returnValue(of([campaign]));
     api.getCampaign.and.returnValue(of(campaign));
+
     const templates = jasmine.createSpyObj('TemplateService', ['getTemplates']);
     templates.getTemplates.and.returnValue(
       of({
@@ -83,6 +92,7 @@ describe('CampaignsComponent', () => {
         pagination: { page: 1, limit: 100, totalRecords: 1, totalPages: 1 },
       }),
     );
+
     const customers = jasmine.createSpyObj('CustomerService', ['getCustomers']);
     customers.getCustomers.and.returnValue(
       of({
@@ -90,9 +100,9 @@ describe('CampaignsComponent', () => {
           {
             id: 'u1',
             firstName: 'Asha',
-            lastName: null,
+            lastName: 'Sharma',
             mobile: '123',
-            email: null,
+            email: 'asha@example.com',
             country: 'India',
             tags: null,
             notes: null,
@@ -104,6 +114,7 @@ describe('CampaignsComponent', () => {
         pagination: { page: 1, limit: 100, totalRecords: 1, totalPages: 1 },
       }),
     );
+
     mediaApi = jasmine.createSpyObj('MediaService', ['getMedia']);
     mediaApi.getMedia.and.returnValue(
       of({
@@ -111,6 +122,66 @@ describe('CampaignsComponent', () => {
         pagination: { page: 1, limit: 100, totalRecords: 0, totalPages: 0 },
       }),
     );
+
+    dashboardApi = jasmine.createSpyObj('DashboardService', ['getSummary']);
+    dashboardApi.getSummary.and.returnValue(
+      of({
+        campaigns: {
+          total: 1,
+          draft: 1,
+          scheduled: 0,
+          running: 0,
+          completed: 0,
+          failed: 0,
+          cancelled: 0,
+        },
+        messages: {
+          totalRecipients: 2,
+          sent: 0,
+          delivered: 0,
+          read: 0,
+          failed: 0,
+        },
+        performance: {
+          deliveryRate: 0,
+          readRate: 0,
+          failureRate: 0,
+        },
+      }),
+    );
+
+    whatsappApi = jasmine.createSpyObj('WhatsAppSettingsService', ['getStatus']);
+    whatsappApi.getStatus.and.returnValue(
+      of({
+        status: 'CONNECTED',
+        connection: null,
+      }),
+    );
+
+    authService = jasmine.createSpyObj('AuthService', ['getCurrentUser']);
+    authService.getCurrentUser.and.returnValue({
+      id: 'usr1',
+      email: 'admin@seyyon.com',
+      companyId: 'comp1',
+      firstName: 'Admin',
+      lastName: 'User',
+      mobile: '+1234567890',
+      role: 'COMPANY_ADMIN',
+      status: 'ACTIVE',
+      createdAt: '',
+      updatedAt: '',
+      company: {
+        id: 'comp1',
+        companyName: 'Seyyon Connect Enterprise',
+        email: 'company@seyyon.com',
+        mobile: '+1234567890',
+        plan: 'ENTERPRISE',
+        status: 'ACTIVE',
+        createdAt: '',
+        updatedAt: '',
+      },
+    });
+
     await TestBed.configureTestingModule({
       imports: [CampaignsComponent],
       providers: [
@@ -119,18 +190,25 @@ describe('CampaignsComponent', () => {
         { provide: TemplateService, useValue: templates },
         { provide: CustomerService, useValue: customers },
         { provide: MediaService, useValue: mediaApi },
+        { provide: DashboardService, useValue: dashboardApi },
+        { provide: WhatsAppSettingsService, useValue: whatsappApi },
+        { provide: AuthService, useValue: authService },
       ],
     }).compileComponents();
+
     fixture = TestBed.createComponent(CampaignsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
+
   afterEach(() => component.ngOnDestroy());
 
   it('renders campaign list and status badge', () => {
     expect(fixture.nativeElement.textContent).toContain('Launch');
     expect(fixture.nativeElement.textContent).toContain('DRAFT');
+    expect(fixture.nativeElement.textContent).toContain('WhatsApp Connected');
   });
+
   it('renders loading and empty states', () => {
     const pending = new Subject<CampaignListData>();
     api.getCampaigns.and.returnValue(pending);
@@ -144,8 +222,9 @@ describe('CampaignsComponent', () => {
     });
     pending.complete();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('No campaigns found');
+    expect(fixture.nativeElement.textContent).toContain('No campaigns yet');
   });
+
   it('debounces search', fakeAsync(() => {
     component.filtersForm.controls.keyword.setValue('launch');
     tick(349);
@@ -159,6 +238,7 @@ describe('CampaignsComponent', () => {
       templateId: undefined,
     });
   }));
+
   it('shows retryable errors', () => {
     api.getCampaigns.and.returnValue(throwError(() => ({ status: 0 })));
     component.campaigns = [];
@@ -168,6 +248,7 @@ describe('CampaignsComponent', () => {
       'Campaigns unavailable',
     );
   });
+
   it('validates create template selection', () => {
     component.openCreate();
     component.campaignForm.patchValue({ name: 'Test' });
@@ -175,6 +256,7 @@ describe('CampaignsComponent', () => {
     expect(component.campaignForm.invalid).toBeTrue();
     expect(api.createCampaign).not.toHaveBeenCalled();
   });
+
   it('creates, assigns selected recipients, and preserves tenant isolation', () => {
     api.createCampaign.and.returnValue(of(campaign));
     api.assignRecipients.and.returnValue(
@@ -198,6 +280,7 @@ describe('CampaignsComponent', () => {
       )['companyId'],
     ).toBeUndefined();
   });
+
   it('serializes scheduling as ISO and updates after creation', () => {
     api.createCampaign.and.returnValue(of(campaign));
     api.updateCampaign.and.returnValue(
@@ -215,6 +298,7 @@ describe('CampaignsComponent', () => {
       /^2030-01-01T/,
     );
   });
+
   it('derives actions from status', () => {
     expect(component.canSend(campaign)).toBeTrue();
     expect(component.canCancel(campaign)).toBeFalse();
@@ -223,6 +307,7 @@ describe('CampaignsComponent', () => {
     ).toBeTrue();
     expect(component.canSend({ ...campaign, status: 'COMPLETED' })).toBeFalse();
   });
+
   it('loads details and recipient report only when requested', () => {
     const report = {
       campaignId: 'c1',
@@ -253,6 +338,7 @@ describe('CampaignsComponent', () => {
     expect(api.getCampaignReport).toHaveBeenCalledWith('c1');
     expect(component.report).toEqual(report);
   });
+
   it('polls scheduled campaigns and stops for terminal status', fakeAsync(() => {
     api.getCampaign.and.returnValue(of({ ...campaign, status: 'SCHEDULED' }));
     component.showDetail('c1');
@@ -265,4 +351,17 @@ describe('CampaignsComponent', () => {
     tick(15000);
     expect(api.getCampaign).not.toHaveBeenCalled();
   }));
+
+  it('filters recipients by search query and toggles all', () => {
+    expect(component.filteredCustomers().length).toBe(1);
+    component.recipientSearch = 'nonexistent';
+    expect(component.filteredCustomers().length).toBe(0);
+    component.recipientSearch = 'Asha';
+    expect(component.filteredCustomers().length).toBe(1);
+    component.toggleAllCustomers(true);
+    expect(component.selectedCustomers.has('u1')).toBeTrue();
+    expect(component.isAllFilteredSelected()).toBeTrue();
+    component.toggleAllCustomers(false);
+    expect(component.selectedCustomers.has('u1')).toBeFalse();
+  });
 });

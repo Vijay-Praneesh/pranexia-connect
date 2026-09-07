@@ -71,7 +71,7 @@ class CustomerRepository {
     });
   }
 
-  async update(id, companyId, customerData) {
+  async update(companyId, id, customerData) {
     return await Customer.update(customerData, {
       where: {
         id,
@@ -80,7 +80,7 @@ class CustomerRepository {
     });
   }
 
-  async delete(id, companyId) {
+  async delete(companyId, id) {
     return await Customer.destroy({
       where: {
         id,
@@ -90,7 +90,7 @@ class CustomerRepository {
   }
 
   // Find a soft deleted customer
-  async findDeletedById(id, companyId) {
+  async findDeletedById(companyId, id) {
     return await Customer.findOne({
       where: {
         id,
@@ -101,12 +101,23 @@ class CustomerRepository {
   }
 
   // Restore a soft deleted customer
-  async restore(id, companyId) {
+  async restore(companyId, id) {
     return await Customer.restore({
       where: {
         id,
         companyId,
       },
+    });
+  }
+
+  // Permanently delete customer
+  async forceDelete(companyId, id) {
+    return await Customer.destroy({
+      where: {
+        id,
+        companyId,
+      },
+      force: true,
     });
   }
 

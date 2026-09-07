@@ -1,19 +1,1049 @@
-.metric-panel {
-  display: flex;
-  min-height: 6rem;
-  flex-direction: column;
-  justify-content: center;
-  padding: 1rem;
-  border: 1px solid var(--pc-border);
-  border-radius: var(--pc-radius);
-  background: var(--pc-surface-subtle);
+// Seyyon Connect — Premium Client Dashboard SCSS
+// Curated Palette & Tokens
+$navy: #0f1b3d;
+$blue: #2563eb;
+$blue-dark: #1d4ed8;
+$blue-subtle: #eff6ff;
+$indigo: #4338ca;
+$indigo-subtle: #eef2ff;
+$gold: #f4b728;
+$emerald: #059669;
+$emerald-subtle: #ecfdf5;
+$rose: #e11d48;
+$rose-subtle: #fff1f2;
+$amber: #d97706;
+$amber-subtle: #fffbeb;
+$sky: #0284c7;
+$sky-subtle: #f0f9ff;
+
+$text-navy: #0f1b3d;
+$text-main: #1e293b;
+$text-muted: #64748b;
+$border-color: #e2e8f0;
+$border-subtle: #f1f5f9;
+$surface-white: #ffffff;
+$surface-subtle: #f8fafc;
+
+.dashboard-page-container {
+  padding: 1.75rem 2rem 3.5rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
-.metric-panel span { color: var(--pc-text-muted); font-size: .875rem; }
-.metric-panel strong { font-size: 1.5rem; }
-.progress { height: .55rem; }
-.status-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem 1.5rem; }
-.spin { animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@media (max-width: 575.98px) { .status-grid { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+// =========================================================================
+// 01: HEADER SECTION
+// =========================================================================
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2.25rem;
+  flex-wrap: wrap;
+
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    .header-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: $blue;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+
+      .eyebrow-accent-bar {
+        width: 14px;
+        height: 3px;
+        background: $gold;
+        border-radius: 2px;
+      }
+    }
+
+    .dashboard-title {
+      font-size: 2.125rem;
+      font-weight: 800;
+      color: $navy;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      margin: 0;
+    }
+
+    .dashboard-welcome {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: #334155;
+      margin: 0;
+
+      .text-navy {
+        color: $navy;
+        font-weight: 700;
+      }
+    }
+
+    .dashboard-subtitle {
+      font-size: 0.875rem;
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+
+    .btn-action-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      height: 42px;
+      padding: 0 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      border: 1px solid transparent;
+      border-radius: 0.625rem;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        color: #ffffff;
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .btn-action-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      height: 42px;
+      padding: 0 1.15rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: $navy;
+      background: $surface-white;
+      border: 1px solid $border-color;
+      border-radius: 0.625rem;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(15, 27, 61, 0.04);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: $surface-subtle;
+        border-color: #cbd5e1;
+        color: $blue;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 27, 61, 0.08);
+      }
+    }
+
+    .btn-action-refresh {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      height: 42px;
+      padding: 0 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: $text-muted;
+      background: $surface-white;
+      border: 1px solid $border-color;
+      border-radius: 0.625rem;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(15, 27, 61, 0.04);
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        color: $navy;
+        background: $surface-subtle;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 27, 61, 0.08);
+
+        i {
+          color: $blue;
+        }
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .refresh-label {
+        font-size: 0.8125rem;
+      }
+    }
+  }
+}
+
+// =========================================================================
+// 02: KPI METRIC GRIDS
+// =========================================================================
+.kpi-grid {
+  display: grid;
+  gap: 1.25rem;
+  width: 100%;
+
+  &.kpi-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  &.kpi-grid-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+// =========================================================================
+// 03: DASHBOARD PANELS (CARDS)
+// =========================================================================
+.dashboard-panel {
+  background: $surface-white;
+  border: 1px solid $border-color;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(15, 27, 61, 0.03), 0 1px 3px rgba(15, 27, 61, 0.02);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+
+  .panel-header {
+    padding: 1.35rem 1.5rem 1.15rem;
+    border-bottom: 1px solid $border-subtle;
+    background: #ffffff;
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: $navy;
+      margin: 0;
+      letter-spacing: -0.015em;
+    }
+
+    .panel-subtitle {
+      font-size: 0.8125rem;
+      color: $text-muted;
+      margin: 0.2rem 0 0;
+    }
+
+    .panel-header-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: $blue;
+      text-decoration: none;
+      transition: gap 0.2s ease, color 0.2s ease;
+
+      &:hover {
+        color: $blue-dark;
+        gap: 0.55rem;
+      }
+    }
+  }
+
+  .panel-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+}
+
+// =========================================================================
+// 04: ANALYTICS DUAL GRID
+// =========================================================================
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+// Metric Highlights Row (Delivery, Read, Failure with distinct backgrounds)
+.metric-highlights-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.875rem;
+  margin-bottom: 1.5rem;
+
+  .highlight-tile {
+    border-radius: 0.75rem;
+    padding: 1rem 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+
+    .highlight-label {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .highlight-value {
+      font-size: 1.625rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    &.highlight-tile-delivery {
+      background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1px solid #a7f3d0;
+
+      .highlight-label {
+        color: #047857;
+      }
+      .highlight-value {
+        color: #064e3b;
+      }
+
+      &:hover {
+        background: linear-gradient(145deg, #d1fae5 0%, #a7f3d0 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(5, 150, 105, 0.15);
+      }
+    }
+
+    &.highlight-tile-read {
+      background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
+      border: 1px solid #bfdbfe;
+
+      .highlight-label {
+        color: #1d4ed8;
+      }
+      .highlight-value {
+        color: #1e3a8a;
+      }
+
+      &:hover {
+        background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+      }
+    }
+
+    &.highlight-tile-failure {
+      background: linear-gradient(145deg, #fff1f2 0%, #ffe4e6 100%);
+      border: 1px solid #fecdd3;
+
+      .highlight-label {
+        color: #be123c;
+      }
+      .highlight-value {
+        color: #4c0519;
+      }
+
+      &:hover {
+        background: linear-gradient(145deg, #ffe4e6 0%, #fecdd3 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(225, 29, 72, 0.15);
+      }
+    }
+  }
+}
+
+// Funnel Progress List
+.funnel-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: auto;
+
+  .funnel-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    .funnel-label-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+
+      .funnel-label {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: $text-navy;
+      }
+
+      .funnel-value-badge {
+        font-size: 0.8125rem;
+        color: $navy;
+      }
+    }
+
+    .funnel-progress {
+      height: 0.55rem;
+      background-color: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+
+      .progress-bar {
+        border-radius: 999px;
+        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+    }
+  }
+}
+
+// Status Grid (Doughnut legend pills)
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.625rem 1rem;
+  background: $surface-subtle;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid $border-subtle;
+
+  .status-pill-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    .status-count {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: $navy;
+    }
+  }
+}
+
+// =========================================================================
+// 05: ACTIVITY & SIDEBAR SPLIT GRID
+// =========================================================================
+.activity-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.45fr 0.85fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+// Recent Campaigns Table
+.recent-campaigns-panel {
+  .recent-campaigns-table {
+    margin: 0;
+    width: 100%;
+
+    thead tr {
+      background-color: #f8fafc;
+      border-bottom: 1px solid $border-color;
+
+      th {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.95rem 1.25rem;
+        border: none;
+        white-space: nowrap;
+      }
+    }
+
+    tbody tr {
+      border-bottom: 1px solid $border-subtle;
+      transition: background-color 0.15s ease;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: #f8fafc;
+      }
+
+      td {
+        padding: 0.95rem 1.25rem;
+        font-size: 0.84375rem;
+        color: $text-main;
+        vertical-align: middle;
+        border: none;
+      }
+    }
+
+    .campaign-name-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      max-width: 220px;
+
+      .campaign-name {
+        color: $navy;
+        font-size: 0.875rem;
+        font-weight: 700;
+      }
+
+      .campaign-type-badge {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: $blue;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+    }
+
+    .template-name {
+      display: block;
+      max-width: 160px;
+      color: #334155;
+    }
+
+    .delivery-ratio {
+      font-size: 0.8125rem;
+      white-space: nowrap;
+    }
+  }
+
+  .empty-table-state {
+    padding: 3.5rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .empty-icon-badge {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 1rem;
+      background-color: #eff6ff;
+      color: $blue;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: $navy;
+      margin: 0 0 0.25rem;
+    }
+
+    .empty-subtitle {
+      font-size: 0.8125rem;
+      color: $text-muted;
+      margin: 0 0 1rem;
+      max-width: 340px;
+      line-height: 1.45;
+    }
+  }
+}
+
+// Right Sidebar Column
+.sidebar-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// Audience Stats List
+.audience-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .audience-stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0.875rem;
+    background: $surface-subtle;
+    border-radius: 0.75rem;
+    border: 1px solid $border-subtle;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      transform: translateX(2px);
+      box-shadow: 0 2px 8px rgba(15, 27, 61, 0.04);
+    }
+
+    .stat-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .stat-icon-wrapper {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.625rem;
+        display: grid;
+        place-items: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+
+        &.bg-blue-subtle {
+          background-color: #eff6ff;
+          color: $blue;
+        }
+
+        &.bg-success-subtle {
+          background-color: #ecfdf5;
+          color: $emerald;
+        }
+
+        &.bg-danger-subtle {
+          background-color: #fef2f2;
+          color: $rose;
+        }
+
+        &.bg-amber-subtle {
+          background-color: #fffbeb;
+          color: $amber;
+        }
+
+        &.bg-indigo-subtle {
+          background-color: #eef2ff;
+          color: $indigo;
+        }
+      }
+
+      .stat-title {
+        font-size: 0.84375rem;
+        font-weight: 600;
+        color: #334155;
+      }
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 800;
+      color: $navy;
+    }
+  }
+}
+
+// Quick Actions Grid (Vibrant hover states per card)
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+
+  .quick-action-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.95rem 1rem;
+    background: $surface-subtle;
+    border: 1px solid $border-color;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    .action-icon {
+      width: 2.375rem;
+      height: 2.375rem;
+      border-radius: 0.625rem;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .action-meta {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      .action-name {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: $navy;
+        transition: color 0.2s ease;
+      }
+
+      .action-desc {
+        font-size: 0.6875rem;
+        color: $text-muted;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+
+      .action-icon {
+        transform: scale(1.08);
+      }
+    }
+
+    // Campaigns (Blue)
+    &.action-card-campaigns {
+      .action-icon {
+        background-color: #eff6ff;
+        color: $blue;
+      }
+      &:hover {
+        background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
+        border-color: #93c5fd;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+        .action-name {
+          color: $blue-dark;
+        }
+      }
+    }
+
+    // Customers (Emerald)
+    &.action-card-customers {
+      .action-icon {
+        background-color: #ecfdf5;
+        color: $emerald;
+      }
+      &:hover {
+        background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+        border-color: #6ee7b7;
+        box-shadow: 0 6px 16px rgba(5, 150, 105, 0.12);
+        .action-name {
+          color: #047857;
+        }
+      }
+    }
+
+    // Templates (Indigo)
+    &.action-card-templates {
+      .action-icon {
+        background-color: #eef2ff;
+        color: $indigo;
+      }
+      &:hover {
+        background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 100%);
+        border-color: #a5b4fc;
+        box-shadow: 0 6px 16px rgba(67, 56, 202, 0.12);
+        .action-name {
+          color: #3730a3;
+        }
+      }
+    }
+
+    // Media (Amber)
+    &.action-card-media {
+      .action-icon {
+        background-color: #fffbeb;
+        color: $amber;
+      }
+      &:hover {
+        background: linear-gradient(145deg, #fffbeb 0%, #fef3c7 100%);
+        border-color: #fcd34d;
+        box-shadow: 0 6px 16px rgba(217, 119, 6, 0.12);
+        .action-name {
+          color: #b45309;
+        }
+      }
+    }
+  }
+}
+
+// =========================================================================
+// 06: ONBOARDING / ZERO-DATA STATE
+// =========================================================================
+.zero-data-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.onboarding-guide-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid $border-color;
+  border-radius: 1.125rem;
+  padding: 2.25rem 2.5rem;
+  box-shadow: 0 4px 20px rgba(15, 27, 61, 0.04);
+
+  .onboarding-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+
+    .onboarding-icon-badge {
+      width: 3.75rem;
+      height: 3.75rem;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-size: 1.85rem;
+      flex-shrink: 0;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
+    }
+
+    .onboarding-title-wrap {
+      .onboarding-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: $navy;
+        margin: 0 0 0.25rem;
+        letter-spacing: -0.02em;
+      }
+
+      .onboarding-subtitle {
+        font-size: 0.9375rem;
+        color: $text-muted;
+        margin: 0;
+        line-height: 1.45;
+      }
+    }
+  }
+
+  .onboarding-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+
+    .step-card {
+      position: relative;
+      border-radius: 1rem;
+      padding: 1.5rem 1.35rem 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+
+      .step-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        .step-icon-badge {
+          width: 2.75rem;
+          height: 2.75rem;
+          border-radius: 0.75rem;
+          display: grid;
+          place-items: center;
+          font-size: 1.25rem;
+          margin-bottom: 0.875rem;
+        }
+
+        .step-title {
+          font-size: 1.05rem;
+          font-weight: 800;
+          color: $navy;
+          margin: 0 0 0.35rem;
+        }
+
+        .step-desc {
+          font-size: 0.8125rem;
+          color: $text-muted;
+          line-height: 1.5;
+          margin: 0 0 1.25rem;
+          flex-grow: 1;
+        }
+
+        .step-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          font-size: 0.8125rem;
+          font-weight: 700;
+          text-decoration: none;
+          transition: gap 0.2s ease;
+
+          &:hover {
+            gap: 0.65rem;
+          }
+        }
+      }
+
+      // Step 1: Blue
+      &.step-card-blue {
+        background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid #bfdbfe;
+
+        .step-icon-badge {
+          background: #ffffff;
+          color: $blue;
+          box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+        }
+        .step-link {
+          color: $blue-dark;
+        }
+
+        &:hover {
+          background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+          border-color: #93c5fd;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 24px rgba(37, 99, 235, 0.15);
+        }
+      }
+
+      // Step 2: Indigo
+      &.step-card-indigo {
+        background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 100%);
+        border: 1px solid #c7d2fe;
+
+        .step-icon-badge {
+          background: #ffffff;
+          color: $indigo;
+          box-shadow: 0 2px 6px rgba(67, 56, 202, 0.15);
+        }
+        .step-link {
+          color: #3730a3;
+        }
+
+        &:hover {
+          background: linear-gradient(145deg, #e0e7ff 0%, #c7d2fe 100%);
+          border-color: #a5b4fc;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 24px rgba(67, 56, 202, 0.15);
+        }
+      }
+
+      // Step 3: Emerald
+      &.step-card-emerald {
+        background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+        border: 1px solid #a7f3d0;
+
+        .step-icon-badge {
+          background: #ffffff;
+          color: $emerald;
+          box-shadow: 0 2px 6px rgba(5, 150, 105, 0.15);
+        }
+        .step-link {
+          color: #047857;
+        }
+
+        &:hover {
+          background: linear-gradient(145deg, #d1fae5 0%, #a7f3d0 100%);
+          border-color: #6ee7b7;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 24px rgba(5, 150, 105, 0.15);
+        }
+      }
+    }
+  }
+}
+
+// Utilities
+.text-emerald {
+  color: #059669 !important;
+}
+
+// State container (Loading / Error)
+.state-container {
+  padding: 3.5rem 1rem;
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// =========================================================================
+// 07: RESPONSIVE BREAKPOINTS
+// =========================================================================
+@media (max-width: 1280px) {
+  .kpi-grid.kpi-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpi-grid.kpi-grid-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .activity-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .dashboard-page-container {
+    padding: 1.25rem 1rem 2.5rem;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-grid.kpi-grid-6 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .onboarding-guide-card {
+    padding: 1.75rem 1.5rem;
+
+    .onboarding-steps-grid {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .metric-highlights-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    .header-actions {
+      justify-content: flex-start;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .kpi-grid.kpi-grid-4,
+  .kpi-grid.kpi-grid-6 {
+    grid-template-columns: 1fr;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+  .kpi-card,
+  .btn-action-primary,
+  .btn-action-secondary,
+  .step-card,
+  .quick-action-card,
+  .highlight-tile {
+    transition: none;
+    &:hover {
+      transform: none;
+    }
+  }
+}

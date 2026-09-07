@@ -1,110 +1,943 @@
-<section aria-labelledby="customers-title">
-  <div class="d-flex flex-column flex-lg-row align-items-lg-start justify-content-between gap-3 mb-4">
-    <div><h1 id="customers-title" class="h3 mb-1">Customers</h1><p class="text-body-secondary mb-0">{{ totalRecords }} customer{{ totalRecords === 1 ? '' : 's' }}</p></div>
-    <div class="d-flex flex-wrap gap-2">
-      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="importOpen = true"><i class="bi bi-upload me-1"></i>Import</button>
-      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="exportCustomers()" [disabled]="actionLoading"><i class="bi bi-download me-1"></i>Export</button>
-      <button class="btn btn-primary btn-sm" type="button" (click)="openCreate()"><i class="bi bi-person-plus me-1"></i>Add customer</button>
+<section class="customers-page-container" aria-labelledby="customers-title">
+  <!-- ===================================================================== -->
+  <!-- 01: PAGE HEADER                                                      -->
+  <!-- ===================================================================== -->
+  <header class="customers-header">
+    <div class="header-content">
+      <div class="header-eyebrow">
+        <span class="eyebrow-accent-bar" aria-hidden="true"></span>
+        <span>CUSTOMER DIRECTORY</span>
+      </div>
+      <h1 id="customers-title" class="customers-title">Customers</h1>
+      <p class="customers-subtitle">
+        Manage your customer contacts and messaging recipients
+        @if (auth.currentUser$ | async; as user) {
+          <span class="company-badge">· {{ user.company.companyName }}</span>
+        }
+      </p>
     </div>
-  </div>
 
-  @if (successMessage) { <div class="alert alert-success" role="status">{{ successMessage }}</div> }
-  @if (errorMessage && customers.length) { <div class="alert alert-warning" role="alert">{{ errorMessage }}</div> }
+    <div class="header-actions">
+      <button
+        class="btn-action-primary"
+        type="button"
+        (click)="openCreate()"
+        aria-label="Add new customer"
+      >
+        <i class="bi bi-person-plus-fill" aria-hidden="true"></i>
+        <span>Add Customer</span>
+      </button>
 
-  <div class="card border-0 shadow-sm mb-3">
-    <div class="card-body">
-      <form [formGroup]="searchForm" role="search">
-        <label class="visually-hidden" for="customer-search">Search customers</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
-          <input id="customer-search" class="form-control" type="search" formControlName="q" placeholder="Search name, mobile, email, or country" autocomplete="off" />
+      <button
+        class="btn-action-secondary"
+        type="button"
+        (click)="importOpen = true"
+        aria-label="Import customers from Excel"
+      >
+        <i class="bi bi-file-earmark-arrow-up-fill" aria-hidden="true"></i>
+        <span>Import</span>
+      </button>
+
+      <button
+        class="btn-action-secondary"
+        type="button"
+        (click)="exportCustomers()"
+        [disabled]="actionLoading"
+        aria-label="Export customer list"
+      >
+        <i class="bi bi-download" aria-hidden="true"></i>
+        <span>Export</span>
+      </button>
+
+      <button
+        class="btn-action-ghost"
+        type="button"
+        (click)="downloadTemplate()"
+        title="Download Excel import template"
+        aria-label="Download template"
+      >
+        <i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i>
+        <span>Template</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- 02: REAL CUSTOMER SUMMARY STRIP                                      -->
+  <!-- ===================================================================== -->
+  @if (stats) {
+    <div class="customer-stats-grid mb-4" aria-label="Customer Statistics">
+      <div class="stat-card stat-indigo">
+        <div class="stat-header">
+          <span class="stat-label">Total Contacts</span>
+          <div class="stat-icon-wrap" aria-hidden="true">
+            <i class="bi bi-people-fill"></i>
+          </div>
         </div>
-      </form>
-    </div>
-  </div>
+        <div class="stat-body">
+          <strong class="stat-value">{{ stats.totalCustomers }}</strong>
+          <span class="stat-subtext">Registered customers</span>
+        </div>
+      </div>
 
-  @if (selected.size) {
-    <div class="bulk-bar d-flex flex-wrap align-items-center gap-2 mb-3" role="region" aria-label="Bulk actions">
-      <strong class="me-auto">{{ selected.size }} selected</strong>
-      <button class="btn btn-outline-success btn-sm" type="button" (click)="bulkStatus('ACTIVE')">Mark active</button>
-      <button class="btn btn-outline-warning btn-sm" type="button" (click)="bulkStatus('BLOCKED')">Mark blocked</button>
-      <button class="btn btn-outline-danger btn-sm" type="button" (click)="bulkDelete()">Delete</button>
+      <div class="stat-card stat-emerald">
+        <div class="stat-header">
+          <span class="stat-label">Active Contacts</span>
+          <div class="stat-icon-wrap" aria-hidden="true">
+            <i class="bi bi-person-check-fill"></i>
+          </div>
+        </div>
+        <div class="stat-body">
+          <strong class="stat-value">{{ stats.activeCustomers }}</strong>
+          <span class="stat-subtext">Eligible for campaigns</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-rose">
+        <div class="stat-header">
+          <span class="stat-label">Blocked Contacts</span>
+          <div class="stat-icon-wrap" aria-hidden="true">
+            <i class="bi bi-person-x-fill"></i>
+          </div>
+        </div>
+        <div class="stat-body">
+          <strong class="stat-value">{{ stats.blockedCustomers }}</strong>
+          <span class="stat-subtext">Opted out / blocked</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-amber">
+        <div class="stat-header">
+          <span class="stat-label">New This Month</span>
+          <div class="stat-icon-wrap" aria-hidden="true">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+        </div>
+        <div class="stat-body">
+          <strong class="stat-value">{{ stats.newThisMonth }}</strong>
+          <span class="stat-subtext">{{ stats.countries }} countries reached</span>
+        </div>
+      </div>
     </div>
   }
 
+  <!-- ===================================================================== -->
+  <!-- 03: SEARCH & FILTER TOOLBAR                                          -->
+  <!-- ===================================================================== -->
+  <div class="toolbar-card mb-3">
+    <div class="toolbar-content">
+      <!-- Search Input -->
+      <form class="search-form" [formGroup]="searchForm" role="search" (ngSubmit)="$event.preventDefault()">
+        <label class="visually-hidden" for="customer-search">Search customers</label>
+        <div class="search-input-wrapper">
+          <i class="bi bi-search search-icon" aria-hidden="true"></i>
+          <input
+            id="customer-search"
+            class="search-input"
+            type="search"
+            formControlName="q"
+            placeholder="Search by name, mobile, email, or country…"
+            autocomplete="off"
+          />
+          @if (q) {
+            <button
+              class="btn-clear-search"
+              type="button"
+              (click)="clearSearch()"
+              aria-label="Clear search query"
+            >
+              <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+      </form>
+
+      <!-- Status Filter Segmented Buttons -->
+      <div class="filter-group" role="group" aria-label="Filter by customer status">
+        <button
+          type="button"
+          class="filter-pill-btn"
+          [class.active]="statusFilter === 'ALL'"
+          (click)="filterStatus('ALL')"
+        >
+          All
+        </button>
+        <button
+          type="button"
+          class="filter-pill-btn filter-active"
+          [class.active]="statusFilter === 'ACTIVE'"
+          (click)="filterStatus('ACTIVE')"
+        >
+          <span class="status-dot dot-active" aria-hidden="true"></span>
+          Active
+        </button>
+        <button
+          type="button"
+          class="filter-pill-btn filter-blocked"
+          [class.active]="statusFilter === 'BLOCKED'"
+          (click)="filterStatus('BLOCKED')"
+        >
+          <span class="status-dot dot-blocked" aria-hidden="true"></span>
+          Blocked
+        </button>
+      </div>
+
+      <!-- Active Filters Reset if Applied -->
+      @if (q || statusFilter !== 'ALL') {
+        <button
+          class="btn-reset-filters"
+          type="button"
+          (click)="clearAllFilters()"
+          title="Reset all filters"
+        >
+          <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+          <span>Reset</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 04: FLOATING BULK ACTIONS BAR                                        -->
+  <!-- ===================================================================== -->
+  @if (selected.size) {
+    <div class="bulk-actions-banner mb-3" role="region" aria-label="Bulk actions">
+      <div class="bulk-left">
+        <span class="selected-badge">{{ selected.size }}</span>
+        <span class="selected-text">customer{{ selected.size === 1 ? '' : 's' }} selected</span>
+      </div>
+      <div class="bulk-actions">
+        <button
+          class="btn-bulk btn-bulk-success"
+          type="button"
+          (click)="bulkStatus('ACTIVE')"
+          [disabled]="actionLoading"
+        >
+          <i class="bi bi-person-check-fill" aria-hidden="true"></i>
+          <span>Mark Active</span>
+        </button>
+
+        <button
+          class="btn-bulk btn-bulk-warning"
+          type="button"
+          (click)="bulkStatus('BLOCKED')"
+          [disabled]="actionLoading"
+        >
+          <i class="bi bi-person-x-fill" aria-hidden="true"></i>
+          <span>Mark Blocked</span>
+        </button>
+
+        <button
+          class="btn-bulk btn-bulk-danger"
+          type="button"
+          (click)="bulkDelete()"
+          [disabled]="actionLoading"
+        >
+          <i class="bi bi-trash3-fill" aria-hidden="true"></i>
+          <span>Delete</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================== -->
+  <!-- 05: CONDITIONAL TABLE STATES                                         -->
+  <!-- ===================================================================== -->
   @if (loading && !customers.length) {
-    <app-loading-state message="Loading customers…" />
+    <div class="state-wrapper">
+      <app-loading-state message="Loading customer directory…" />
+    </div>
   } @else if (errorMessage && !customers.length) {
-    <app-error-state title="Customers unavailable" [message]="errorMessage" [retryable]="true" (retry)="load()" />
+    <div class="state-wrapper">
+      <app-error-state
+        title="Customers unavailable"
+        [message]="errorMessage"
+        [retryable]="true"
+        (retry)="load()"
+      />
+    </div>
   } @else if (!customers.length) {
-    <app-empty-state [title]="q ? 'No customers match your search' : 'No customers found'" [message]="q ? 'Try a different search term.' : 'Add your first customer or import an Excel file.'">
-      @if (!q) { <button class="btn btn-primary btn-sm" type="button" (click)="openCreate()">Add customer</button> }
-    </app-empty-state>
+    <div class="empty-wrapper">
+      <app-empty-state
+        [title]="q ? 'No customers match your search' : 'No customers found'"
+        [message]="q ? 'Try adjusting your search keywords or clearing active filters.' : 'Start building your customer directory by adding contacts or importing an Excel spreadsheet.'"
+      >
+        @if (!q) {
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            <button class="btn btn-primary btn-sm" type="button" (click)="openCreate()">
+              <i class="bi bi-person-plus-fill me-1" aria-hidden="true"></i>
+              <span>Add Customer</span>
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" type="button" (click)="importOpen = true">
+              <i class="bi bi-file-earmark-arrow-up-fill me-1" aria-hidden="true"></i>
+              <span>Import Excel</span>
+            </button>
+          </div>
+        }
+      </app-empty-state>
+    </div>
   } @else {
-    <div class="card border-0 shadow-sm overflow-hidden">
+    <!-- =================================================================== -->
+    <!-- 06: CRM CUSTOMER TABLE                                              -->
+    <!-- =================================================================== -->
+    <div class="table-card">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead><tr>
-            <th class="selection"><input class="form-check-input" type="checkbox" aria-label="Select all customers" [checked]="selected.size === customers.length" (change)="toggleAll($any($event.target).checked)" /></th>
-            <th><button class="sort-button" (click)="sort('firstName')">Name</button></th>
-            <th><button class="sort-button" (click)="sort('mobile')">Mobile</button></th>
-            <th><button class="sort-button" (click)="sort('email')">Email</button></th>
-            <th>Country</th><th><button class="sort-button" (click)="sort('status')">Status</button></th>
-            <th><button class="sort-button" (click)="sort('createdAt')">Created</button></th><th class="text-end">Actions</th>
-          </tr></thead>
+        <table class="crm-table">
+          <thead>
+            <tr>
+              <th class="col-checkbox" scope="col">
+                <input
+                  class="crm-checkbox"
+                  type="checkbox"
+                  aria-label="Select all customers on this page"
+                  [checked]="selected.size === customers.length && customers.length > 0"
+                  (change)="toggleAll($any($event.target).checked)"
+                />
+              </th>
+              <th scope="col">
+                <button
+                  class="btn-table-sort"
+                  type="button"
+                  (click)="sort('firstName')"
+                  [attr.aria-label]="'Sort by Name ' + (sortBy === 'firstName' ? order : 'none')"
+                >
+                  <span>Customer</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-down]="sortBy === 'firstName' && order === 'DESC'"
+                    [class.bi-arrow-up]="sortBy === 'firstName' && order === 'ASC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'firstName'"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
+              <th scope="col">
+                <button
+                  class="btn-table-sort"
+                  type="button"
+                  (click)="sort('mobile')"
+                  [attr.aria-label]="'Sort by Mobile ' + (sortBy === 'mobile' ? order : 'none')"
+                >
+                  <span>Mobile</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-down]="sortBy === 'mobile' && order === 'DESC'"
+                    [class.bi-arrow-up]="sortBy === 'mobile' && order === 'ASC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'mobile'"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
+              <th scope="col">
+                <button
+                  class="btn-table-sort"
+                  type="button"
+                  (click)="sort('email')"
+                  [attr.aria-label]="'Sort by Email ' + (sortBy === 'email' ? order : 'none')"
+                >
+                  <span>Email</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-down]="sortBy === 'email' && order === 'DESC'"
+                    [class.bi-arrow-up]="sortBy === 'email' && order === 'ASC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'email'"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
+              <th scope="col">Country</th>
+              <th scope="col">Tags</th>
+              <th scope="col">
+                <button
+                  class="btn-table-sort"
+                  type="button"
+                  (click)="sort('status')"
+                  [attr.aria-label]="'Sort by Status ' + (sortBy === 'status' ? order : 'none')"
+                >
+                  <span>Status</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-down]="sortBy === 'status' && order === 'DESC'"
+                    [class.bi-arrow-up]="sortBy === 'status' && order === 'ASC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'status'"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
+              <th scope="col">
+                <button
+                  class="btn-table-sort"
+                  type="button"
+                  (click)="sort('createdAt')"
+                  [attr.aria-label]="'Sort by Created ' + (sortBy === 'createdAt' ? order : 'none')"
+                >
+                  <span>Created</span>
+                  <i
+                    class="bi"
+                    [class.bi-arrow-down]="sortBy === 'createdAt' && order === 'DESC'"
+                    [class.bi-arrow-up]="sortBy === 'createdAt' && order === 'ASC'"
+                    [class.bi-arrow-down-up]="sortBy !== 'createdAt'"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
+              <th class="col-actions text-end" scope="col">Actions</th>
+            </tr>
+          </thead>
           <tbody>
             @for (customer of customers; track customer.id) {
-              <tr>
-                <td><input class="form-check-input" type="checkbox" [checked]="selected.has(customer.id)" [attr.aria-label]="'Select ' + customer.firstName" (change)="toggle(customer.id, $any($event.target).checked)" /></td>
-                <td><button class="btn btn-link p-0 text-start text-decoration-none" type="button" (click)="showDetail(customer.id)"><strong>{{ customer.firstName }} {{ customer.lastName }}</strong></button></td>
-                <td>{{ customer.mobile }}</td><td>{{ customer.email || '—' }}</td><td>{{ customer.country }}</td>
-                <td><app-status-badge [status]="customer.status" /></td><td>{{ customer.createdAt | date:'mediumDate' }}</td>
-                <td class="text-end text-nowrap"><button class="btn btn-sm btn-link" type="button" (click)="openEdit(customer)" [attr.aria-label]="'Edit ' + customer.firstName"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-link text-danger" type="button" (click)="remove(customer)" [attr.aria-label]="'Delete ' + customer.firstName"><i class="bi bi-trash"></i></button></td>
+              <tr [class.row-selected]="selected.has(customer.id)">
+                <!-- Checkbox -->
+                <td class="col-checkbox">
+                  <input
+                    class="crm-checkbox"
+                    type="checkbox"
+                    [checked]="selected.has(customer.id)"
+                    [attr.aria-label]="'Select ' + customer.firstName"
+                    (change)="toggle(customer.id, $any($event.target).checked)"
+                  />
+                </td>
+
+                <!-- Customer Identity with Initials Avatar -->
+                <td>
+                  <div class="customer-profile-cell">
+                    <div
+                      class="customer-avatar {{ getAvatarToneClass(customer.firstName) }}"
+                      aria-hidden="true"
+                    >
+                      {{ getInitials(customer.firstName, customer.lastName) }}
+                    </div>
+                    <div class="customer-info-meta">
+                      <button
+                        class="customer-name-btn"
+                        type="button"
+                        (click)="showDetail(customer.id)"
+                        title="View customer profile"
+                      >
+                        {{ customer.firstName }} {{ customer.lastName }}
+                      </button>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Mobile -->
+                <td>
+                  <span class="contact-mobile-text">{{ customer.mobile }}</span>
+                </td>
+
+                <!-- Email -->
+                <td>
+                  <span class="contact-email-text text-truncate">{{ customer.email || '—' }}</span>
+                </td>
+
+                <!-- Country -->
+                <td>
+                  <span class="country-pill">{{ customer.country }}</span>
+                </td>
+
+                <!-- Tags -->
+                <td>
+                  @if (customer.tags && customer.tags.length) {
+                    <div class="tags-list">
+                      @for (tag of customer.tags; track tag) {
+                        <span class="tag-badge">{{ tag }}</span>
+                      }
+                    </div>
+                  } @else {
+                    <span class="text-muted small">—</span>
+                  }
+                </td>
+
+                <!-- Status -->
+                <td>
+                  <app-status-badge [status]="customer.status" />
+                </td>
+
+                <!-- Created Date -->
+                <td>
+                  <span class="date-text">{{ customer.createdAt | date:'mediumDate' }}</span>
+                </td>
+
+                <!-- Actions -->
+                <td class="col-actions text-end">
+                  <div class="row-actions-group">
+                    <button
+                      class="btn-row-action btn-view"
+                      type="button"
+                      (click)="showDetail(customer.id)"
+                      [attr.aria-label]="'View details for ' + customer.firstName"
+                      title="View details"
+                    >
+                      <i class="bi bi-eye-fill" aria-hidden="true"></i>
+                    </button>
+
+                    <button
+                      class="btn-row-action btn-edit"
+                      type="button"
+                      (click)="openEdit(customer)"
+                      [attr.aria-label]="'Edit ' + customer.firstName"
+                      title="Edit customer"
+                    >
+                      <i class="bi bi-pencil-fill" aria-hidden="true"></i>
+                    </button>
+
+                    <button
+                      class="btn-row-action btn-delete"
+                      type="button"
+                      (click)="remove(customer)"
+                      [attr.aria-label]="'Delete ' + customer.firstName"
+                      title="Delete customer"
+                    >
+                      <i class="bi bi-trash3-fill" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
-      @if (!q) { <div class="card-footer bg-white d-flex justify-content-between align-items-center gap-3"><small class="text-body-secondary">Page {{ page }} of {{ totalPages || 1 }}</small><app-pagination [page]="page" [totalPages]="totalPages" (pageChange)="changePage($event)" /></div> }
+
+      <!-- Pagination Footer -->
+      @if (!q) {
+        <div class="table-pagination-footer">
+          <div class="pagination-info">
+            <span>Showing page <strong>{{ page }}</strong> of <strong>{{ totalPages || 1 }}</strong></span>
+            <span class="text-muted">({{ totalRecords }} total customer{{ totalRecords === 1 ? '' : 's' }})</span>
+          </div>
+          <app-pagination
+            [page]="page"
+            [totalPages]="totalPages"
+            (pageChange)="changePage($event)"
+          />
+        </div>
+      }
     </div>
   }
 </section>
 
+<!-- ======================================================================= -->
+<!-- 07: ADD / EDIT CUSTOMER MODAL                                           -->
+<!-- ======================================================================= -->
 @if (editorOpen) {
-  <div class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="customer-editor-title">
-    <div class="modal-card card shadow-lg">
-      <form [formGroup]="customerForm" (ngSubmit)="save()">
-        <div class="card-header d-flex justify-content-between align-items-center"><h2 id="customer-editor-title" class="h5 mb-0">{{ editing ? 'Edit customer' : 'Add customer' }}</h2><button class="btn-close" type="button" aria-label="Close" (click)="editorOpen = false"></button></div>
-        <div class="card-body"><div class="row g-3">
-          <div class="col-sm-6"><label class="form-label" for="firstName">First name</label><input id="firstName" class="form-control" formControlName="firstName" [class.is-invalid]="customerForm.controls.firstName.touched && customerForm.controls.firstName.invalid" /><div class="invalid-feedback">First name is required.</div></div>
-          <div class="col-sm-6"><label class="form-label" for="lastName">Last name</label><input id="lastName" class="form-control" formControlName="lastName" /></div>
-          <div class="col-sm-6"><label class="form-label" for="mobile">Mobile</label><input id="mobile" class="form-control" formControlName="mobile" inputmode="tel" [class.is-invalid]="customerForm.controls.mobile.touched && customerForm.controls.mobile.invalid" /><div class="invalid-feedback">Mobile is required.</div></div>
-          <div class="col-sm-6"><label class="form-label" for="email">Email</label><input id="email" class="form-control" type="email" formControlName="email" [class.is-invalid]="customerForm.controls.email.touched && customerForm.controls.email.invalid" /><div class="invalid-feedback">Enter a valid email.</div></div>
-          <div class="col-sm-6"><label class="form-label" for="country">Country</label><input id="country" class="form-control" formControlName="country" /></div>
-          <div class="col-sm-6"><label class="form-label" for="status">Status</label><select id="status" class="form-select" formControlName="status"><option value="ACTIVE">Active</option><option value="BLOCKED">Blocked</option></select></div>
-          <div class="col-12"><label class="form-label" for="tags">Tags</label><input id="tags" class="form-control" formControlName="tags" placeholder="Comma-separated tags" /></div>
-          <div class="col-12"><label class="form-label" for="notes">Notes</label><textarea id="notes" class="form-control" rows="3" formControlName="notes"></textarea></div>
-        </div></div>
-        <div class="card-footer d-flex justify-content-end gap-2"><button class="btn btn-outline-secondary" type="button" (click)="editorOpen = false">Cancel</button><button class="btn btn-primary" type="submit" [disabled]="actionLoading">{{ actionLoading ? 'Saving…' : 'Save customer' }}</button></div>
+  <div
+    class="modal-backdrop-layer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="customer-editor-title"
+  >
+    <div class="modal-dialog-box modal-lg">
+      <form class="modal-form" [formGroup]="customerForm" (ngSubmit)="save()">
+        <header class="modal-dialog-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="modal-header-icon" aria-hidden="true">
+              <i class="bi {{ editing ? 'bi-pencil-square' : 'bi-person-plus-fill' }}"></i>
+            </div>
+            <div>
+              <h2 id="customer-editor-title" class="modal-dialog-title">
+                {{ editing ? 'Edit Customer' : 'Add Customer' }}
+              </h2>
+              <p class="modal-dialog-subtitle">
+                {{ editing ? 'Update customer information and messaging status.' : 'Add a customer to your recipient list for campaigns.' }}
+              </p>
+            </div>
+          </div>
+          <button
+            class="btn-modal-close"
+            type="button"
+            aria-label="Close"
+            (click)="editorOpen = false"
+          >
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
+        </header>
+
+        <div class="modal-dialog-body">
+          <div class="form-grid">
+            <!-- First Name -->
+            <div class="form-field-group">
+              <label class="form-label" for="firstName">
+                First Name <span class="required-asterisk">*</span>
+              </label>
+              <input
+                id="firstName"
+                class="form-control"
+                type="text"
+                formControlName="firstName"
+                placeholder="e.g. Surya"
+                [class.is-invalid]="customerForm.controls.firstName.touched && customerForm.controls.firstName.invalid"
+              />
+              @if (customerForm.controls.firstName.touched && customerForm.controls.firstName.invalid) {
+                <div class="invalid-feedback">First name is required.</div>
+              }
+            </div>
+
+            <!-- Last Name -->
+            <div class="form-field-group">
+              <label class="form-label" for="lastName">Last Name</label>
+              <input
+                id="lastName"
+                class="form-control"
+                type="text"
+                formControlName="lastName"
+                placeholder="e.g. Kumar"
+              />
+            </div>
+
+            <!-- Mobile -->
+            <div class="form-field-group">
+              <label class="form-label" for="mobile">
+                Mobile Number <span class="required-asterisk">*</span>
+              </label>
+              <input
+                id="mobile"
+                class="form-control"
+                type="tel"
+                inputmode="tel"
+                formControlName="mobile"
+                placeholder="e.g. 919876543210"
+                [class.is-invalid]="customerForm.controls.mobile.touched && customerForm.controls.mobile.invalid"
+              />
+              @if (customerForm.controls.mobile.touched && customerForm.controls.mobile.invalid) {
+                <div class="invalid-feedback">Mobile number is required.</div>
+              }
+            </div>
+
+            <!-- Email -->
+            <div class="form-field-group">
+              <label class="form-label" for="email">Email Address</label>
+              <input
+                id="email"
+                class="form-control"
+                type="email"
+                formControlName="email"
+                placeholder="e.g. surya@example.com"
+                [class.is-invalid]="customerForm.controls.email.touched && customerForm.controls.email.invalid"
+              />
+              @if (customerForm.controls.email.touched && customerForm.controls.email.invalid) {
+                <div class="invalid-feedback">Please enter a valid email address.</div>
+              }
+            </div>
+
+            <!-- Country -->
+            <div class="form-field-group">
+              <label class="form-label" for="country">
+                Country <span class="required-asterisk">*</span>
+              </label>
+              <input
+                id="country"
+                class="form-control"
+                type="text"
+                formControlName="country"
+                placeholder="e.g. India"
+              />
+            </div>
+
+            <!-- Status -->
+            <div class="form-field-group">
+              <label class="form-label" for="status">
+                Status <span class="required-asterisk">*</span>
+              </label>
+              <select id="status" class="form-select" formControlName="status">
+                <option value="ACTIVE">Active (Can receive messages)</option>
+                <option value="BLOCKED">Blocked (Opted out / do not message)</option>
+              </select>
+            </div>
+
+            <!-- Tags -->
+            <div class="form-field-group col-span-2">
+              <label class="form-label" for="tags">
+                Tags <span class="field-hint">(comma-separated)</span>
+              </label>
+              <input
+                id="tags"
+                class="form-control"
+                type="text"
+                formControlName="tags"
+                placeholder="e.g. VIP, Wholesale, Retail"
+              />
+            </div>
+
+            <!-- Notes -->
+            <div class="form-field-group col-span-2">
+              <label class="form-label" for="notes">Notes & Remarks</label>
+              <textarea
+                id="notes"
+                class="form-control"
+                rows="3"
+                formControlName="notes"
+                placeholder="Add any internal customer notes…"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-dialog-footer">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            (click)="editorOpen = false"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary btn-submit"
+            type="submit"
+            [disabled]="actionLoading"
+          >
+            @if (actionLoading) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              <span>Saving…</span>
+            } @else {
+              <span>{{ editing ? 'Save Changes' : 'Add Customer' }}</span>
+            }
+          </button>
+        </footer>
       </form>
     </div>
   </div>
 }
 
-@if (importOpen) {
-  <div class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="import-title"><div class="modal-card card shadow-lg">
-    <div class="card-header d-flex justify-content-between"><h2 id="import-title" class="h5 mb-0">Import customers</h2><button class="btn-close" type="button" aria-label="Close" (click)="importOpen = false"></button></div>
-    <div class="card-body"><p class="text-body-secondary">Upload an Excel .xlsx or .xls file, up to 5 MB.</p><input class="form-control mb-3" type="file" accept=".xlsx,.xls" (change)="selectImportFile($event)" />
-      <button class="btn btn-link px-0" type="button" (click)="downloadTemplate()">Download import template</button>
-      @if (importResult) { <div class="alert alert-info mt-3"><strong>{{ importResult.imported }}</strong> imported, <strong>{{ importResult.skipped }}</strong> skipped.@if (importResult.errors.length) { <ul class="mb-0 mt-2">@for (error of importResult.errors; track error.row) { <li>Row {{ error.row }}: {{ error.reason }}</li> }</ul> }</div> }
+<!-- ======================================================================= -->
+<!-- 08: CUSTOMER DETAILS MODAL                                              -->
+<!-- ======================================================================= -->
+@if (detail) {
+  <div
+    class="modal-backdrop-layer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="detail-title"
+  >
+    <div class="modal-dialog-box modal-md">
+      <header class="modal-dialog-header">
+        <div class="d-flex align-items-center gap-3">
+          <div
+            class="customer-avatar-large {{ getAvatarToneClass(detail.firstName) }}"
+            aria-hidden="true"
+          >
+            {{ getInitials(detail.firstName, detail.lastName) }}
+          </div>
+          <div>
+            <h2 id="detail-title" class="modal-dialog-title mb-0">
+              {{ detail.firstName }} {{ detail.lastName }}
+            </h2>
+            <div class="d-flex align-items-center gap-2 mt-1">
+              <app-status-badge [status]="detail.status" />
+              <span class="text-muted small">· Created {{ detail.createdAt | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+        <button
+          class="btn-modal-close"
+          type="button"
+          aria-label="Close profile"
+          (click)="detail = null"
+        >
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </header>
+
+      <div class="modal-dialog-body">
+        <div class="detail-cards-grid">
+          <!-- Mobile -->
+          <div class="detail-item">
+            <span class="detail-label">Mobile Number</span>
+            <strong class="detail-value text-navy">{{ detail.mobile }}</strong>
+          </div>
+
+          <!-- Email -->
+          <div class="detail-item">
+            <span class="detail-label">Email Address</span>
+            <strong class="detail-value">{{ detail.email || '—' }}</strong>
+          </div>
+
+          <!-- Country -->
+          <div class="detail-item">
+            <span class="detail-label">Country</span>
+            <strong class="detail-value">{{ detail.country }}</strong>
+          </div>
+
+          <!-- Status -->
+          <div class="detail-item">
+            <span class="detail-label">Status</span>
+            <div><app-status-badge [status]="detail.status" /></div>
+          </div>
+
+          <!-- Created -->
+          <div class="detail-item">
+            <span class="detail-label">Added Date</span>
+            <span class="detail-value">{{ detail.createdAt | date:'medium' }}</span>
+          </div>
+
+          <!-- Updated -->
+          <div class="detail-item">
+            <span class="detail-label">Last Modified</span>
+            <span class="detail-value">{{ detail.updatedAt | date:'medium' }}</span>
+          </div>
+
+          <!-- Tags -->
+          <div class="detail-item col-span-2">
+            <span class="detail-label">Tags</span>
+            @if (detail.tags && detail.tags.length) {
+              <div class="tags-list mt-1">
+                @for (tag of detail.tags; track tag) {
+                  <span class="tag-badge">{{ tag }}</span>
+                }
+              </div>
+            } @else {
+              <span class="text-muted small">No tags assigned</span>
+            }
+          </div>
+
+          <!-- Notes -->
+          @if (detail.notes) {
+            <div class="detail-item col-span-2">
+              <span class="detail-label">Notes & Remarks</span>
+              <p class="detail-notes-box mb-0">{{ detail.notes }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <footer class="modal-dialog-footer d-flex justify-content-between">
+        <button
+          class="btn btn-outline-danger"
+          type="button"
+          (click)="remove(detail)"
+        >
+          <i class="bi bi-trash3-fill me-1" aria-hidden="true"></i>
+          <span>Delete</span>
+        </button>
+
+        <div class="d-flex gap-2">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            (click)="detail = null"
+          >
+            Close
+          </button>
+          <button
+            class="btn btn-primary"
+            type="button"
+            (click)="openEdit(detail); detail = null"
+          >
+            <i class="bi bi-pencil-fill me-1" aria-hidden="true"></i>
+            <span>Edit Customer</span>
+          </button>
+        </div>
+      </footer>
     </div>
-    <div class="card-footer d-flex justify-content-end gap-2"><button class="btn btn-outline-secondary" type="button" (click)="importOpen = false">Close</button><button class="btn btn-primary" type="button" [disabled]="!importFile || actionLoading" (click)="importCustomers()">{{ actionLoading ? 'Importing…' : 'Import' }}</button></div>
-  </div></div>
+  </div>
 }
 
-@if (detail) {
-  <div class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="detail-title"><div class="modal-card card shadow-lg">
-    <div class="card-header d-flex justify-content-between"><h2 id="detail-title" class="h5 mb-0">Customer details</h2><button class="btn-close" type="button" aria-label="Close" (click)="detail = null"></button></div>
-    <div class="card-body"><h3 class="h5">{{ detail.firstName }} {{ detail.lastName }}</h3><dl class="row mb-0"><dt class="col-4">Mobile</dt><dd class="col-8">{{ detail.mobile }}</dd><dt class="col-4">Email</dt><dd class="col-8">{{ detail.email || '—' }}</dd><dt class="col-4">Country</dt><dd class="col-8">{{ detail.country }}</dd><dt class="col-4">Status</dt><dd class="col-8"><app-status-badge [status]="detail.status" /></dd><dt class="col-4">Created</dt><dd class="col-8">{{ detail.createdAt | date:'medium' }}</dd><dt class="col-4">Updated</dt><dd class="col-8">{{ detail.updatedAt | date:'medium' }}</dd><dt class="col-4">Notes</dt><dd class="col-8">{{ detail.notes || '—' }}</dd></dl></div>
-  </div></div>
+<!-- ======================================================================= -->
+<!-- 09: IMPORT CUSTOMERS MODAL                                              -->
+<!-- ======================================================================= -->
+@if (importOpen) {
+  <div
+    class="modal-backdrop-layer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="import-title"
+  >
+    <div class="modal-dialog-box modal-md">
+      <header class="modal-dialog-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="modal-header-icon bg-emerald-subtle text-emerald" aria-hidden="true">
+            <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+          </div>
+          <div>
+            <h2 id="import-title" class="modal-dialog-title">Import Customers</h2>
+            <p class="modal-dialog-subtitle">
+              Upload customer contacts in bulk via Excel spreadsheet.
+            </p>
+          </div>
+        </div>
+        <button
+          class="btn-modal-close"
+          type="button"
+          aria-label="Close"
+          (click)="importOpen = false"
+        >
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </header>
+
+      <div class="modal-dialog-body">
+        <div class="upload-dropzone mb-3">
+          <i class="bi bi-cloud-arrow-up upload-dropzone-icon" aria-hidden="true"></i>
+          <h3 class="upload-title">Choose Excel File</h3>
+          <p class="upload-subtitle">Accepts <code>.xlsx</code> or <code>.xls</code> files up to 5 MB</p>
+          <input
+            class="form-control file-input-field mt-2"
+            type="file"
+            accept=".xlsx,.xls"
+            (change)="selectImportFile($event)"
+          />
+        </div>
+
+        <div class="template-help-row d-flex align-items-center justify-content-between p-3 bg-light rounded-3 mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle-fill text-primary fs-5" aria-hidden="true"></i>
+            <span class="small text-muted">Need the standard spreadsheet format?</span>
+          </div>
+          <button
+            class="btn btn-sm btn-outline-primary"
+            type="button"
+            (click)="downloadTemplate()"
+          >
+            <i class="bi bi-download me-1" aria-hidden="true"></i>
+            <span>Download Template</span>
+          </button>
+        </div>
+
+        <!-- Import Summary Report -->
+        @if (importResult) {
+          <div class="import-result-card alert alert-info mb-0">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+              <strong>Import Results:</strong>
+              <span>{{ importResult.imported }} contacts added, {{ importResult.skipped }} skipped.</span>
+            </div>
+
+            @if (importResult.errors && importResult.errors.length) {
+              <div class="import-errors-list mt-2">
+                <span class="small fw-bold text-danger">Row Errors:</span>
+                <ul class="small mb-0 mt-1">
+                  @for (error of importResult.errors; track error.row) {
+                    <li>Row {{ error.row }}: {{ error.reason }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <footer class="modal-dialog-footer">
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="importOpen = false"
+        >
+          Close
+        </button>
+        <button
+          class="btn btn-primary"
+          type="button"
+          [disabled]="!importFile || actionLoading"
+          (click)="importCustomers()"
+        >
+          @if (actionLoading) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <span>Importing…</span>
+          } @else {
+            <i class="bi bi-file-earmark-arrow-up-fill me-1" aria-hidden="true"></i>
+            <span>Import Contacts</span>
+          }
+        </button>
+      </footer>
+    </div>
+  </div>
 }

@@ -3,7 +3,9 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, inject, OnDestroy } from '@angular/core';
 import { finalize } from 'rxjs';
 
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
 import { HttpErrorService } from '../../core/services/http-error.service';
+import { ToastService } from '../../core/services/toast.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
@@ -18,6 +20,8 @@ import { MediaService } from './media.service';
 export class MediaComponent implements OnDestroy {
   private readonly api = inject(MediaService);
   private readonly errors = inject(HttpErrorService);
+  private readonly modalService = inject(ConfirmationModalService);
+  private readonly toastService = inject(ToastService);
   media: Media[] = [];
   loading = true;
   uploading = false;
@@ -43,22 +47,71 @@ export class MediaComponent implements OnDestroy {
   upload(file: File): void {
     if (this.uploading) return;
     const error = this.clientValidation(file);
-    if (error) { this.errorMessage = error; return; }
+    if (error) {
+      this.errorMessage = error;
+      this.toastService.warning(error);
+      return;
+    }
     this.uploading = true; this.uploadProgress = 0; this.errorMessage = ''; this.successMessage = '';
     this.api.uploadMedia(file).pipe(finalize(() => { this.uploading = false; })).subscribe({
       next: (event) => {
         if (event.type === HttpEventType.UploadProgress) this.uploadProgress = event.total ? Math.round((event.loaded / event.total) * 100) : 0;
-        if (event.type === HttpEventType.Response) { this.successMessage = 'Media uploaded successfully.'; this.load(); }
+        if (event.type === HttpEventType.Response) {
+          this.successMessage = 'Media uploaded successfully.';
+          this.toastService.success('Media uploaded successfully.');
+          this.load();
+        }
       },
-      error: (response) => { this.errorMessage = this.errors.map(response).message; },
+      error: (response) => {
+        const msg = this.errors.map(response).message;
+        this.errorMessage = msg;
+        this.toastService.error(msg);
+      },
     });
   }
   remove(item: Media): void {
-    if (!confirm(`Delete ${item.originalName}?`) || this.uploading) return;
-    this.api.deleteMedia(item.id).subscribe({ next: () => { this.releasePreview(item.id); this.media = this.media.filter((media) => media.id !== item.id); this.successMessage = 'Media deleted successfully.'; }, error: (error) => { this.errorMessage = this.errors.map(error).message; } });
+    if (this.uploading) return;
+    this.modalService
+      .confirm({
+        title: 'Delete Media?',
+        message: `Are you sure you want to delete "${item.originalName}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger',
+        icon: 'bi-trash3-fill',
+        action: () => this.api.deleteMedia(item.id),
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.releasePreview(item.id);
+          this.media = this.media.filter((media) => media.id !== item.id);
+          this.successMessage = 'Media deleted successfully.';
+          this.toastService.success('Media deleted successfully.');
+        }
+      })
+      .catch((error) => {
+        const msg = this.errors.map(error).message || 'Failed to delete media.';
+        this.errorMessage = msg;
+        this.toastService.error(msg);
+      });
   }
   download(item: Media): void {
-    this.api.getMediaFile(item.id).subscribe({ next: (response) => { const url = URL.createObjectURL(response.body ?? new Blob()); const link = document.createElement('a'); link.href = url; link.download = item.originalName; link.click(); URL.revokeObjectURL(url); }, error: (error) => { this.errorMessage = this.errors.map(error).message; } });
+    this.api.getMediaFile(item.id).subscribe({
+      next: (response) => {
+        const url = URL.createObjectURL(response.body ?? new Blob());
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = item.originalName;
+        link.click();
+        URL.revokeObjectURL(url);
+        this.toastService.success('Media download started.');
+      },
+      error: (error) => {
+        const msg = this.errors.map(error).message;
+        this.errorMessage = msg;
+        this.toastService.error(msg);
+      }
+    });
   }
   previewUrl(item: Media): string | undefined { return this.previewUrls.get(item.id); }
   icon(type: MediaType): string { return type === 'IMAGE' ? 'bi-image' : type === 'VIDEO' ? 'bi-film' : 'bi-file-earmark-text'; }
