@@ -501,15 +501,18 @@
       <div class="modal-surface-card">
         <form [formGroup]="campaignForm" (ngSubmit)="save()" class="editor-form">
           <!-- Modal Header -->
-          <header class="modal-head d-flex justify-content-between align-items-center">
+          <header class="modal-head d-flex justify-content-between align-items-start">
             <div class="head-title-wrap">
-              <div class="modal-eyebrow">
-                <i class="bi bi-broadcast me-1" aria-hidden="true"></i>
-                {{ editing ? "CAMPAIGN MANAGEMENT" : "NEW BROADCAST" }}
+              <div class="modal-eyebrow d-flex align-items-center gap-1 mb-1">
+                <i class="bi bi-broadcast" aria-hidden="true"></i>
+                <span>{{ editing ? "CAMPAIGN MANAGEMENT" : "NEW BROADCAST" }}</span>
               </div>
-              <h2 id="campaign-editor-title" class="modal-title mb-0">
+              <h2 id="campaign-editor-title" class="modal-title mb-1">
                 {{ editing ? "Edit Campaign" : "Create Campaign" }}
               </h2>
+              <p class="modal-subtitle mb-0">
+                Set up your campaign details and preview how it will look on WhatsApp.
+              </p>
             </div>
             <button
               class="btn-modal-close"
@@ -523,12 +526,14 @@
 
           <!-- WhatsApp Notice if not configured -->
           @if (whatsappStatus && whatsappStatus !== 'CONNECTED') {
-            <div class="connection-warning-strip">
-              <i class="bi bi-info-circle-fill text-warning flex-shrink-0" aria-hidden="true"></i>
-              <div class="strip-text">
-                <strong>WhatsApp connection required:</strong> Connect your Meta WhatsApp Business API account in Settings before launching live broadcasts.
+            <div class="connection-warning-strip d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-circle-fill text-warning flex-shrink-0" aria-hidden="true"></i>
+                <div class="strip-text">
+                  <strong>WhatsApp connection required:</strong> Connect your Meta WhatsApp Business API account in Settings before launching live broadcasts.
+                </div>
               </div>
-              <a routerLink="/settings/whatsapp" class="btn btn-sm btn-outline-warning text-nowrap">
+              <a routerLink="/settings/whatsapp" class="btn btn-sm btn-outline-warning text-nowrap configure-btn">
                 Configure
               </a>
             </div>
@@ -547,46 +552,63 @@
                 }
 
                 <!-- Section 1: Campaign Details -->
-                <div class="form-section mb-4">
-                  <h3 class="section-title">1. Campaign Identity</h3>
-                  <div class="row g-3">
-                    <div class="col-12">
-                      <label class="form-label" for="campaign-name">
-                        Campaign Name <span class="text-danger">*</span>
-                      </label>
-                      <input
-                        id="campaign-name"
-                        class="form-control premium-input"
-                        formControlName="name"
-                        placeholder="e.g. Summer Festival Launch Announcement"
-                        [class.is-invalid]="
-                          campaignForm.controls.name.touched &&
-                          campaignForm.controls.name.invalid
-                        "
-                      />
-                      <div class="invalid-feedback">
-                        A campaign name (up to 150 characters) is required.
-                      </div>
+                <div class="stepped-form-section mb-4">
+                  <div class="section-badge-header d-flex align-items-center gap-2 mb-3">
+                    <span class="step-num-circle">1</span>
+                    <h3 class="section-title mb-0">1.CAMPAIGN IDENTITY</h3>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label class="form-label" for="campaign-name">
+                      Campaign Name <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      id="campaign-name"
+                      class="form-control premium-input"
+                      formControlName="name"
+                      maxlength="100"
+                      placeholder="e.g. Summer Festival Launch Announcement"
+                      [class.is-invalid]="
+                        campaignForm.controls.name.touched &&
+                        campaignForm.controls.name.invalid
+                      "
+                    />
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                      @if (
+                        campaignForm.controls.name.touched &&
+                        campaignForm.controls.name.invalid
+                      ) {
+                        <span class="text-danger small">A campaign name is required.</span>
+                      } @else {
+                        <span></span>
+                      }
+                      <span class="char-counter">{{ campaignForm.controls.name.value.length || 0 }}/100</span>
                     </div>
+                  </div>
 
-                    <div class="col-12">
-                      <label class="form-label" for="campaign-description">Description (Optional)</label>
-                      <textarea
-                        id="campaign-description"
-                        class="form-control premium-input"
-                        rows="2"
-                        formControlName="description"
-                        placeholder="Internal campaign objective or reference notes…"
-                      ></textarea>
+                  <div class="form-group">
+                    <label class="form-label" for="campaign-description">Description (Optional)</label>
+                    <textarea
+                      id="campaign-description"
+                      class="form-control premium-input"
+                      rows="3"
+                      maxlength="500"
+                      formControlName="description"
+                      placeholder="Internal campaign objective or reference notes…"
+                    ></textarea>
+                    <div class="text-end mt-1">
+                      <span class="char-counter">{{ campaignForm.controls.description.value.length || 0 }}/500</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Section 2: Template & Media -->
-                <div class="form-section mb-4">
-                  <h3 class="section-title">2. WhatsApp Message Template</h3>
+                <div class="stepped-form-section mb-4">
+                  <div class="section-badge-header d-flex align-items-center gap-2 mb-3">
+                    <span class="step-num-circle">2</span>
+                    <h3 class="section-title mb-0">2.WHATSAPP MESSAGE TEMPLATE</h3>
+                  </div>
                   <div class="row g-3">
-                    <div class="col-md-7">
+                    <div class="col-md-6">
                       <label class="form-label" for="campaign-form-template">
                         Approved Template <span class="text-danger">*</span>
                       </label>
@@ -609,7 +631,7 @@
                       <div class="invalid-feedback">Please select an approved WhatsApp template.</div>
                     </div>
 
-                    <div class="col-md-5">
+                    <div class="col-md-6">
                       <label class="form-label" for="campaign-media">Media Asset (Optional)</label>
                       <select
                         id="campaign-media"
@@ -625,16 +647,19 @@
                       </select>
                     </div>
                   </div>
-                </div>
 
-                <!-- Dynamic Variable Mapping -->
-                @if (templateVariables().length) {
-                  <fieldset class="form-section variable-mapping-section mb-4">
-                    <legend class="section-title mb-1">3. Dynamic Variable Mappings</legend>
-                    <p class="section-help text-muted small mb-3">
-                      Map each template placeholder variable to a customer record field.
-                    </p>
-                    <div class="mapping-table-wrap border rounded p-3 bg-light">
+                  <div class="info-callout-strip d-flex align-items-center gap-2 mt-3">
+                    <i class="bi bi-info-circle-fill text-primary flex-shrink-0" aria-hidden="true"></i>
+                    <span>Only approved templates from your WhatsApp Business account can be used for campaigns.</span>
+                  </div>
+
+                  <!-- Dynamic Variable Mapping -->
+                  @if (templateVariables().length) {
+                    <div class="variable-mappings-panel mt-3 p-3 rounded border">
+                      <div class="small fw-bold text-dark mb-2">Dynamic Variable Mappings</div>
+                      <p class="text-muted small mb-3">
+                        Map each template placeholder variable to a customer record field.
+                      </p>
                       @for (
                         variable of templateVariables();
                         track variable;
@@ -667,189 +692,325 @@
                         </div>
                       }
                     </div>
-                  </fieldset>
+                  }
+                </div>
+
+                <!-- Section 3: Recipients -->
+                @if (!editing) {
+                  <div class="stepped-form-section mb-4">
+                    <div class="section-badge-header d-flex align-items-center gap-2 mb-3">
+                      <span class="step-num-circle">3</span>
+                      <h3 class="section-title mb-0">3.RECIPIENTS</h3>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <label class="form-label mb-0" id="recipients-label">
+                        Select Recipients <span class="text-danger">*</span>
+                      </label>
+                      <span class="badge-audience-pill">{{ selectedCustomers.size }} customers</span>
+                    </div>
+
+                    <div class="custom-recipient-select-wrap position-relative">
+                      <button
+                        type="button"
+                        class="form-select text-start recipient-trigger-btn d-flex align-items-center justify-content-between"
+                        (click)="toggleRecipientsPicker()"
+                        aria-expanded="showRecipientsPicker"
+                      >
+                        <div class="d-flex align-items-center gap-2 text-truncate">
+                          <i class="bi bi-people text-muted" aria-hidden="true"></i>
+                          <span [class.text-muted]="selectedCustomers.size === 0">
+                            {{ getRecipientDisplayText() }}
+                          </span>
+                        </div>
+                        <i class="bi bi-chevron-down text-muted chevron-icon" [class.rotate-180]="showRecipientsPicker"></i>
+                      </button>
+
+                      @if (showRecipientsPicker) {
+                        <div class="recipients-dropdown-panel shadow-lg rounded p-3 border mt-1">
+                          <div class="d-flex gap-2 mb-2">
+                            <div class="input-group input-group-sm flex-grow-1">
+                              <span class="input-group-text bg-white border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                              </span>
+                              <input
+                                type="text"
+                                class="form-control border-start-0"
+                                [(ngModel)]="recipientSearch"
+                                [ngModelOptions]="{ standalone: true }"
+                                placeholder="Search recipients by name, phone, or email…"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-outline-secondary text-nowrap"
+                              (click)="toggleAllCustomers(!isAllFilteredSelected())"
+                            >
+                              {{ isAllFilteredSelected() ? "Deselect All" : "Select All" }}
+                            </button>
+                          </div>
+
+                          <div class="recipients-list-scrollable border rounded">
+                            @for (customer of filteredCustomers(); track customer.id) {
+                              <label class="recipient-item-row d-flex align-items-center gap-2 p-2 rounded">
+                                <input
+                                  class="form-check-input recipient-checkbox m-0"
+                                  type="checkbox"
+                                  [checked]="selectedCustomers.has(customer.id)"
+                                  (change)="toggleCustomer(customer.id, $any($event.target).checked)"
+                                />
+                                <div
+                                  class="recipient-avatar-circle"
+                                  [style.background]="getAvatarGradient(customer.firstName + ' ' + (customer.lastName || ''))"
+                                >
+                                  {{ getInitials(customer.firstName, customer.lastName) }}
+                                </div>
+                                <div class="recipient-info-meta text-truncate">
+                                  <div class="name-text">{{ customer.firstName }} {{ customer.lastName }}</div>
+                                  <div class="sub-text">{{ customer.mobile }} · {{ customer.email || "No email" }}</div>
+                                </div>
+                              </label>
+                            }
+                            @if (!filteredCustomers().length) {
+                              <div class="p-3 text-center text-muted small">
+                                No customer records match your filter.
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
                 }
 
-                <!-- Section 3: Schedule & Delivery -->
-                <div class="form-section mb-4">
-                  <h3 class="section-title">4. Delivery Mode</h3>
-                  <div class="row g-3">
-                    <div class="col-md-5">
-                      <label class="form-label" for="campaign-form-type">Send Timing</label>
+                <!-- Section 4: Delivery Mode -->
+                <div class="stepped-form-section mb-4">
+                  <div class="section-badge-header d-flex align-items-center gap-2 mb-3">
+                    <span class="step-num-circle">4</span>
+                    <h3 class="section-title mb-0">4.DELIVERY MODE</h3>
+                  </div>
+
+                  <div class="form-group mb-2">
+                    <label class="form-label" for="campaign-send-timing">Send Timing</label>
+                    <div class="input-with-leading-icon position-relative">
+                      <i class="bi bi-clock leading-icon text-muted"></i>
                       <select
-                        id="campaign-form-type"
-                        class="form-select premium-select"
+                        id="campaign-send-timing"
+                        class="form-select premium-select ps-5"
                         formControlName="sendType"
                       >
                         <option value="NOW">Save as draft (Send manually)</option>
                         <option value="SCHEDULED">Schedule for future date</option>
                       </select>
                     </div>
+                  </div>
 
-                    @if (campaignForm.controls.sendType.value === "SCHEDULED") {
-                      <div class="col-md-7">
-                        <label class="form-label" for="campaign-schedule">
-                          Schedule Date & Time <span class="text-danger">*</span>
-                        </label>
-                        <input
-                          id="campaign-schedule"
-                          class="form-control premium-input"
-                          type="datetime-local"
-                          formControlName="scheduledAt"
-                        />
-                      </div>
-                    }
+                  <div class="info-callout-strip d-flex align-items-center gap-2 mt-2">
+                    <i class="bi bi-info-circle-fill text-primary flex-shrink-0" aria-hidden="true"></i>
+                    <span>Scheduled campaigns will be sent at the selected date and time.</span>
                   </div>
                 </div>
 
-                <!-- Section 4: Recipients Picker (When creating new) -->
-                @if (!editing) {
-                  <fieldset class="form-section mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <legend class="section-title mb-0">5. Target Audience</legend>
-                      <span class="badge-audience-count">
-                        {{ selectedCustomers.size }} selected
-                      </span>
-                    </div>
+                <!-- Section 5: Schedule (Optional) -->
+                <div class="stepped-form-section mb-4">
+                  <div class="section-badge-header d-flex align-items-center gap-2 mb-3">
+                    <span class="step-num-circle">5</span>
+                    <h3 class="section-title mb-0">5.SCHEDULE (Optional)</h3>
+                  </div>
 
-                    <div class="recipient-controls d-flex gap-2 mb-2">
-                      <div class="search-wrap flex-grow-1">
-                        <i class="bi bi-search me-1 text-muted" aria-hidden="true"></i>
-                        <input
-                          class="form-control form-control-sm"
-                          type="text"
-                          [(ngModel)]="recipientSearch"
-                          [ngModelOptions]="{ standalone: true }"
-                          placeholder="Search recipients by name, phone, or email…"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary text-nowrap"
-                        (click)="toggleAllCustomers(!isAllFilteredSelected())"
-                      >
-                        {{ isAllFilteredSelected() ? 'Deselect All' : 'Select All' }}
-                      </button>
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="form-check form-switch modern-switch mb-0">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="schedule-toggle-switch"
+                        [checked]="scheduleLater"
+                        (change)="onScheduleToggle($any($event.target).checked)"
+                      />
+                      <label class="form-check-label fw-semibold text-dark ms-2" for="schedule-toggle-switch">
+                        Schedule for later
+                      </label>
                     </div>
+                  </div>
 
-                    <div class="recipient-picker-scrollable border rounded">
-                      @for (customer of filteredCustomers(); track customer.id) {
-                        <label class="recipient-row-card">
-                          <input
-                            class="form-check-input recipient-checkbox"
-                            type="checkbox"
-                            [checked]="selectedCustomers.has(customer.id)"
-                            (change)="
-                              toggleCustomer(
-                                customer.id,
-                                $any($event.target).checked
-                              )
-                            "
-                          />
-                          <div
-                            class="recipient-avatar"
-                            [style.background]="getAvatarGradient(customer.firstName + ' ' + (customer.lastName || ''))"
-                          >
-                            {{ getInitials(customer.firstName, customer.lastName) }}
-                          </div>
-                          <div class="recipient-meta">
-                            <span class="recipient-name">
-                              {{ customer.firstName }} {{ customer.lastName }}
-                            </span>
-                            <span class="recipient-sub">
-                              {{ customer.mobile }} · {{ customer.email || 'No email' }}
-                            </span>
-                          </div>
-                        </label>
-                      }
-
-                      @if (!filteredCustomers().length) {
-                        <div class="p-3 text-center text-muted small">
-                          No active customer records match your filter.
-                        </div>
-                      }
+                  @if (scheduleLater) {
+                    <div class="schedule-datetime-wrap mt-3">
+                      <label class="form-label" for="campaign-schedule-time">
+                        Scheduled Date & Time <span class="text-danger">*</span>
+                      </label>
+                      <input
+                        id="campaign-schedule-time"
+                        class="form-control premium-input"
+                        type="datetime-local"
+                        formControlName="scheduledAt"
+                      />
                     </div>
-                  </fieldset>
-                }
+                  }
+                </div>
               </div>
 
-              <!-- Right Preview Column -->
+              <!-- Right Preview Column (WhatsApp Smartphone Frame) -->
               <aside class="preview-column" aria-label="WhatsApp live preview">
-                <div class="preview-sticky-card">
-                  <div class="preview-card-header">
-                    <span class="preview-label">
-                      <i class="bi bi-whatsapp text-success me-1"></i>
-                      WhatsApp Live Preview
-                    </span>
-                    <span class="badge bg-secondary-subtle text-secondary small">Simulated</span>
+                <div class="preview-sticky-wrap">
+                  <div class="preview-header-bar d-flex justify-content-between align-items-center mb-1">
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="bi bi-whatsapp text-success fs-5" aria-hidden="true"></i>
+                      <h3 class="preview-title mb-0">WhatsApp Live Preview</h3>
+                    </div>
+                    <span class="simulated-pill">Simulated</span>
                   </div>
+                  <p class="preview-subtitle text-muted small mb-3">
+                    See how your message will appear to recipients on WhatsApp.
+                  </p>
 
-                  <!-- WhatsApp Chat Bubble -->
-                  <div class="whatsapp-mockup-frame">
-                    <div class="whatsapp-chat-surface">
-                      <div class="whatsapp-bubble">
-                        @if (selectedTemplateObj()?.headerText) {
-                          <div class="bubble-header">
-                            {{ selectedTemplateObj()?.headerText }}
+                  <!-- Ultra-Realistic Smartphone Mockup Frame -->
+                  <div class="phone-device-chassis">
+                    <div class="phone-outer-rim">
+                      <div class="phone-screen-glass">
+                        <!-- Status Bar with Dynamic Island -->
+                        <div class="phone-status-bar d-flex justify-content-between align-items-center">
+                          <span class="phone-time">10:30</span>
+                          <div class="dynamic-island">
+                            <div class="dynamic-island-lens"></div>
                           </div>
-                        }
-
-                        <div class="bubble-body">
-                          {{ selectedTemplateObj()?.body || "Select an approved template on the left to preview WhatsApp message content." }}
+                          <div class="phone-status-icons d-flex align-items-center gap-1">
+                            <i class="bi bi-reception-4"></i>
+                            <i class="bi bi-wifi"></i>
+                            <i class="bi bi-battery-full"></i>
+                          </div>
                         </div>
 
-                        @if (selectedTemplateObj()?.footer) {
-                          <div class="bubble-footer">
-                            {{ selectedTemplateObj()?.footer }}
-                          </div>
-                        }
-
-                        <div class="bubble-timestamp">
-                          12:00 PM <i class="bi bi-check2-all text-primary ms-1"></i>
-                        </div>
-                      </div>
-
-                      @if (selectedTemplateObj()?.buttons?.length) {
-                        <div class="bubble-actions">
-                          @for (btn of selectedTemplateObj()?.buttons; track $index) {
-                            <div class="whatsapp-btn-pill">
-                              <i class="bi bi-reply me-1"></i> {{ btn.text || 'Action Button' }}
+                        <!-- WhatsApp Top Navigation Bar -->
+                        <div class="wa-chat-header d-flex align-items-center justify-content-between">
+                          <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-chevron-left wa-back-btn"></i>
+                            <div class="wa-brand-avatar">
+                              <span class="wa-brand-s">S</span>
                             </div>
-                          }
+                            <div class="wa-brand-meta">
+                              <div class="wa-brand-name d-flex align-items-center gap-1">
+                                <span>Seyyon Connect</span>
+                                <i class="bi bi-patch-check-fill text-success verified-icon"></i>
+                              </div>
+                              <div class="wa-brand-type">Business Account</div>
+                            </div>
+                          </div>
+                          <i class="bi bi-three-dots-vertical text-muted"></i>
                         </div>
-                      }
+
+                        <!-- WhatsApp Chat Surface Canvas -->
+                        <div class="wa-chat-surface">
+                          <!-- Date Badge -->
+                          <div class="text-center my-2">
+                            <span class="wa-date-pill">Today</span>
+                          </div>
+
+                          <!-- WhatsApp Chat Bubble -->
+                          <div class="wa-message-bubble-container">
+                            <div class="wa-message-bubble">
+                              <!-- Media Banner Card -->
+                              @if (selectedMediaObj()) {
+                                <div class="wa-media-card">
+                                  @if (selectedMediaObj()?.mediaType === 'IMAGE') {
+                                    <div class="wa-media-image-placeholder">
+                                      <i class="bi bi-image text-primary"></i>
+                                      <span>{{ selectedMediaObj()?.originalName }}</span>
+                                    </div>
+                                  } @else if (selectedMediaObj()?.mediaType === 'VIDEO') {
+                                    <div class="wa-media-video-placeholder">
+                                      <i class="bi bi-play-circle-fill"></i>
+                                      <span>{{ selectedMediaObj()?.originalName }}</span>
+                                    </div>
+                                  } @else {
+                                    <div class="wa-media-doc-placeholder">
+                                      <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
+                                      <span>{{ selectedMediaObj()?.originalName }}</span>
+                                    </div>
+                                  }
+                                </div>
+                              } @else {
+                                <!-- Default Brand Card matching Image 2 -->
+                                <div class="wa-brand-banner-card">
+                                  <div class="banner-content">
+                                    <div class="banner-logo-row d-flex align-items-center gap-2">
+                                      <div class="banner-s-logo">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#F4B728" />
+                                        </svg>
+                                      </div>
+                                      <div class="banner-text">
+                                        <div class="brand-title">Seyyon Connect</div>
+                                        <div class="brand-tagline">Connect. Engage. Grow.</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="banner-gold-wave"></div>
+                                </div>
+                              }
+
+                              <!-- Optional Template Header Text -->
+                              @if (selectedTemplateObj()?.headerText) {
+                                <div class="wa-bubble-header-text">
+                                  {{ selectedTemplateObj()?.headerText }}
+                                </div>
+                              }
+
+                              <!-- Message Body Text -->
+                              <div class="wa-bubble-body-text">
+                                {{ livePreviewBodyText }}
+                              </div>
+
+                              <!-- Optional Template Footer Text -->
+                              @if (selectedTemplateObj()?.footer) {
+                                <div class="wa-bubble-footer-text">
+                                  {{ selectedTemplateObj()?.footer }}
+                                </div>
+                              }
+
+                              <!-- Timestamp & Read Receipts -->
+                              <div class="wa-bubble-meta d-flex align-items-center justify-content-end gap-1">
+                                <span class="wa-time-text">10:30 AM</span>
+                                <i class="bi bi-check2-all wa-receipt-checks"></i>
+                              </div>
+                            </div>
+
+                            <!-- WhatsApp Action Buttons (if template has buttons) -->
+                            @if (selectedTemplateObj()?.buttons?.length) {
+                              <div class="wa-buttons-stack mt-1">
+                                @for (btn of selectedTemplateObj()?.buttons; track $index) {
+                                  <div class="wa-btn-pill">
+                                    <i class="bi bi-reply me-1"></i> {{ btn.text || "Action Button" }}
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </div>
+
+                        <!-- WhatsApp Bottom Input Bar -->
+                        <div class="wa-input-bottom-bar d-flex align-items-center gap-2">
+                          <i class="bi bi-emoji-smile wa-input-icon"></i>
+                          <div class="wa-input-pill flex-grow-1">
+                            <span>Type a message</span>
+                          </div>
+                          <i class="bi bi-paperclip wa-input-icon"></i>
+                          <i class="bi bi-camera-fill wa-input-icon"></i>
+                          <div class="wa-mic-btn">
+                            <i class="bi bi-mic-fill"></i>
+                          </div>
+                        </div>
+
+                        <!-- Home Indicator Bar -->
+                        <div class="phone-home-indicator-bar"></div>
+                      </div>
                     </div>
                   </div>
 
-                  <!-- Campaign Summary Pill Panel -->
-                  <div class="preview-summary-panel mt-3">
-                    <h4 class="summary-head">Broadcast Summary</h4>
-                    <div class="summary-line">
-                      <span class="key">Campaign Name:</span>
-                      <strong class="val">{{ campaignForm.controls.name.value || 'Untitled' }}</strong>
-                    </div>
-                    <div class="summary-line">
-                      <span class="key">Template:</span>
-                      <span class="val">{{ selectedTemplateName() }}</span>
-                    </div>
-                    @if (!editing) {
-                      <div class="summary-line">
-                        <span class="key">Recipients:</span>
-                        <span class="val badge bg-primary-subtle text-primary">{{ selectedCustomers.size }} customers</span>
-                      </div>
-                    }
-                    <div class="summary-line">
-                      <span class="key">Send Mode:</span>
-                      <span class="val">
-                        {{ campaignForm.controls.sendType.value === 'SCHEDULED' ? 'Scheduled' : 'Draft / Send Now' }}
-                      </span>
-                    </div>
-                    @if (campaignForm.controls.mediaId.value) {
-                      <div class="summary-line">
-                        <span class="key">Media:</span>
-                        <span class="val">{{ selectedMediaName() }}</span>
-                      </div>
-                    }
+                  <!-- Live Preview Disclaimer Note below Phone -->
+                  <div class="preview-disclaimer-note d-flex align-items-center justify-content-center gap-1 mt-3">
+                    <i class="bi bi-info-circle flex-shrink-0"></i>
+                    <span>This is a live preview of your selected template and media. Actual delivery may vary based on device and WhatsApp version.</span>
                   </div>
                 </div>
               </aside>
@@ -857,16 +1018,16 @@
           </div>
 
           <!-- Modal Footer -->
-          <footer class="modal-foot d-flex justify-content-end gap-2">
+          <footer class="modal-foot d-flex justify-content-between align-items-center">
             <button
-              class="btn btn-outline-secondary"
+              class="btn btn-outline-secondary btn-cancel-action"
               type="button"
               (click)="editorOpen = false"
             >
               Cancel
             </button>
             <button
-              class="btn btn-primary"
+              class="btn btn-primary btn-save-action"
               type="submit"
               [disabled]="actionLoading"
             >
@@ -874,8 +1035,8 @@
                 <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                 Saving…
               } @else {
-                <i class="bi" [class.bi-check-lg]="editing" [class.bi-plus-lg]="!editing" aria-hidden="true"></i>
-                {{ editing ? "Save Changes" : "Create Campaign" }}
+                <i class="bi bi-send-fill me-1" aria-hidden="true"></i>
+                {{ editing ? "Save Changes" : (campaignForm.controls.sendType.value === 'SCHEDULED' ? "Schedule Campaign" : "Save as Draft") }}
               }
             </button>
           </footer>

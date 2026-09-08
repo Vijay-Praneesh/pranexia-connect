@@ -145,6 +145,9 @@ export class CampaignsComponent implements OnDestroy {
     variableMappings: this.fb.nonNullable.group({}),
   });
 
+  scheduleLater = false;
+  showRecipientsPicker = false;
+
   constructor() {
     this.filtersForm.controls.keyword.valueChanges
       .pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
@@ -158,6 +161,11 @@ export class CampaignsComponent implements OnDestroy {
         .subscribe(
           (value) => void this.updateQuery({ [key]: value || null, page: 1 }),
         );
+    this.campaignForm.controls.sendType.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((type) => {
+        this.scheduleLater = type === 'SCHEDULED';
+      });
     this.loadOptions();
     this.loadSummary();
     this.loadWhatsAppStatus();
@@ -351,6 +359,8 @@ export class CampaignsComponent implements OnDestroy {
     this.selectedCustomers.clear();
     this.recipientSearch = '';
     this.formError = '';
+    this.scheduleLater = false;
+    this.showRecipientsPicker = false;
     this.campaignForm.reset({
       name: '',
       description: '',
@@ -368,6 +378,8 @@ export class CampaignsComponent implements OnDestroy {
     this.selectedCustomers.clear();
     this.recipientSearch = '';
     this.formError = '';
+    this.scheduleLater = campaign.sendType === 'SCHEDULED';
+    this.showRecipientsPicker = false;
     this.campaignForm.reset({
       name: campaign.name,
       description: campaign.description ?? '',
@@ -380,6 +392,34 @@ export class CampaignsComponent implements OnDestroy {
       variableMappings: campaign.variableMappings ?? {},
     });
     this.editorOpen = true;
+  }
+
+  toggleRecipientsPicker(): void {
+    this.showRecipientsPicker = !this.showRecipientsPicker;
+  }
+
+  getRecipientDisplayText(): string {
+    if (this.selectedCustomers.size === 0) {
+      return 'Choose recipients...';
+    }
+    if (this.selectedCustomers.size === this.customers.length && this.customers.length > 0) {
+      return `All customers (${this.customers.length})`;
+    }
+    return `${this.selectedCustomers.size} customer${this.selectedCustomers.size === 1 ? '' : 's'} selected`;
+  }
+
+  onScheduleToggle(enabled: boolean): void {
+    this.scheduleLater = enabled;
+    if (enabled) {
+      this.campaignForm.controls.sendType.setValue('SCHEDULED');
+      if (!this.campaignForm.controls.scheduledAt.value) {
+        const nextHour = new Date(Date.now() + 3600000);
+        this.campaignForm.controls.scheduledAt.setValue(this.toLocalInput(nextHour.toISOString()));
+      }
+    } else {
+      this.campaignForm.controls.sendType.setValue('NOW');
+      this.campaignForm.controls.scheduledAt.setValue('');
+    }
   }
 
   toggleCustomer(id: string, checked: boolean): void {
@@ -457,6 +497,20 @@ export class CampaignsComponent implements OnDestroy {
         (item) => item.id === this.campaignForm.controls.mediaId.value,
       )?.originalName || 'No media attached'
     );
+  }
+
+  selectedMediaObj(): Media | undefined {
+    const id = this.campaignForm.controls.mediaId.value;
+    if (!id) return undefined;
+    return this.media.find((item) => item.id === id);
+  }
+
+  get livePreviewBodyText(): string {
+    const template = this.selectedTemplateObj();
+    if (!template || !template.body) {
+      return "Hello {{1}},\n\nWe're excited to bring you the latest updates, offers and announcements from Seyyon Connect.\n\nStay connected with us! 🚀";
+    }
+    return template.body;
   }
 
   save(): void {

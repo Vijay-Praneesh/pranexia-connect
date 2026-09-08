@@ -1,21 +1,567 @@
-<section aria-labelledby="media-title">
-  <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
-    <div><h1 id="media-title" class="h3 mb-1">Media library</h1><p class="text-body-secondary mb-0">Secure media available to your company.</p></div>
-    <button class="btn btn-primary btn-sm" type="button" (click)="choose(fileInput)" [disabled]="uploading"><i class="bi bi-upload me-1" aria-hidden="true"></i>Upload media</button>
-    <input #fileInput class="visually-hidden" type="file" accept=".jpg,.jpeg,.png,.webp,.mp4,.pdf,.doc,.docx,.xls,.xlsx" (change)="onFileChange($event)" />
-  </div>
-  @if (successMessage) { <div class="alert alert-success" role="status">{{ successMessage }}</div> }
-  @if (errorMessage && media.length) { <div class="alert alert-warning" role="alert">{{ errorMessage }}</div> }
-  <div class="drop-zone mb-4" [class.is-uploading]="uploading" (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="choose(fileInput)" role="button" tabindex="0" (keydown.enter)="choose(fileInput)">
-    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i><strong>{{ uploading ? 'Uploading media' : 'Drop a file here or choose one' }}</strong><small>Images up to 5 MB, videos up to 16 MB, documents up to 100 MB</small>
-    @if (uploading) { <div class="progress w-100 mt-2" role="progressbar" [attr.aria-valuenow]="uploadProgress"><div class="progress-bar" [style.width.%]="uploadProgress"></div></div> }
-  </div>
-  @if (loading) { <app-loading-state message="Loading media…" /> }
-  @else if (errorMessage && !media.length) { <app-error-state title="Media unavailable" [message]="errorMessage" [retryable]="true" (retry)="load()" /> }
-  @else if (!media.length) { <app-empty-state title="No media yet" message="Upload images, videos, or documents for future WhatsApp campaigns."><button class="btn btn-primary btn-sm" type="button" (click)="choose(fileInput)">Upload media</button></app-empty-state> }
-  @else { <div class="media-grid">@for (item of media; track item.id) { <article class="media-item border rounded bg-white overflow-hidden">
-    <div class="media-preview">@if (item.mediaType === 'IMAGE' && previewUrl(item)) { <img [src]="previewUrl(item)" [alt]="item.originalName" /> } @else { <i class="bi {{ icon(item.mediaType) }}" aria-hidden="true"></i> }</div>
-    <div class="p-3"><div class="d-flex justify-content-between gap-2"><strong class="filename" [title]="item.originalName">{{ item.originalName }}</strong><span class="badge text-bg-light">{{ item.mediaType }}</span></div><small class="d-block text-body-secondary mt-2">{{ fileSize(item.size) }} · {{ item.createdAt | date:'mediumDate' }}</small>
-      <div class="d-flex gap-2 mt-3"><button class="btn btn-outline-secondary btn-sm" type="button" (click)="download(item)"><i class="bi bi-download" aria-hidden="true"></i><span class="visually-hidden">Download</span></button><button class="btn btn-outline-danger btn-sm" type="button" (click)="remove(item)"><i class="bi bi-trash" aria-hidden="true"></i><span class="visually-hidden">Delete</span></button></div>
-    </div></article> }</div> }
+<section class="media-module" aria-labelledby="media-title">
+  <!-- Page Header -->
+  <header class="page-header d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+    <div class="header-content">
+      <div class="header-badge-row mb-1">
+        <span class="badge-eyebrow">
+          <i class="bi bi-folder2-open me-1" aria-hidden="true"></i>
+          {{ userCompanyName }} · Asset Studio
+        </span>
+      </div>
+      <h1 id="media-title" class="page-title mb-1">Media</h1>
+      <p class="page-subtitle mb-0">
+        Manage the images, videos and files used across your campaigns.
+      </p>
+    </div>
+
+    <div class="header-actions d-flex align-items-center gap-2">
+      <button
+        class="btn btn-refresh"
+        type="button"
+        (click)="load()"
+        [disabled]="loading"
+        title="Refresh assets"
+        aria-label="Refresh assets"
+      >
+        <i class="bi bi-arrow-clockwise" [class.spin]="loading" aria-hidden="true"></i>
+      </button>
+
+      <button
+        class="btn btn-primary btn-upload-header"
+        type="button"
+        (click)="choose(fileInput)"
+        [disabled]="uploading"
+        id="btn-upload-media"
+      >
+        <i class="bi bi-cloud-arrow-up me-1" aria-hidden="true"></i>
+        <span>Upload Media</span>
+      </button>
+      <input
+        #fileInput
+        class="visually-hidden"
+        type="file"
+        accept=".jpg,.jpeg,.png,.webp,.mp4,.pdf,.doc,.docx,.xls,.xlsx"
+        (change)="onFileChange($event)"
+      />
+    </div>
+  </header>
+
+  <!-- Notification Banners -->
+  @if (successMessage) {
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" role="status">
+      <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+      <div>{{ successMessage }}</div>
+    </div>
+  }
+  @if (errorMessage && media.length) {
+    <div class="alert alert-warning d-flex align-items-center justify-content-between gap-2 mb-4" role="alert">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-circle-fill flex-shrink-0" aria-hidden="true"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+      <button class="btn btn-sm btn-outline-dark" type="button" (click)="load()">Retry</button>
+    </div>
+  }
+
+  <!-- Summary KPI Cards -->
+  <section class="summary-grid mb-4" aria-label="Media asset summary statistics">
+    <div class="summary-card card-total">
+      <div class="card-body">
+        <div class="icon-wrapper">
+          <i class="bi bi-collection-fill" aria-hidden="true"></i>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Total Assets</span>
+          <h2 class="metric-value">{{ totalCount }}</h2>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="subtext">All registered files</span>
+      </div>
+    </div>
+
+    <div class="summary-card card-images">
+      <div class="card-body">
+        <div class="icon-wrapper">
+          <i class="bi bi-images" aria-hidden="true"></i>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Images</span>
+          <h2 class="metric-value">{{ imageCount }}</h2>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="subtext">JPG, PNG, WEBP</span>
+      </div>
+    </div>
+
+    <div class="summary-card card-videos">
+      <div class="card-body">
+        <div class="icon-wrapper">
+          <i class="bi bi-camera-video-fill" aria-hidden="true"></i>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Videos</span>
+          <h2 class="metric-value">{{ videoCount }}</h2>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="subtext">MP4 video broadcasts</span>
+      </div>
+    </div>
+
+    <div class="summary-card card-storage">
+      <div class="card-body">
+        <div class="icon-wrapper">
+          <i class="bi bi-hdd-network-fill" aria-hidden="true"></i>
+        </div>
+        <div class="metric-data">
+          <span class="metric-label">Storage Used</span>
+          <div class="metric-value-wrap">
+            <h2 class="metric-value">{{ formattedTotalStorage }}</h2>
+            <span class="metric-limit-denominator">/ {{ formattedStorageLimit }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-mini-progress-track">
+        <div
+          class="card-mini-progress-fill"
+          [style.width.%]="storageUsagePercent > 0 ? (storageUsagePercent < 2 ? 2 : storageUsagePercent) : 0"
+          [class.warning]="storageUsagePercent >= 80 && storageUsagePercent < 95"
+          [class.danger]="storageUsagePercent >= 95"
+        ></div>
+      </div>
+      <div class="card-footer-strip d-flex align-items-center justify-content-between">
+        <span class="subtext">{{ storageUsagePercent }}% used · {{ formattedStorageRemaining }} free</span>
+        @if (documentCount > 0) {
+          <span class="doc-badge">{{ documentCount }} doc{{ documentCount === 1 ? '' : 's' }}</span>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Drag & Drop Upload Zone -->
+  <section class="upload-section mb-4" aria-label="Upload media files">
+    <div
+      class="drop-zone card border-0 shadow-sm"
+      [class.is-dragging]="isDragging"
+      [class.is-uploading]="uploading"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      (click)="choose(fileInput)"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="choose(fileInput)"
+      aria-label="Drag and drop or browse files to upload"
+    >
+      <div class="card-body p-4 text-center">
+        @if (uploading) {
+          <div class="uploading-state">
+            <div class="spinner-border text-primary mb-2" role="status">
+              <span class="visually-hidden">Uploading…</span>
+            </div>
+            <h3 class="h6 fw-bold mb-1 text-navy">Uploading {{ uploadingFileName }}…</h3>
+            <p class="text-muted small mb-2">Processing upload to secure company storage.</p>
+            <div class="progress upload-progress-bar mx-auto" role="progressbar" [attr.aria-valuenow]="uploadProgress" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" [style.width.%]="uploadProgress"></div>
+            </div>
+            <span class="badge bg-light text-navy border mt-2 font-monospace">{{ uploadProgress }}%</span>
+          </div>
+        } @else {
+          <div class="idle-state">
+            <div class="upload-icon-wrapper mx-auto mb-2">
+              <i class="bi bi-cloud-arrow-up-fill" aria-hidden="true"></i>
+            </div>
+            <h3 class="h6 fw-bold mb-1 text-navy">Drag & drop media files here, or <span class="text-primary text-decoration-underline">browse files</span></h3>
+            <p class="text-muted small mb-3">Upload media to attach as campaign headers and rich broadcast messages.</p>
+
+            <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+              <span class="format-badge"><i class="bi bi-image me-1"></i> Images up to 5 MB</span>
+              <span class="format-badge"><i class="bi bi-film me-1"></i> Videos up to 16 MB</span>
+              <span class="format-badge"><i class="bi bi-file-earmark-text me-1"></i> Documents up to 100 MB</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Toolbar & Filters -->
+  <section class="toolbar-card card border-0 shadow-sm mb-4" aria-label="Media search and filters">
+    <div class="card-body p-3">
+      <div class="row g-2 align-items-center">
+        <!-- Search Input -->
+        <div class="col-12 col-lg-5">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0 text-muted">
+              <i class="bi bi-search" aria-hidden="true"></i>
+            </span>
+            <input
+              id="media-search"
+              class="form-control border-start-0 ps-0"
+              type="search"
+              [(ngModel)]="keyword"
+              placeholder="Search assets by filename or format…"
+              aria-label="Search media files"
+            />
+          </div>
+        </div>
+
+        <!-- Media Type Selector -->
+        <div class="col-6 col-md-4 col-lg-3">
+          <select
+            id="media-type-filter"
+            class="form-select"
+            [(ngModel)]="selectedType"
+            aria-label="Filter by asset type"
+          >
+            @for (type of mediaTypes; track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Sort Option -->
+        <div class="col-6 col-md-4 col-lg-2">
+          <select
+            id="media-sort-filter"
+            class="form-select"
+            [(ngModel)]="sortBy"
+            aria-label="Sort media assets"
+          >
+            <option value="date_desc">Newest First</option>
+            <option value="date_asc">Oldest First</option>
+            <option value="name_asc">Name (A–Z)</option>
+            <option value="name_desc">Name (Z–A)</option>
+            <option value="size_desc">Size (Largest)</option>
+            <option value="size_asc">Size (Smallest)</option>
+          </select>
+        </div>
+
+        <!-- View Switcher & Clear -->
+        <div class="col-12 col-md-4 col-lg-2 d-flex align-items-center justify-content-end gap-2">
+          @if (hasFilters) {
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+              (click)="clearFilters()"
+              title="Reset search and filters"
+            >
+              <i class="bi bi-x-circle me-1"></i> Clear
+            </button>
+          }
+          <div class="btn-group view-switcher" role="group" aria-label="View switcher">
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.active]="viewMode === 'grid'"
+              [class.btn-light]="viewMode !== 'grid'"
+              [class.btn-primary]="viewMode === 'grid'"
+              (click)="viewMode = 'grid'"
+              title="Grid View"
+              aria-label="Grid View"
+            >
+              <i class="bi bi-grid-fill" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.active]="viewMode === 'list'"
+              [class.btn-light]="viewMode !== 'list'"
+              [class.btn-primary]="viewMode === 'list'"
+              (click)="viewMode = 'list'"
+              title="List View"
+              aria-label="List View"
+            >
+              <i class="bi bi-list-ul" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Section -->
+  @if (loading && !media.length) {
+    <app-loading-state message="Loading media assets…" />
+  } @else if (errorMessage && !media.length) {
+    <app-error-state
+      title="Media unavailable"
+      [message]="errorMessage"
+      [retryable]="true"
+      (retry)="load()"
+    />
+  } @else if (!media.length) {
+    <app-empty-state
+      title="No media yet"
+      message="Upload your first media file to use it across your WhatsApp marketing campaigns."
+    >
+      <button class="btn btn-primary btn-sm" type="button" (click)="choose(fileInput)">
+        <i class="bi bi-cloud-arrow-up me-1"></i> Upload Media
+      </button>
+    </app-empty-state>
+  } @else if (!filteredMedia.length) {
+    <app-empty-state
+      title="No assets match your search"
+      message="Try clearing your search keyword or changing active filters."
+    >
+      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="clearFilters()">
+        Clear Filters
+      </button>
+    </app-empty-state>
+  } @else {
+    <!-- GRID VIEW -->
+    @if (viewMode === 'grid') {
+      <div class="media-grid mb-4">
+        @for (item of filteredMedia; track item.id) {
+          <article class="media-card card border-0 shadow-sm overflow-hidden" (click)="openPreview(item)">
+            <!-- Card Thumbnail Frame -->
+            <div class="media-preview-frame">
+              @if (item.mediaType === 'IMAGE' && previewUrl(item)) {
+                <img [src]="previewUrl(item)" [alt]="item.originalName" class="media-img" loading="lazy" />
+              } @else if (item.mediaType === 'VIDEO') {
+                <div class="media-placeholder video-placeholder">
+                  <i class="bi bi-play-circle-fill play-icon" aria-hidden="true"></i>
+                  <span class="type-indicator">MP4 Video</span>
+                </div>
+              } @else {
+                <div class="media-placeholder document-placeholder">
+                  <i class="bi {{ icon(item.mediaType) }} doc-icon" aria-hidden="true"></i>
+                  <span class="type-indicator font-monospace">{{ fileExtension(item.originalName) }}</span>
+                </div>
+              }
+
+              <!-- Format Chip Overlay -->
+              <span class="badge-format-chip" [attr.data-type]="item.mediaType">
+                {{ item.mediaType }}
+              </span>
+
+              <!-- Hover Quick Action Bar -->
+              <div class="card-overlay-actions" (click)="$event.stopPropagation()">
+                <button
+                  class="btn btn-sm btn-light btn-action"
+                  type="button"
+                  (click)="openPreview(item)"
+                  title="Preview media"
+                  [attr.aria-label]="'Preview ' + item.originalName"
+                >
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-light btn-action"
+                  type="button"
+                  (click)="download(item, $event)"
+                  title="Download file"
+                  [attr.aria-label]="'Download ' + item.originalName"
+                >
+                  <i class="bi bi-download"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-danger btn-action"
+                  type="button"
+                  (click)="remove(item, $event)"
+                  title="Delete media"
+                  [attr.aria-label]="'Delete ' + item.originalName"
+                >
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card Metadata Body -->
+            <div class="card-body p-3">
+              <h3 class="filename h6 mb-1 text-truncate" [title]="item.originalName">
+                {{ item.originalName }}
+              </h3>
+              <div class="d-flex align-items-center justify-content-between text-muted small mt-2">
+                <span>{{ fileSize(item.size) }}</span>
+                <span>{{ item.createdAt | date:'mediumDate' }}</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <!-- LIST VIEW -->
+      <div class="card border-0 shadow-sm overflow-hidden mb-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 50px;">Preview</th>
+                <th>File Name</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Uploaded</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of filteredMedia; track item.id) {
+                <tr (click)="openPreview(item)" role="button">
+                  <td>
+                    <div class="list-thumb">
+                      @if (item.mediaType === 'IMAGE' && previewUrl(item)) {
+                        <img [src]="previewUrl(item)" [alt]="item.originalName" />
+                      } @else {
+                        <i class="bi {{ icon(item.mediaType) }}"></i>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    <strong class="text-navy text-truncate d-inline-block" style="max-width: 320px;" [title]="item.originalName">
+                      {{ item.originalName }}
+                    </strong>
+                    <small class="text-muted d-block font-monospace">{{ item.mimeType }}</small>
+                  </td>
+                  <td>
+                    <span class="badge-format-chip inline" [attr.data-type]="item.mediaType">
+                      {{ item.mediaType }}
+                    </span>
+                  </td>
+                  <td><span class="small font-monospace">{{ fileSize(item.size) }}</span></td>
+                  <td><span class="text-muted small">{{ item.createdAt | date:'mediumDate' }}</span></td>
+                  <td class="text-end text-nowrap" (click)="$event.stopPropagation()">
+                    <button
+                      class="btn btn-sm btn-outline-secondary me-1"
+                      type="button"
+                      (click)="openPreview(item)"
+                      title="Preview"
+                      [attr.aria-label]="'Preview ' + item.originalName"
+                    >
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-secondary me-1"
+                      type="button"
+                      (click)="download(item, $event)"
+                      title="Download"
+                      [attr.aria-label]="'Download ' + item.originalName"
+                    >
+                      <i class="bi bi-download"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      type="button"
+                      (click)="remove(item, $event)"
+                      title="Delete"
+                      [attr.aria-label]="'Delete ' + item.originalName"
+                    >
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
 </section>
+
+<!-- =================================================== -->
+<!-- MEDIA PREVIEW LIGHTBOX MODAL                        -->
+<!-- =================================================== -->
+@if (previewItem) {
+  <div class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title">
+    <div class="lightbox-dialog card shadow-2xl border-0 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="modal-header-custom d-flex align-items-center justify-content-between p-3 px-4 border-bottom">
+        <div class="d-flex align-items-center gap-2 text-truncate me-3">
+          <i class="bi {{ icon(previewItem.mediaType) }} text-primary fs-5"></i>
+          <h2 id="preview-modal-title" class="h5 mb-0 fw-bold text-navy text-truncate" [title]="previewItem.originalName">
+            {{ previewItem.originalName }}
+          </h2>
+        </div>
+        <button class="btn-close" type="button" aria-label="Close" (click)="closePreview()"></button>
+      </div>
+
+      <!-- Modal Body (Split Preview & Metadata) -->
+      <div class="lightbox-body-split">
+        <!-- Media Rendering Area -->
+        <div class="media-display-pane p-4 d-flex align-items-center justify-content-center">
+          @if (previewItem.mediaType === 'IMAGE') {
+            @if (previewUrl(previewItem)) {
+              <img [src]="previewUrl(previewItem)" [alt]="previewItem.originalName" class="lightbox-full-img" />
+            } @else {
+              <div class="text-center p-4">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <p class="text-muted small mb-0">Loading high-resolution image…</p>
+              </div>
+            }
+          } @else if (previewItem.mediaType === 'VIDEO') {
+            <div class="lightbox-document-view text-center">
+              <i class="bi bi-camera-video-fill text-primary display-3 mb-2 d-block"></i>
+              <h3 class="h6 fw-bold text-navy mb-1">{{ previewItem.originalName }}</h3>
+              <p class="text-muted small">MP4 Video broadcast asset ready for WhatsApp campaigns.</p>
+            </div>
+          } @else {
+            <div class="lightbox-document-view text-center">
+              <i class="bi bi-file-earmark-text-fill text-primary display-3 mb-2 d-block"></i>
+              <h3 class="h6 fw-bold text-navy mb-1">{{ previewItem.originalName }}</h3>
+              <p class="text-muted small">Document asset ready for campaign attachment.</p>
+            </div>
+          }
+        </div>
+
+        <!-- Specifications & Metadata Panel -->
+        <div class="details-pane p-4">
+          <h3 class="section-title mb-3">Asset Specifications</h3>
+
+          <div class="metadata-table">
+            <dl class="row small mb-0 g-2">
+              <dt class="col-5 text-muted">File Name</dt>
+              <dd class="col-7 text-truncate font-monospace" [title]="previewItem.originalName">
+                {{ previewItem.originalName }}
+              </dd>
+
+              <dt class="col-5 text-muted">Media Type</dt>
+              <dd class="col-7">
+                <span class="badge-format-chip inline" [attr.data-type]="previewItem.mediaType">
+                  {{ previewItem.mediaType }}
+                </span>
+              </dd>
+
+              <dt class="col-5 text-muted">MIME Type</dt>
+              <dd class="col-7"><code class="mime-tag">{{ previewItem.mimeType }}</code></dd>
+
+              <dt class="col-5 text-muted">File Size</dt>
+              <dd class="col-7 fw-semibold">{{ fileSize(previewItem.size) }}</dd>
+
+              <dt class="col-5 text-muted">Uploaded</dt>
+              <dd class="col-7">{{ previewItem.createdAt | date:'medium' }}</dd>
+
+              <dt class="col-5 text-muted">Status</dt>
+              <dd class="col-7">
+                <span class="badge rounded-pill text-bg-success">
+                  {{ previewItem.status }}
+                </span>
+              </dd>
+            </dl>
+          </div>
+
+          <div class="mt-4 pt-3 border-top d-flex gap-2">
+            <button
+              class="btn btn-primary btn-sm flex-fill"
+              type="button"
+              (click)="download(previewItem)"
+            >
+              <i class="bi bi-download me-1"></i> Download
+            </button>
+            <button
+              class="btn btn-outline-danger btn-sm"
+              type="button"
+              (click)="remove(previewItem)"
+              title="Delete Asset"
+            >
+              <i class="bi bi-trash3 me-1"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
