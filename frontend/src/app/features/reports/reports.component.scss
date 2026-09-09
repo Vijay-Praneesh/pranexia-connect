@@ -1,10 +1,394 @@
-.reports-page { max-width: 90rem; margin-inline: auto; }
-.metric { display: grid; gap: .3rem; height: 100%; padding: 1rem; border: 1px solid var(--bs-border-color); border-radius: .6rem; background: var(--bs-tertiary-bg); }
-.metric span { color: var(--bs-secondary-color); font-size: .78rem; }
-.metric strong { font-size: 1.55rem; }
-.rate-row { padding: .8rem; border: 1px solid var(--bs-border-color); border-radius: .5rem; }
-.rate-row > div:first-child { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: .6rem; }
-.progress { height: .55rem; }
-th { white-space: nowrap; }
-.failure { max-width: 20rem; overflow-wrap: anywhere; }
-@media (max-width: 575.98px) { .metric { padding: .8rem; } }
+// =============================================================================
+// SEYYON CONNECT — CLIENT REPORTS & ANALYTICS STYLESHEET
+// Super-Premium SaaS Analytics Command Center
+// =============================================================================
+
+:host {
+  display: block;
+  --sc-navy: #0f1b3d;
+  --sc-navy-dark: #0a1229;
+  --sc-blue: #2563eb;
+  --sc-blue-hover: #1d4ed8;
+  --sc-blue-subtle: #eff6ff;
+  --sc-indigo: #4338ca;
+  --sc-indigo-subtle: #eef2ff;
+  --sc-emerald: #10b981;
+  --sc-emerald-subtle: #ecfdf5;
+  --sc-cyan: #06b6d4;
+  --sc-cyan-subtle: #ecfeff;
+  --sc-rose: #ef4444;
+  --sc-rose-subtle: #fef2f2;
+  --sc-gold: #f4b728;
+  --sc-gold-subtle: #fef9c3;
+  --sc-text-dark: #172033;
+  --sc-text-muted: #64748b;
+  --sc-border: #e2e8f0;
+  --sc-border-subtle: #f1f5f9;
+  --sc-surface: #ffffff;
+  --sc-surface-subtle: #f8fafc;
+  --sc-shadow-sm: 0 1px 3px 0 rgba(15, 27, 61, 0.06), 0 1px 2px 0 rgba(15, 27, 61, 0.04);
+  --sc-shadow-md: 0 4px 8px -1px rgba(15, 27, 61, 0.08), 0 2px 4px -2px rgba(15, 27, 61, 0.04);
+  --sc-shadow-lg: 0 12px 24px -4px rgba(15, 27, 61, 0.1), 0 4px 8px -4px rgba(15, 27, 61, 0.04);
+}
+
+.reports-page {
+  max-width: 96rem;
+  margin-inline: auto;
+}
+
+// Standardized Icon Alignment & Uniformity
+i.bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+// Spacing Utilities
+.gap-1 { gap: 0.25rem !important; }
+.gap-1\.5, .gap-1-5 { gap: 0.375rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-2\.5, .gap-2-5 { gap: 0.75rem !important; }
+.gap-3 { gap: 1rem !important; }
+.gap-3\.5, .gap-3-5 { gap: 1.25rem !important; }
+.gap-4 { gap: 1.5rem !important; }
+
+.me-1 { margin-right: 0.25rem !important; }
+.me-1\.5, .me-1-5 { margin-right: 0.45rem !important; }
+.me-2 { margin-right: 0.5rem !important; }
+.me-2\.5, .me-2-5 { margin-right: 0.75rem !important; }
+.me-3 { margin-right: 1rem !important; }
+
+.p-2\.5, .p-2-5 { padding: 0.65rem !important; }
+.p-3\.5, .p-3-5 { padding: 1rem !important; }
+.px-3\.5, .px-3-5 { padding-left: 1rem !important; padding-right: 1rem !important; }
+.py-2\.5, .py-2-5 { padding-top: 0.65rem !important; padding-bottom: 0.65rem !important; }
+.py-3\.5, .py-3-5 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+
+// Utility Colors & Classes
+.text-navy {
+  color: var(--sc-navy) !important;
+}
+
+.text-indigo {
+  color: var(--sc-indigo) !important;
+}
+
+.bg-navy-subtle {
+  background-color: #f1f5f9 !important;
+}
+
+.bg-indigo-subtle {
+  background-color: var(--sc-indigo-subtle) !important;
+}
+
+.bg-surface-subtle {
+  background-color: var(--sc-surface-subtle) !important;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.spin {
+  animation: spin-anim 1s linear infinite;
+}
+
+@keyframes spin-anim {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// =============================================================================
+// 1. PAGE HEADER
+// =============================================================================
+.reports-header {
+  border-bottom: 1px solid var(--sc-border-subtle);
+
+  .page-title {
+    color: var(--sc-navy);
+    letter-spacing: -0.025em;
+    font-size: 2rem;
+  }
+
+  .page-subtitle {
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  .btn-outline-navy {
+    color: var(--sc-navy);
+    border-color: var(--sc-border);
+    background-color: var(--sc-surface);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--sc-surface-subtle);
+      border-color: var(--sc-navy);
+      color: var(--sc-navy);
+    }
+  }
+}
+
+// =============================================================================
+// 2. TOOLBAR / FILTER CARD
+// =============================================================================
+.toolbar-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--sc-border) !important;
+  box-shadow: var(--sc-shadow-sm);
+
+  .form-select {
+    border-color: var(--sc-border);
+    font-size: 0.925rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+      border-color: var(--sc-blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+  }
+
+  .input-group-text {
+    border-color: var(--sc-border);
+  }
+}
+
+// =============================================================================
+// 3. EXECUTIVE KPI CARDS
+// =============================================================================
+.kpi-card {
+  background-color: #ffffff;
+  border: 1px solid var(--sc-border) !important;
+  box-shadow: var(--sc-shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sc-shadow-md);
+  }
+
+  .kpi-icon-box {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .kpi-value {
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  // Variants
+  &--navy {
+    &::before {
+      background: var(--sc-navy);
+    }
+  }
+
+  &--indigo {
+    &::before {
+      background: var(--sc-indigo);
+    }
+  }
+
+  &--blue {
+    &::before {
+      background: var(--sc-blue);
+    }
+  }
+
+  &--emerald {
+    &::before {
+      background: var(--sc-emerald);
+    }
+  }
+
+  &--cyan {
+    &::before {
+      background: var(--sc-cyan);
+    }
+  }
+
+  &--rose {
+    &::before {
+      background: var(--sc-rose);
+    }
+  }
+}
+
+// =============================================================================
+// 4. ANALYTICS GRID & CHART CARD
+// =============================================================================
+.analytics-card {
+  background-color: #ffffff;
+  border: 1px solid var(--sc-border) !important;
+  box-shadow: var(--sc-shadow-sm);
+
+  .chart-header-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .chart-wrapper {
+    height: 250px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chart-center-overlay {
+    pointer-events: none;
+    z-index: 1;
+
+    span.h3 {
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    span.small {
+      font-size: 0.725rem;
+    }
+  }
+
+  .rate-bar-item {
+    .progress {
+      background-color: var(--sc-border-subtle);
+      overflow: hidden;
+
+      .progress-bar {
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    }
+  }
+
+  .lifecycle-card {
+    border-color: var(--sc-border) !important;
+  }
+}
+
+// =============================================================================
+// 5. GLOBAL OVERVIEW & PROMPT CARD
+// =============================================================================
+.prompt-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  border: 1px dashed rgba(37, 99, 235, 0.3) !important;
+
+  .prompt-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    background-color: var(--sc-blue-subtle);
+    color: var(--sc-blue);
+  }
+
+  .btn-outline-navy {
+    background-color: #ffffff;
+    border-color: var(--sc-border);
+    color: var(--sc-navy);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--sc-navy);
+      color: #ffffff;
+      border-color: var(--sc-navy);
+      transform: translateY(-2px);
+      box-shadow: var(--sc-shadow-sm);
+    }
+  }
+}
+
+// =============================================================================
+// 6. RECIPIENT AUDIT DATA TABLE
+// =============================================================================
+.recipient-table-card {
+  background-color: #ffffff;
+  border: 1px solid var(--sc-border) !important;
+  box-shadow: var(--sc-shadow-sm);
+
+  .recipient-table {
+    font-size: 0.875rem;
+
+    thead th {
+      border-bottom: 2px solid var(--sc-border);
+      padding: 1.1rem 0.85rem;
+      color: var(--sc-navy);
+      font-weight: 700;
+      letter-spacing: 0.025em;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 1rem 0.85rem;
+      border-bottom: 1px solid var(--sc-border-subtle);
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+  }
+
+  .customer-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    font-size: 0.825rem;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(37, 99, 235, 0.15);
+  }
+
+  .failure-col {
+    max-width: 22rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+// =============================================================================
+// 7. RESPONSIVE BREAKPOINTS
+// =============================================================================
+@media (max-width: 767.98px) {
+  .reports-header {
+    .page-title {
+      font-size: 1.6rem;
+    }
+  }
+
+  .kpi-card {
+    .kpi-value {
+      font-size: 1.4rem;
+    }
+  }
+
+  .analytics-card {
+    .chart-wrapper {
+      height: 220px;
+    }
+  }
+}

@@ -25,4 +25,17 @@ describe('NotificationsComponent', () => {
   it('refreshes the currently selected customer activity', async () => { await create(); component.selectionForm.controls.customerId.setValue('u1'); api.getCustomerActivity.calls.reset(); component.refresh(); expect(api.getCustomerActivity).toHaveBeenCalledWith('u1'); });
   it('does not call admin-only activity APIs for other roles', async () => { await create({ ...admin, role: 'MANAGER' }); expect(api.getCustomers).not.toHaveBeenCalled(); expect(fixture.nativeElement.textContent).toContain('Activity unavailable for this role'); });
   it('does not render read controls, filters, pagination, or a fabricated count', async () => { await create(); expect(fixture.nativeElement.querySelector('[aria-label="Mark all as read"]')).toBeNull(); expect(fixture.nativeElement.querySelector('.pagination')).toBeNull(); expect(fixture.nativeElement.textContent).not.toContain('unread notifications'); });
+  it('returns appropriate icon and icon box classes for delivery statuses', async () => {
+    await create();
+    expect(component.getStatusIcon('READ')).toBe('bi-check2-all');
+    expect(component.getStatusIcon('DELIVERED')).toBe('bi-check2');
+    expect(component.getStatusIcon('SENT')).toBe('bi-send-fill');
+    expect(component.getStatusIcon('FAILED')).toBe('bi-exclamation-octagon-fill');
+    expect(component.getStatusIcon('PENDING')).toBe('bi-clock-history');
+
+    expect(component.getStatusIconBoxClass('READ')).toBe('status-icon-box--read');
+    expect(component.getStatusIconBoxClass('DELIVERED')).toBe('status-icon-box--delivered');
+    expect(component.getStatusIconBoxClass('SENT')).toBe('status-icon-box--sent');
+    expect(component.getStatusIconBoxClass('FAILED')).toBe('status-icon-box--failed');
+  });
 });

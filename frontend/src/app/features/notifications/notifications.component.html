@@ -1,17 +1,207 @@
-<section class="notifications-page" aria-labelledby="notifications-title">
-  <header class="d-flex flex-column flex-sm-row justify-content-between gap-3 mb-4"><div><h1 id="notifications-title" class="h3 mb-1">Notifications & activity</h1><p class="text-body-secondary mb-0">Review the notification capabilities and supported customer campaign activity.</p></div>@if (isCompanyAdmin) { <button class="btn btn-outline-secondary btn-sm align-self-start" type="button" (click)="refresh()" [disabled]="customersLoading || activityLoading"><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Refresh</button> }</header>
-  <article class="card border-0 shadow-sm mb-4" aria-labelledby="notification-status-title"><div class="card-body p-4 d-flex gap-3 align-items-start"><i class="bi bi-bell-slash fs-3 text-secondary" aria-hidden="true"></i><div><h2 id="notification-status-title" class="h5 mb-1">Notifications unavailable</h2><p class="text-body-secondary mb-0">The current backend does not provide notifications, unread state, unread counts, or mark-read actions. No notification data is fabricated or stored in this browser.</p></div></div></article>
-  <article class="card border-0 shadow-sm" aria-labelledby="activity-title"><div class="card-header bg-white"><h2 id="activity-title" class="h5 mb-1">Customer campaign activity</h2><p class="text-body-secondary small mb-0">Real delivery history returned for a selected customer.</p></div><div class="card-body p-4">
-    @if (!isCompanyAdmin) { <app-empty-state title="Activity unavailable for this role" message="The backend restricts customer campaign history to company administrators." /> }
-    @else if (customersLoading && !customers.length) { <app-loading-state message="Loading customers…" /> }
-    @else if (errorMessage && !customers.length) { <app-error-state title="Activity unavailable" [message]="errorMessage" [retryable]="true" (retry)="loadCustomers()" /> }
-    @else if (!customers.length) { <app-empty-state title="No customers available" message="Customer activity becomes available after customers are added." /> }
-    @else { <form [formGroup]="selectionForm" class="mb-4"><label class="form-label" for="activity-customer">Customer</label><select id="activity-customer" class="form-select" formControlName="customerId"><option value="">Select a customer</option>@for (customer of customers; track customer.id) { <option [value]="customer.id">{{ customer.firstName }} {{ customer.lastName }} · {{ customer.mobile }}</option> }</select></form>
-      @if (errorMessage) { <div class="alert alert-warning" role="alert">{{ errorMessage }}@if (activity.length) { The last activity remains displayed. }</div> }
-      @if (!selectionForm.controls.customerId.value) { <app-empty-state title="Select a customer" message="Choose a customer to load their campaign delivery history." /> }
-      @else if (activityLoading && !activity.length) { <app-loading-state message="Loading customer activity…" /> }
-      @else if (!activity.length) { <app-empty-state title="No campaign activity" message="This customer has no campaign-recipient history." /> }
-      @else { <ol class="activity-list list-unstyled mb-0" aria-label="Customer campaign activity">@for (item of activity; track item.id) { <li><div class="activity-icon"><i class="bi bi-send" aria-hidden="true"></i></div><div class="activity-content"><div class="d-flex flex-wrap gap-2 align-items-center"><strong>{{ item.campaign?.name || 'Campaign' }}</strong><app-status-badge [status]="item.status" /></div><p class="text-body-secondary small mb-1">Template: {{ item.campaign?.template?.name || 'Unavailable' }}</p>@if (item.failureReason) { <p class="text-danger small mb-1">{{ item.failureReason }}</p> }<time class="small text-body-secondary" [attr.datetime]="activityTime(item)">{{ activityTime(item) | date:'medium' }}</time></div></li> }</ol> }
-    }
-  </div></article>
+<section class="notifications-page container-fluid px-0" aria-labelledby="notifications-title">
+  <!-- Page Header -->
+  <header class="notifications-header mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold text-uppercase tracking-wider small">
+            <i class="bi bi-bell-fill me-1"></i>Activity & Notifications
+          </span>
+        </div>
+        <h1 id="notifications-title" class="page-title h2 mb-1 fw-bold text-navy">Notifications & activity</h1>
+        <p class="page-subtitle text-muted mb-0">
+          Review the notification capabilities and supported customer campaign activity.
+        </p>
+      </div>
+
+      @if (isCompanyAdmin) {
+        <button
+          class="btn btn-outline-navy d-inline-flex align-items-center gap-2 px-3 py-2 fw-medium shadow-sm align-self-start align-self-sm-center"
+          type="button"
+          (click)="refresh()"
+          [disabled]="customersLoading || activityLoading"
+          aria-label="Refresh notifications and customer activity"
+        >
+          <i class="bi bi-arrow-clockwise fs-6" [class.spin]="customersLoading || activityLoading" aria-hidden="true"></i>
+          <span>Refresh</span>
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Capability & Architecture Status Card -->
+  <article class="card border-0 shadow-sm mb-4 capability-card" aria-labelledby="notification-status-title">
+    <div class="card-body p-4 d-flex gap-3.5 align-items-start">
+      <div class="capability-icon-box rounded-circle p-2.5 flex-shrink-0">
+        <i class="bi bi-bell-slash fs-4" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          <h2 id="notification-status-title" class="h6 mb-0 fw-bold text-navy">Notifications unavailable</h2>
+          <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-0.5 small">
+            Realtime Audit Mode
+          </span>
+        </div>
+        <p class="text-muted small mb-0">
+          The current backend does not provide notifications, unread state, unread counts, or mark-read actions. No notification data is fabricated or stored in this browser.
+        </p>
+      </div>
+    </div>
+  </article>
+
+  <!-- Customer Campaign Activity Command Card -->
+  <article class="card border-0 shadow-sm activity-card overflow-hidden" aria-labelledby="activity-title">
+    <div class="card-header bg-white py-3.5 px-4 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+      <div>
+        <h2 id="activity-title" class="h5 mb-0 fw-bold text-navy d-flex align-items-center gap-2">
+          <i class="bi bi-broadcast text-primary"></i>
+          <span>Customer campaign activity</span>
+        </h2>
+        <p class="text-muted small mb-0 mt-0.5">Real delivery history returned for a selected customer.</p>
+      </div>
+
+      @if (selectedCustomer && isCompanyAdmin) {
+        <span class="badge bg-light text-navy border px-2.5 py-1.5 fw-semibold small">
+          <i class="bi bi-person-check-fill text-success me-1"></i>Active Contact Context
+        </span>
+      }
+    </div>
+
+    <div class="card-body p-4">
+      @if (!isCompanyAdmin) {
+        <app-empty-state
+          title="Activity unavailable for this role"
+          message="The backend restricts customer campaign history to company administrators."
+        />
+      } @else if (customersLoading && !customers.length) {
+        <app-loading-state message="Loading customers…" />
+      } @else if (errorMessage && !customers.length) {
+        <app-error-state
+          title="Activity unavailable"
+          [message]="errorMessage"
+          [retryable]="true"
+          (retry)="loadCustomers()"
+        />
+      } @else if (!customers.length) {
+        <app-empty-state
+          title="No customers available"
+          message="Customer activity becomes available after customers are added."
+        />
+      } @else {
+        <!-- Customer Selection Box -->
+        <div class="customer-selection-wrapper p-3.5 rounded-3 mb-4 border bg-surface-subtle">
+          <form [formGroup]="selectionForm">
+            <label class="form-label fw-bold text-navy small text-uppercase tracking-wider d-flex align-items-center gap-1.5 mb-2" for="activity-customer">
+              <i class="bi bi-person-lines-fill text-primary"></i>
+              <span>Customer</span>
+            </label>
+            <div class="position-relative">
+              <select
+                id="activity-customer"
+                class="form-select form-select-lg customer-select-input shadow-none"
+                formControlName="customerId"
+              >
+                <option value="">Select a customer</option>
+                @for (customer of customers; track customer.id) {
+                  <option [value]="customer.id">
+                    {{ customer.firstName }} {{ customer.lastName }} · {{ customer.mobile }}
+                  </option>
+                }
+              </select>
+            </div>
+          </form>
+
+          @if (selectedCustomer) {
+            <div class="selected-customer-pill mt-3 pt-3 border-top d-flex flex-wrap align-items-center justify-content-between gap-2 small">
+              <div class="d-flex align-items-center gap-2 text-navy">
+                <div class="avatar-circle rounded-circle bg-primary text-white fw-bold">
+                  {{ selectedCustomer.firstName.charAt(0) }}
+                </div>
+                <div>
+                  <span class="fw-bold d-block">{{ selectedCustomer.firstName }} {{ selectedCustomer.lastName || '' }}</span>
+                  <span class="text-muted font-monospace">{{ selectedCustomer.mobile }}</span>
+                </div>
+              </div>
+
+              @if (selectedCustomer.status) {
+                <app-status-badge [status]="selectedCustomer.status" />
+              }
+            </div>
+          }
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert alert-warning border border-warning-subtle shadow-sm mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5 text-warning flex-shrink-0"></i>
+            <span>{{ errorMessage }}@if (activity.length) { The last activity remains displayed. }</span>
+          </div>
+        }
+
+        @if (!selectionForm.controls.customerId.value) {
+          <app-empty-state
+            title="Select a customer"
+            message="Choose a customer to load their campaign delivery history."
+          />
+        } @else if (activityLoading && !activity.length) {
+          <app-loading-state message="Loading customer activity…" />
+        } @else if (!activity.length) {
+          <app-empty-state
+            title="No campaign activity"
+            message="This customer has no campaign-recipient history."
+          />
+        } @else {
+          <!-- Realtime Customer Activity Timeline Feed -->
+          <div class="timeline-container mt-2">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+              <span class="small fw-bold text-uppercase tracking-wider text-muted">
+                Campaign Events Timeline ({{ activity.length }})
+              </span>
+              <span class="small text-muted">
+                Sorted by most recent
+              </span>
+            </div>
+
+            <ol class="activity-timeline list-unstyled mb-0" aria-label="Customer campaign activity">
+              @for (item of activity; track item.id) {
+                <li class="activity-timeline-item">
+                  <div class="timeline-node">
+                    <div class="activity-icon-box" [ngClass]="getStatusIconBoxClass(item.status)">
+                      <i class="bi" [ngClass]="getStatusIcon(item.status)" aria-hidden="true"></i>
+                    </div>
+                  </div>
+
+                  <div class="activity-card-bubble p-3 rounded-3 border">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1.5">
+                      <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <strong class="activity-campaign-title text-navy fs-6">
+                          {{ item.campaign?.name || 'Campaign' }}
+                        </strong>
+                        <app-status-badge [status]="item.status" />
+                      </div>
+                      <time class="small text-muted d-flex align-items-center gap-1" [attr.datetime]="activityTime(item)">
+                        <i class="bi bi-clock"></i>
+                        <span>{{ activityTime(item) | date:'medium' }}</span>
+                      </time>
+                    </div>
+
+                    <p class="text-muted small mb-1">
+                      <i class="bi bi-file-earmark-text me-1 text-primary"></i>
+                      <span>Template: <strong>{{ item.campaign?.template?.name || 'Unavailable' }}</strong></span>
+                    </p>
+
+                    @if (item.failureReason) {
+                      <div class="failure-callout mt-2 p-2 rounded-2 bg-danger-subtle text-danger small d-flex align-items-center gap-1.5">
+                        <i class="bi bi-exclamation-octagon-fill"></i>
+                        <span>{{ item.failureReason }}</span>
+                      </div>
+                    }
+                  </div>
+                </li>
+              }
+            </ol>
+          </div>
+        }
+      }
+    </div>
+  </article>
 </section>

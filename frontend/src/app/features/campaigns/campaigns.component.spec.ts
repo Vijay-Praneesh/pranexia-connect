@@ -1,3 +1,4 @@
+import { HttpResponse } from '@angular/common/http';
 import {
   ComponentFixture,
   fakeAsync,
@@ -115,12 +116,27 @@ describe('CampaignsComponent', () => {
       }),
     );
 
-    mediaApi = jasmine.createSpyObj('MediaService', ['getMedia']);
+    mediaApi = jasmine.createSpyObj('MediaService', ['getMedia', 'getMediaFile']);
     mediaApi.getMedia.and.returnValue(
       of({
-        media: [],
-        pagination: { page: 1, limit: 100, totalRecords: 0, totalPages: 0 },
+        media: [
+          {
+            id: 'm1',
+            originalName: 'logo-black.png',
+            storedName: 'logo-black.png',
+            mimeType: 'image/png',
+            mediaType: 'IMAGE',
+            size: 1024,
+            status: 'READY',
+            createdAt: '',
+            updatedAt: '',
+          },
+        ],
+        pagination: { page: 1, limit: 100, totalRecords: 1, totalPages: 1 },
       }),
+    );
+    mediaApi.getMediaFile.and.returnValue(
+      of(new HttpResponse({ body: new Blob(['fake-img-data'], { type: 'image/png' }) })),
     );
 
     dashboardApi = jasmine.createSpyObj('DashboardService', ['getSummary']);
@@ -363,5 +379,40 @@ describe('CampaignsComponent', () => {
     expect(component.isAllFilteredSelected()).toBeTrue();
     component.toggleAllCustomers(false);
     expect(component.selectedCustomers.has('u1')).toBeFalse();
+  });
+
+  it('updates live WhatsApp preview dynamically on form changes', () => {
+    component.openCreate();
+    fixture.detectChanges();
+
+    // No template initially selected
+    expect(component.selectedTemplateObj()).toBeUndefined();
+    expect(component.livePreviewBodyText).toBe('');
+
+    // Set template
+    component.campaignForm.patchValue({ templateId: 't1' });
+    fixture.detectChanges();
+    expect(component.selectedTemplateObj()?.name).toBe('Welcome');
+    expect(component.livePreviewBodyText).toBe('Hi');
+
+    // Set campaign name and description
+    component.campaignForm.patchValue({
+      name: 'Pranexia_Campaign',
+      description: 'Hey hi Hello',
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Pranexia_Campaign');
+    expect(fixture.nativeElement.textContent).toContain('Hey hi Hello');
+
+    // Select media asset
+    component.campaignForm.patchValue({ mediaId: 'm1' });
+    fixture.detectChanges();
+    expect(component.selectedMediaObj()?.originalName).toBe('logo-black.png');
+    expect(component.getMediaPreviewUrl('m1')).toBeDefined();
+
+    // Clear media asset
+    component.campaignForm.patchValue({ mediaId: '' });
+    fixture.detectChanges();
+    expect(component.selectedMediaObj()).toBeUndefined();
   });
 });

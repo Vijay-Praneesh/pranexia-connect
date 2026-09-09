@@ -3,8 +3,10 @@ import { Component, inject } from '@angular/core';
 import { finalize } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { ConfirmationModalService } from '../../../core/services/confirmation-modal.service';
 import { GoogleAuthService } from '../../../core/services/google-auth.service';
 import { HttpErrorService } from '../../../core/services/http-error.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ErrorStateComponent } from '../../../shared/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
@@ -23,6 +25,8 @@ export class AccountSettingsComponent {
   readonly auth = inject(AuthService);
   readonly googleAuth = inject(GoogleAuthService);
   private readonly errors = inject(HttpErrorService);
+  private readonly toast = inject(ToastService);
+  private readonly modal = inject(ConfirmationModalService);
 
   user: AccountSettingsUser | null = this.auth.getCurrentUser();
   loading = false;
@@ -69,6 +73,23 @@ export class AccountSettingsComponent {
     this.auth.logout();
   }
 
+  confirmLogout(): void {
+    void this.modal
+      .confirm({
+        title: 'Sign Out',
+        message: 'Are you sure you want to end your current session? You will need to log in again to access Seyyon Connect.',
+        confirmText: 'Sign Out',
+        cancelText: 'Stay Logged In',
+        variant: 'danger',
+        icon: 'bi-box-arrow-right',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.logout();
+        }
+      });
+  }
+
   refresh(): void {
     if (this.loading || this.user?.role !== 'COMPANY_ADMIN') return;
     this.loading = true;
@@ -77,8 +98,13 @@ export class AccountSettingsComponent {
       .getCurrentUser()
       .pipe(finalize(() => { this.loading = false; }))
       .subscribe({
-        next: (user) => { this.user = user; },
-        error: (error) => { this.errorMessage = this.errors.map(error).message; },
+        next: (user) => {
+          this.user = user;
+          this.toast.success('Account information refreshed successfully.');
+        },
+        error: (error) => {
+          this.errorMessage = this.errors.map(error).message;
+        },
       });
   }
 
@@ -90,6 +116,7 @@ export class AccountSettingsComponent {
 
     if (!this.googleAuth.isConfigured()) {
       this.errorMessage = 'Google Sign-In is not configured on this environment.';
+      this.toast.warning(this.errorMessage);
       return;
     }
 
@@ -102,15 +129,18 @@ export class AccountSettingsComponent {
           next: (updatedUser) => {
             this.user = updatedUser;
             this.successMessage = 'Google account successfully linked!';
+            this.toast.success('Google account successfully linked!');
           },
           error: (error) => {
             this.errorMessage = this.errors.map(error).message;
+            this.toast.error(this.errorMessage);
           },
         });
     }).then((ready) => {
       if (!ready) {
         this.linkingGoogle = false;
         this.errorMessage = 'Could not load Google Sign-In SDK.';
+        this.toast.error(this.errorMessage);
       }
     });
   }
@@ -129,10 +159,29 @@ export class AccountSettingsComponent {
         next: (updatedUser) => {
           this.user = updatedUser;
           this.successMessage = 'Google account disconnected successfully.';
+          this.toast.success('Google account disconnected successfully.');
         },
         error: (error) => {
           this.errorMessage = this.errors.map(error).message;
+          this.toast.error(this.errorMessage);
         },
+      });
+  }
+
+  confirmUnlinkGoogle(): void {
+    void this.modal
+      .confirm({
+        title: 'Disconnect Google Account',
+        message: 'Are you sure you want to unlink your Google Account? You will no longer be able to use Google Single Sign-On until you re-link it.',
+        confirmText: 'Disconnect',
+        cancelText: 'Cancel',
+        variant: 'warning',
+        icon: 'bi-google',
+      })
+      .then((confirmed) => {
+        if (confirmed) {
+          this.unlinkGoogle();
+        }
       });
   }
 

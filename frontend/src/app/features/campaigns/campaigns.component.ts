@@ -31,7 +31,7 @@ import { Media } from '../media/media.model';
 import { MediaService } from '../media/media.service';
 import { WhatsAppConnectionStatus } from '../settings/whatsapp/whatsapp-settings.model';
 import { WhatsAppSettingsService } from '../settings/whatsapp/whatsapp-settings.service';
-import { Template } from '../templates/template.model';
+import { Template, TemplateButton } from '../templates/template.model';
 import { TemplateService } from '../templates/template.service';
 import {
   Campaign,
@@ -90,6 +90,9 @@ export class CampaignsComponent implements OnDestroy {
   detail: Campaign | null = null;
   summary: DashboardSummary | null = null;
   whatsappStatus: WhatsAppConnectionStatus | null = null;
+  mediaObjectUrls = new Map<string, string>();
+  loadingMediaIds = new Set<string>();
+  mediaErrorIds = new Set<string>();
   recipientSearch = '';
   page = 1;
   limit = 10;
@@ -166,6 +169,13 @@ export class CampaignsComponent implements OnDestroy {
       .subscribe((type) => {
         this.scheduleLater = type === 'SCHEDULED';
       });
+    this.campaignForm.controls.mediaId.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((id) => {
+        if (id) {
+          this.getMediaPreviewUrl(id);
+        }
+      });
     this.loadOptions();
     this.loadSummary();
     this.loadWhatsAppStatus();
@@ -208,6 +218,10 @@ export class CampaignsComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopPolling();
+    this.mediaObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    this.mediaObjectUrls.clear();
+    this.loadingMediaIds.clear();
+    this.mediaErrorIds.clear();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -283,6 +297,7 @@ export class CampaignsComponent implements OnDestroy {
     this.mediaApi?.getMedia({ page: 1, limit: 100 }).subscribe({
       next: (result) => {
         this.media = result.media.filter((item) => item.status === 'READY');
+        this.refreshMediaPreviews();
       },
       error: () => undefined,
     });
@@ -391,6 +406,9 @@ export class CampaignsComponent implements OnDestroy {
       mediaId: campaign.mediaId ?? '',
       variableMappings: campaign.variableMappings ?? {},
     });
+    if (campaign.mediaId) {
+      this.getMediaPreviewUrl(campaign.mediaId);
+    }
     this.editorOpen = true;
   }
 
@@ -505,10 +523,106 @@ export class CampaignsComponent implements OnDestroy {
     return this.media.find((item) => item.id === id);
   }
 
+  private refreshMediaPreviews(): void {
+    if (!this.mediaApi) return;
+    this.media
+      .filter(
+        (item) =>
+          item.mediaType === 'IMAGE' &&
+          !this.mediaObjectUrls.has(item.id) &&
+          !this.mediaErrorIds.has(item.id),
+      )
+      .forEach((item) => {
+        this.getMediaPreviewUrl(item.id);
+      });
+  }
+
+  getMediaPreviewUrl(mediaId?: string | null): string | undefined {
+    if (!mediaId) return undefined;
+    if (this.mediaObjectUrls.has(mediaId)) {
+      return this.mediaObjectUrls.get(mediaId);
+    }
+    const item = this.media.find((m) => m.id === mediaId);
+    if (
+      item &&
+      item.mediaType === 'IMAGE' &&
+      this.mediaApi &&
+      !this.loadingMediaIds.has(mediaId) &&
+      !this.mediaErrorIds.has(mediaId)
+    ) {
+      this.loadingMediaIds.add(mediaId);
+      this.mediaApi.getMediaFile(mediaId).subscribe({
+        next: (response) => {
+          this.loadingMediaIds.delete(mediaId);
+          if (response.body) {
+            const url = URL.createObjectURL(response.body);
+            this.mediaObjectUrls.set(mediaId, url);
+          }
+        },
+        error: (err) => {
+          this.loadingMediaIds.delete(mediaId);
+          this.mediaErrorIds.add(mediaId);
+          console.error('Failed to load media preview for ID:', mediaId, err);
+        },
+      });
+    }
+    return undefined;
+  }
+
+  onMediaImgError(mediaId?: string | null): void {
+    if (mediaId) {
+      this.mediaErrorIds.add(mediaId);
+    }
+  }
+
+  isMediaLoading(mediaId?: string | null): boolean {
+    return Boolean(mediaId && this.loadingMediaIds.has(mediaId));
+  }
+
+  isMediaError(mediaId?: string | null): boolean {
+    return Boolean(mediaId && this.mediaErrorIds.has(mediaId));
+  }
+
+  fileExtension(filename?: string | null): string {
+    if (!filename) return 'FILE';
+    return filename.split('.').pop()?.toUpperCase() || 'FILE';
+  }
+
+  getLivePreviewButtons(): TemplateButton[] {
+    const template = this.selectedTemplateObj();
+    if (!template || !template.buttons) return [];
+    if (Array.isArray(template.buttons)) {
+      return template.buttons;
+    }
+    if (typeof template.buttons === 'string') {
+      try {
+        const parsed: unknown = JSON.parse(template.buttons);
+        return Array.isArray(parsed) ? (parsed as TemplateButton[]) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }
+
+  buttonLabel(btn: TemplateButton): string {
+    return (
+      btn.text ||
+      ((btn as Record<string, unknown>)['name'] as string) ||
+      ((btn as Record<string, unknown>)['label'] as string) ||
+      'Action Button'
+    );
+  }
+
+  get livePreviewHeaderText(): string {
+    const template = this.selectedTemplateObj();
+    return template?.headerText || '';
+  }
+
   get livePreviewBodyText(): string {
     const template = this.selectedTemplateObj();
     if (!template || !template.body) {
-      return "Hello {{1}},\n\nWe're excited to bring you the latest updates, offers and announcements from Seyyon Connect.\n\nStay connected with us! 🚀";
+      return '';
     }
     return template.body;
   }

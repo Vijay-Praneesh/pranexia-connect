@@ -1,16 +1,16 @@
 <section class="settings-page" aria-labelledby="settings-title">
   <!-- ===================================================================== -->
-  <!-- 01: PAGE HEADER -->
+  <!-- 01: PAGE HEADER                                                       -->
   <!-- ===================================================================== -->
   <header class="settings-header">
     <div class="header-text-block">
       <div class="header-eyebrow">
         <span class="eyebrow-accent-bar" aria-hidden="true"></span>
-        <span>SETTINGS</span>
+        <span>SETTINGS &amp; PREFERENCES</span>
       </div>
-      <h1 id="settings-title" class="header-title">Company & account</h1>
+      <h1 id="settings-title" class="header-title">Company &amp; account</h1>
       <p class="header-subtitle">
-        Your current account and company information.
+        Your current account and enterprise organization information.
       </p>
     </div>
 
@@ -23,15 +23,15 @@
           [disabled]="loading"
           aria-label="Refresh account data"
         >
-          <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>
-          <span>Refresh</span>
+          <i class="bi bi-arrow-clockwise refresh-icon" [class.spin-active]="loading" aria-hidden="true"></i>
+          <span>{{ loading ? 'Refreshing…' : 'Refresh' }}</span>
         </button>
       </div>
     }
   </header>
 
   <!-- ===================================================================== -->
-  <!-- 02: STATES & NOTIFICATION BANNERS -->
+  <!-- 02: STATES & NOTIFICATION BANNERS                                     -->
   <!-- ===================================================================== -->
   @if (loading && !user) {
     <div class="state-card">
@@ -54,11 +54,13 @@
       />
     </div>
   } @else {
-    <!-- Notification Alerts -->
+    <!-- Dynamic Notification Banners -->
     @if (loading) {
       <div class="custom-alert-banner alert-info mb-4" role="status">
-        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-        <span>Refreshing account information…</span>
+        <div class="banner-content">
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          <span>Refreshing account information…</span>
+        </div>
       </div>
     }
 
@@ -98,13 +100,15 @@
 
     @if (user.role !== 'COMPANY_ADMIN') {
       <div class="custom-alert-banner alert-info-soft mb-4" role="status">
-        <i class="bi bi-info-circle-fill text-blue me-2" aria-hidden="true"></i>
-        <span>Live account refresh is restricted by the backend to company administrators. Information from your authenticated session is shown below.</span>
+        <div class="banner-content">
+          <i class="bi bi-shield-lock text-blue me-2" aria-hidden="true"></i>
+          <span>Live account refresh is restricted by the backend to company administrators. Information from your authenticated session is shown below.</span>
+        </div>
       </div>
     }
 
     <!-- ===================================================================== -->
-    <!-- 03: SETTINGS NAVIGATION TABS -->
+    <!-- 03: SETTINGS NAVIGATION TABS                                          -->
     <!-- ===================================================================== -->
     <nav class="settings-nav mb-4" aria-label="Settings sections" role="tablist">
       <button
@@ -173,14 +177,18 @@
     </nav>
 
     <!-- ===================================================================== -->
-    <!-- 04: SETTINGS PANELS -->
+    <!-- 04: SETTINGS PANELS                                                   -->
     <!-- ===================================================================== -->
     @if (activeTab === 'account') {
       <article id="account-panel" class="settings-panel-surface card" role="tabpanel" aria-labelledby="account-tab">
+        <!-- Hero Identity Banner -->
         <div class="panel-header-block">
           <div class="user-hero-wrap">
-            <div class="user-hero-avatar" aria-hidden="true">
-              {{ getUserInitials(user) }}
+            <div class="user-hero-avatar-box">
+              <div class="user-hero-avatar" aria-hidden="true">
+                {{ getUserInitials(user) }}
+              </div>
+              <div class="avatar-status-dot" [class.dot-active]="user.status === 'ACTIVE'"></div>
             </div>
             <div class="user-hero-meta">
               <div class="user-hero-name-row">
@@ -205,95 +213,178 @@
           </div>
         </div>
 
+        <!-- Main Content Area -->
         <div class="panel-body-content">
+          <!-- Subcard 1: Profile Information -->
           <div class="settings-subcard">
             <div class="subcard-header">
-              <i class="bi bi-person-circle subcard-icon" aria-hidden="true"></i>
-              <h3 class="subcard-title">Profile Information</h3>
+              <div class="subcard-header-left">
+                <div class="subcard-icon-wrap icon-blue">
+                  <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h3 class="subcard-title">Profile Information</h3>
+                  <p class="subcard-desc">Personal identity and verified contact details.</p>
+                </div>
+              </div>
             </div>
+
             <dl class="profile-list mb-0">
               <div class="profile-item">
-                <dt>Name</dt>
-                <dd>{{ user.firstName }} {{ user.lastName }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-person me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Name</span>
+                </dt>
+                <dd class="profile-val">{{ user.firstName }} {{ user.lastName }}</dd>
               </div>
+
               <div class="profile-item">
-                <dt>Email</dt>
-                <dd>
-                  {{ user.email }}
+                <dt class="profile-key">
+                  <i class="bi bi-envelope me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Email</span>
+                </dt>
+                <dd class="profile-val">
+                  <span>{{ user.email }}</span>
                   @if (user.emailVerified) {
-                    <span class="verified-tag ms-2">Verified</span>
+                    <span class="verified-tag ms-2">
+                      <i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i>Verified
+                    </span>
                   }
                 </dd>
               </div>
+
               <div class="profile-item">
-                <dt>Mobile</dt>
-                <dd>{{ user.mobile }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-telephone me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Mobile</span>
+                </dt>
+                <dd class="profile-val">{{ user.mobile || 'Not provided' }}</dd>
               </div>
+
               <div class="profile-item">
-                <dt>Role</dt>
-                <dd>{{ user.role.replaceAll('_', ' ') }}</dd>
-              </div>
-              <div class="profile-item">
-                <dt>Google Sign-In</dt>
-                <dd>
-                  @if (user.googleId) {
-                    <div class="google-connected-row">
-                      <span class="google-linked-pill">
-                        <i class="bi bi-google me-1" aria-hidden="true"></i>Linked
-                      </span>
-                      <button
-                        class="btn-unlink-google"
-                        type="button"
-                        (click)="unlinkGoogle()"
-                        [disabled]="linkingGoogle"
-                        aria-label="Disconnect Google Account"
-                      >
-                        Disconnect
-                      </button>
-                    </div>
-                  } @else {
-                    <button
-                      class="btn-link-google"
-                      type="button"
-                      (click)="linkGoogle()"
-                      [disabled]="linkingGoogle"
-                    >
-                      @if (linkingGoogle) {
-                        <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
-                        <span>Connecting…</span>
-                      } @else {
-                        <i class="bi bi-google google-icon-brand me-1" aria-hidden="true"></i>
-                        <span>Link Google Account</span>
-                      }
-                    </button>
-                  }
+                <dt class="profile-key">
+                  <i class="bi bi-shield-check me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Role</span>
+                </dt>
+                <dd class="profile-val">
+                  <span class="val-role-tag">{{ user.role.replaceAll('_', ' ') }}</span>
                 </dd>
               </div>
+
               <div class="profile-item">
-                <dt>Created</dt>
-                <dd>{{ user.createdAt | date: 'mediumDate' }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-calendar-check me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Created</span>
+                </dt>
+                <dd class="profile-val">{{ user.createdAt | date: 'mediumDate' }}</dd>
               </div>
+
               <div class="profile-item">
-                <dt>Last updated</dt>
-                <dd>{{ user.updatedAt | date: 'medium' }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-clock-history me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Last updated</span>
+                </dt>
+                <dd class="profile-val">{{ user.updatedAt | date: 'medium' }}</dd>
               </div>
             </dl>
           </div>
 
+          <!-- Subcard 2: Google Sign-In & Single Sign-On -->
+          <div class="settings-subcard">
+            <div class="subcard-header">
+              <div class="subcard-header-left">
+                <div class="subcard-icon-wrap icon-google">
+                  <i class="bi bi-google" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h3 class="subcard-title">Google Sign-In</h3>
+                  <p class="subcard-desc">Seamless one-click authentication linked with your Google account.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="google-auth-body">
+              <div class="google-status-left">
+                @if (user.googleId) {
+                  <div class="google-state-indicator linked">
+                    <span class="state-dot green-dot"></span>
+                    <span class="state-label">Google Account is currently <strong>Linked</strong></span>
+                  </div>
+                  <p class="google-state-hint">You can sign in directly to Seyyon Connect using Google Single Sign-On.</p>
+                } @else {
+                  <div class="google-state-indicator unlinked">
+                    <span class="state-dot gray-dot"></span>
+                    <span class="state-label">No Google Account linked</span>
+                  </div>
+                  <p class="google-state-hint">Connect your Google workspace account to enable instant single sign-on.</p>
+                }
+              </div>
+
+              <div class="google-action-right">
+                @if (user.googleId) {
+                  <button
+                    class="btn-unlink-google"
+                    type="button"
+                    (click)="confirmUnlinkGoogle()"
+                    [disabled]="linkingGoogle"
+                    aria-label="Disconnect Google Account"
+                  >
+                    @if (linkingGoogle) {
+                      <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                      <span>Disconnecting…</span>
+                    } @else {
+                      <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+                      <span>Disconnect</span>
+                    }
+                  </button>
+                } @else {
+                  <button
+                    class="btn-link-google"
+                    type="button"
+                    (click)="linkGoogle()"
+                    [disabled]="linkingGoogle"
+                    aria-label="Link Google Account"
+                  >
+                    @if (linkingGoogle) {
+                      <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                      <span>Connecting…</span>
+                    } @else {
+                      <i class="bi bi-google google-icon-brand me-1" aria-hidden="true"></i>
+                      <span>Link Google Account</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Subcard 3: Session & Security -->
           <div class="settings-subcard session-subcard">
             <div class="subcard-header">
-              <i class="bi bi-shield-lock subcard-icon" aria-hidden="true"></i>
-              <h3 class="subcard-title">Session & Security</h3>
+              <div class="subcard-header-left">
+                <div class="subcard-icon-wrap icon-danger">
+                  <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h3 class="subcard-title">Session &amp; Security</h3>
+                  <p class="subcard-desc">Active session token and authentication controls.</p>
+                </div>
+              </div>
             </div>
+
             <div class="session-actions-row">
               <div class="session-desc">
-                <span class="session-title">Active Platform Session</span>
-                <span class="session-hint">You are currently logged in with verified credentials.</span>
+                <div class="session-title-wrap">
+                  <span class="status-indicator-live"></span>
+                  <span class="session-title">Active Platform Session</span>
+                </div>
+                <span class="session-hint">You are currently logged in with verified credentials and JWT session tokens.</span>
               </div>
+
               <button
                 class="btn-session-logout"
                 type="button"
-                (click)="logout()"
+                (click)="confirmLogout()"
                 aria-label="Sign out of Seyyon Connect"
               >
                 <i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>
@@ -305,17 +396,23 @@
       </article>
     } @else if (activeTab === 'company') {
       <article id="company-panel" class="settings-panel-surface card" role="tabpanel" aria-labelledby="company-tab">
+        <!-- Company Identity Banner -->
         <div class="panel-header-block">
           <div class="company-hero-wrap">
-            <div class="company-hero-avatar" aria-hidden="true">
-              {{ user.company.companyName.charAt(0) }}
+            <div class="company-hero-avatar-box">
+              <div class="company-hero-avatar" aria-hidden="true">
+                {{ user.company.companyName.charAt(0) }}
+              </div>
+              <div class="avatar-status-dot dot-active"></div>
             </div>
+
             <div class="company-hero-meta">
               <div class="company-hero-name-row">
                 <h2 id="company-title" class="company-hero-name">
                   {{ user.company.companyName }}
                 </h2>
                 <span class="plan-pill-badge">
+                  <i class="bi bi-lightning-charge-fill me-1" aria-hidden="true"></i>
                   {{ user.company.plan }}
                 </span>
                 <app-status-badge [status]="user.company.status" />
@@ -325,42 +422,76 @@
                 <span>{{ user.company.email }}</span>
                 <span class="meta-dot">·</span>
                 <i class="bi bi-phone me-1" aria-hidden="true"></i>
-                <span>{{ user.company.mobile }}</span>
+                <span>{{ user.company.mobile || 'No mobile' }}</span>
               </p>
             </div>
           </div>
         </div>
 
+        <!-- Company Body Content -->
         <div class="panel-body-content">
           <div class="settings-subcard">
             <div class="subcard-header">
-              <i class="bi bi-building subcard-icon" aria-hidden="true"></i>
-              <h3 class="subcard-title">Company Profile</h3>
+              <div class="subcard-header-left">
+                <div class="subcard-icon-wrap icon-navy">
+                  <i class="bi bi-building-fill" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h3 class="subcard-title">Company Profile</h3>
+                  <p class="subcard-desc">Organization details and active subscription plan.</p>
+                </div>
+              </div>
             </div>
+
             <dl class="profile-list mb-0">
               <div class="profile-item">
-                <dt>Company name</dt>
-                <dd>{{ user.company.companyName }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-building me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Company name</span>
+                </dt>
+                <dd class="profile-val">{{ user.company.companyName }}</dd>
               </div>
+
               <div class="profile-item">
-                <dt>Email</dt>
-                <dd>{{ user.company.email }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-envelope me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Email</span>
+                </dt>
+                <dd class="profile-val">{{ user.company.email }}</dd>
               </div>
+
               <div class="profile-item">
-                <dt>Mobile</dt>
-                <dd>{{ user.company.mobile }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-telephone me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Mobile</span>
+                </dt>
+                <dd class="profile-val">{{ user.company.mobile || 'Not provided' }}</dd>
               </div>
+
               <div class="profile-item">
-                <dt>Plan</dt>
-                <dd>{{ user.company.plan }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-award me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Plan</span>
+                </dt>
+                <dd class="profile-val">
+                  <span class="plan-pill-badge-sm">{{ user.company.plan }}</span>
+                </dd>
               </div>
+
               <div class="profile-item">
-                <dt>Created</dt>
-                <dd>{{ user.company.createdAt | date: 'mediumDate' }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-calendar-check me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Created</span>
+                </dt>
+                <dd class="profile-val">{{ user.company.createdAt | date: 'mediumDate' }}</dd>
               </div>
+
               <div class="profile-item">
-                <dt>Last updated</dt>
-                <dd>{{ user.company.updatedAt | date: 'medium' }}</dd>
+                <dt class="profile-key">
+                  <i class="bi bi-clock-history me-2 profile-key-icon" aria-hidden="true"></i>
+                  <span>Last updated</span>
+                </dt>
+                <dd class="profile-val">{{ user.company.updatedAt | date: 'medium' }}</dd>
               </div>
             </dl>
           </div>
@@ -370,26 +501,39 @@
       <article id="team-panel" class="settings-panel-surface card" role="tabpanel" aria-labelledby="team-tab">
         <div class="empty-capability-panel">
           <div class="empty-icon-wrap icon-blue">
-            <i class="bi bi-people" aria-hidden="true"></i>
+            <i class="bi bi-people-fill" aria-hidden="true"></i>
           </div>
           <h2 class="empty-capability-title">Team</h2>
           <p class="empty-capability-text">
             Team management is not currently available because the backend provides no member listing or management endpoints.
           </p>
+          <div class="empty-capability-footer">
+            <span class="capability-pill">
+              <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+              Feature Roadmap: Enterprise Multi-User Roles
+            </span>
+          </div>
         </div>
       </article>
     } @else {
       <article id="preferences-panel" class="settings-panel-surface card" role="tabpanel" aria-labelledby="preferences-tab">
         <div class="empty-capability-panel">
           <div class="empty-icon-wrap icon-purple">
-            <i class="bi bi-sliders" aria-hidden="true"></i>
+            <i class="bi bi-sliders2" aria-hidden="true"></i>
           </div>
           <h2 class="empty-capability-title">Preferences</h2>
           <p class="empty-capability-text">
             Account preferences are not currently available from the backend.
           </p>
+          <div class="empty-capability-footer">
+            <span class="capability-pill">
+              <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+              Feature Roadmap: Custom Notification &amp; Regional Settings
+            </span>
+          </div>
         </div>
       </article>
     }
   }
 </section>
+

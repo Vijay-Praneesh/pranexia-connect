@@ -1,44 +1,227 @@
-.subscription-hero-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 1) 100%);
-  border-left: 4px solid var(--bs-primary) !important;
+// =============================================================================
+// Seyyon Connect — Plans & Billing Command Center Styles
+// Color Palette: Deep Navy #0F1B3D, Blue #2563EB, Indigo #4338CA, Gold #F4B728
+// =============================================================================
+
+$navy: #0f1b3d;
+$navy-dark: #0a1229;
+$primary-blue: #2563eb;
+$primary-hover: #1d4ed8;
+$indigo: #4338ca;
+$indigo-accent: #6366f1;
+$gold: #f4b728;
+$text-dark: #172033;
+$text-muted: #64748b;
+$border-light: #e2e8f0;
+$surface-subtle: #f8fafc;
+$surface-hover: #f1f5f9;
+
+.subscription-command-center {
+  padding-bottom: 2.5rem;
+  color: $text-dark;
 }
 
-.limit-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+// -----------------------------------------------------------------------------
+// Typography & Colors
+// -----------------------------------------------------------------------------
+.text-navy {
+  color: $navy !important;
+}
+
+.text-gold {
+  color: $gold !important;
+}
+
+.bg-navy {
+  background-color: $navy !important;
+}
+
+.bg-gold {
+  background-color: $gold !important;
+}
+
+.btn-gold {
+  background-color: $gold;
+  border-color: $gold;
+  color: #0f1b3d;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    background-color: darken($gold, 6%);
+    border-color: darken($gold, 6%);
+    color: #0a1229;
   }
 }
 
-.plan-comparison-card {
-  .active-plan-col {
-    background-color: var(--bs-primary-bg-subtle, #e7f1ff) !important;
-  }
+.bg-surface-subtle {
+  background-color: $surface-subtle !important;
 }
 
-.plan-select-card {
-  cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    border-color: var(--bs-primary) !important;
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
-  }
+.tracking-wider {
+  letter-spacing: 0.05em;
 }
 
 .cursor-pointer {
   cursor: pointer;
 }
 
-.btn-xs {
-  font-size: 0.75rem;
-  line-height: 1.2;
+// -----------------------------------------------------------------------------
+// Header Elements
+// -----------------------------------------------------------------------------
+.page-title {
+  letter-spacing: -0.02em;
 }
 
+.action-btn {
+  font-size: 0.875rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+}
+
+.icon-only-btn {
+  width: 38px;
+  height: 38px;
+}
+
+// -----------------------------------------------------------------------------
+// Current Plan Hero Command Banner
+// -----------------------------------------------------------------------------
+.current-plan-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 27, 61, 0.04) !important;
+
+  .plan-hero-icon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (min-width: 992px) {
+  .border-start-lg {
+    border-left: 1px solid $border-light !important;
+    padding-left: 1.5rem !important;
+  }
+  .border-end-lg {
+    border-right: 1px solid $border-light !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Billing Frequency Toggle Switch
+// -----------------------------------------------------------------------------
+.billing-interval-selector-wrapper {
+  .interval-toggle-btn {
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Commercial Pricing Tier Cards (3 in a Row)
+// -----------------------------------------------------------------------------
+.pricing-tier-card {
+  background: #ffffff;
+  border: 1px solid $border-light !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px -4px rgba(15, 27, 61, 0.1) !important;
+  }
+
+  &.featured-plan-card {
+    border: 2px solid $primary-blue !important;
+    box-shadow: 0 8px 24px -2px rgba(37, 99, 235, 0.12) !important;
+
+    .popular-badge-ribbon {
+      background: rgba(244, 183, 40, 0.15);
+      border-bottom: 1px solid rgba(244, 183, 40, 0.3);
+    }
+  }
+
+  &.current-active-card {
+    border: 2px solid #10b981 !important;
+  }
+
+  .features-list {
+    li {
+      line-height: 1.5;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Enterprise VIP Full-Width Banner Below
+// -----------------------------------------------------------------------------
+.enterprise-vip-card {
+  background: linear-gradient(135deg, $navy 0%, $navy-dark 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 30px rgba(15, 27, 61, 0.15) !important;
+
+  .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.3);
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: #ffffff;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Collapsible Full Comparison Matrix
+// -----------------------------------------------------------------------------
+.plan-comparison-card {
+  border: 1px solid $border-light !important;
+
+  .comparison-table {
+    th, td {
+      padding: 1.1rem 1.25rem;
+      border-color: $border-light;
+    }
+
+    .current-plan-header {
+      background-color: #eff6ff !important;
+      border-left: 2px solid $primary-blue;
+      border-right: 2px solid $primary-blue;
+      border-top: 3px solid $primary-blue;
+    }
+
+    .current-plan-col {
+      background-color: #f8faff !important;
+      border-left: 2px solid $primary-blue;
+      border-right: 2px solid $primary-blue;
+      font-weight: 600;
+      color: $navy;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Modals Styling
+// -----------------------------------------------------------------------------
+.plan-modal-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.interval-option {
+  transition: all 0.2s ease;
+  &:hover {
+    border-color: $primary-blue !important;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Animation Utilities
+// -----------------------------------------------------------------------------
 .spin {
-  animation: spin-animation 1s linear infinite;
+  animation: spin-animation 0.9s linear infinite;
 }
 
 @keyframes spin-animation {
@@ -47,11 +230,5 @@
   }
   to {
     transform: rotate(360deg);
-  }
-}
-
-@media (min-width: 768px) {
-  .border-end-md {
-    border-right: 1px solid var(--bs-border-color) !important;
   }
 }

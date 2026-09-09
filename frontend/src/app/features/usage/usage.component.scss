@@ -1,28 +1,296 @@
-.period-select-group {
-  min-width: 200px;
+// =============================================================================
+// Seyyon Connect — Usage & Costs Command Center Styles
+// Color Palette: Deep Navy #0F1B3D, Blue #2563EB, Indigo #4338CA, Gold #F4B728
+// =============================================================================
+
+$navy: #0f1b3d;
+$navy-dark: #0a1229;
+$primary-blue: #2563eb;
+$primary-hover: #1d4ed8;
+$indigo: #4338ca;
+$indigo-accent: #6366f1;
+$gold: #f4b728;
+$text-dark: #172033;
+$text-muted: #64748b;
+$border-light: #e2e8f0;
+$surface-subtle: #f8fafc;
+$surface-hover: #f1f5f9;
+
+.usage-command-center {
+  padding-bottom: 2rem;
+  color: $text-dark;
 }
 
-.limit-card {
+// -----------------------------------------------------------------------------
+// Typography & Utility Classes
+// -----------------------------------------------------------------------------
+.text-navy {
+  color: $navy !important;
+}
+
+.text-gold {
+  color: $gold !important;
+}
+
+.text-indigo {
+  color: $indigo-accent !important;
+}
+
+.bg-navy {
+  background-color: $navy !important;
+}
+
+.bg-surface-subtle {
+  background-color: $surface-subtle !important;
+}
+
+.bg-indigo-subtle {
+  background-color: #eef2ff !important;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// -----------------------------------------------------------------------------
+// Header Elements
+// -----------------------------------------------------------------------------
+.page-title {
+  letter-spacing: -0.02em;
+}
+
+.active-plan-link {
+  transition: all 0.2s ease;
+  &:hover {
+    background-color: $navy-dark !important;
+    transform: translateY(-1px);
+  }
+}
+
+.period-selector-group {
+  min-width: 220px;
+
+  .input-group-text {
+    border-color: $border-light;
+  }
+
+  .form-select {
+    border-color: $border-light;
+    font-size: 0.875rem;
+
+    &:focus {
+      border-color: $primary-blue;
+      box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+    }
+  }
+}
+
+.action-btn {
+  font-size: 0.875rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+}
+
+.icon-only-btn {
+  width: 38px;
+  height: 38px;
+}
+
+// -----------------------------------------------------------------------------
+// Hero Context Banner
+// -----------------------------------------------------------------------------
+.period-context-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 27, 61, 0.04) !important;
+
+  .period-icon-badge {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Limit Alert Banner
+// -----------------------------------------------------------------------------
+.limit-alert-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a !important;
+
+  .alert-icon-wrap {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Metric Quota Cards
+// -----------------------------------------------------------------------------
+.limit-metric-card {
+  background: #ffffff;
+  border: 1px solid $border-light !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -3px rgba(15, 27, 61, 0.08) !important;
+  }
+
+  .metric-icon-circle {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+
+  &.status-over_limit,
+  &.status-exhausted {
+    border-top: 3px solid #ef4444 !important;
+  }
+
+  &.status-critical {
+    border-top: 3px solid #f59e0b !important;
+  }
+
+  &.status-warning {
+    border-top: 3px solid #06b6d4 !important;
+  }
+
+  &.status-normal {
+    border-top: 3px solid $primary-blue !important;
+  }
+
+  .link-hover {
+    transition: color 0.15s ease, transform 0.15s ease;
+    &:hover {
+      color: $primary-hover !important;
+      transform: translateX(2px);
+    }
   }
 }
 
-.meta-usage-card {
-  border-left: 4px solid #25d366 !important;
+// -----------------------------------------------------------------------------
+// Meta Cost & WABA Command Card
+// -----------------------------------------------------------------------------
+.meta-cost-command-card {
+  border: 1px solid $border-light !important;
+
+  .waba-logo-badge {
+    width: 48px;
+    height: 48px;
+  }
+
+  .category-stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+  }
 }
 
+// -----------------------------------------------------------------------------
+// Chart Cards & Donut Center
+// -----------------------------------------------------------------------------
+.chart-card {
+  border: 1px solid $border-light !important;
+}
+
+.donut-center-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+// -----------------------------------------------------------------------------
+// Plan Comparison Matrix
+// -----------------------------------------------------------------------------
 .plan-comparison-card {
-  .active-plan-col {
-    background-color: var(--bs-primary-bg-subtle, #e7f1ff) !important;
+  border: 1px solid $border-light !important;
+
+  .comparison-table {
+    th, td {
+      padding: 1rem 1.25rem;
+      border-color: $border-light;
+    }
+
+    .current-plan-header {
+      background-color: #eff6ff !important;
+      border-left: 2px solid $primary-blue;
+      border-right: 2px solid $primary-blue;
+      border-top: 3px solid $primary-blue;
+    }
+
+    .current-plan-col {
+      background-color: #f8faff !important;
+      border-left: 2px solid $primary-blue;
+      border-right: 2px solid $primary-blue;
+      font-weight: 600;
+      color: $navy;
+    }
   }
 }
 
+// -----------------------------------------------------------------------------
+// Historical Usage Table
+// -----------------------------------------------------------------------------
+.history-table-card {
+  border: 1px solid $border-light !important;
+
+  .history-table {
+    th {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: $text-muted;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid $border-light;
+    }
+
+    td {
+      padding: 1.1rem 1.25rem;
+      border-bottom: 1px solid $border-light;
+      font-size: 0.875rem;
+    }
+
+    tbody tr {
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: $surface-hover;
+      }
+    }
+
+    .table-active-period {
+      background-color: #f0f7ff !important;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Animation Utilities
+// -----------------------------------------------------------------------------
 .spin {
-  animation: spin-animation 1s linear infinite;
+  animation: spin-animation 0.9s linear infinite;
 }
 
 @keyframes spin-animation {
@@ -31,5 +299,26 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Responsive Breakpoints
+// -----------------------------------------------------------------------------
+@media (max-width: 991.98px) {
+  .period-selector-group {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .page-header {
+    .d-flex.gap-2\.5 {
+      width: 100%;
+      button, .period-selector-group {
+        flex: 1 1 auto;
+      }
+    }
   }
 }

@@ -1,6 +1,262 @@
-.notifications-page { max-width: 72rem; margin-inline: auto; }
-.activity-list { display: grid; }
-.activity-list li { display: grid; grid-template-columns: 2.5rem 1fr; gap: 1rem; padding-block: 1rem; border-bottom: 1px solid var(--bs-border-color); }
-.activity-list li:last-child { border-bottom: 0; }
-.activity-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; color: var(--bs-primary); background: var(--bs-primary-bg-subtle); }
-.activity-content { min-width: 0; }
+// =============================================================================
+// SEYYON CONNECT — CLIENT NOTIFICATIONS & ACTIVITY STYLESHEET
+// Super-Premium SaaS Activity & Notification Center
+// =============================================================================
+
+:host {
+  display: block;
+  --sc-navy: #0f1b3d;
+  --sc-blue: #2563eb;
+  --sc-blue-hover: #1d4ed8;
+  --sc-blue-subtle: #eff6ff;
+  --sc-indigo: #4338ca;
+  --sc-gold: #f4b728;
+  --sc-text-dark: #172033;
+  --sc-text-muted: #64748b;
+  --sc-border: #e2e8f0;
+  --sc-border-subtle: #f1f5f9;
+  --sc-surface: #ffffff;
+  --sc-surface-subtle: #f8fafc;
+  --sc-shadow-sm: 0 1px 2px 0 rgba(15, 27, 61, 0.05);
+  --sc-shadow-md: 0 4px 6px -1px rgba(15, 27, 61, 0.08), 0 2px 4px -2px rgba(15, 27, 61, 0.04);
+}
+
+.notifications-page {
+  max-width: 68rem;
+  margin-inline: auto;
+}
+
+.text-navy {
+  color: var(--sc-navy) !important;
+}
+
+.bg-surface-subtle {
+  background-color: var(--sc-surface-subtle) !important;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.spin {
+  animation: spin-anim 1s linear infinite;
+}
+
+@keyframes spin-anim {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// =============================================================================
+// 1. PAGE HEADER
+// =============================================================================
+.notifications-header {
+  .page-title {
+    letter-spacing: -0.02em;
+  }
+
+  .btn-outline-navy {
+    color: var(--sc-navy);
+    border-color: var(--sc-border);
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--sc-surface-subtle);
+      border-color: var(--sc-navy);
+      color: var(--sc-navy);
+    }
+  }
+}
+
+// =============================================================================
+// 2. CAPABILITY & STATUS BANNER
+// =============================================================================
+.capability-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--sc-border) !important;
+  border-left: 4px solid var(--sc-navy) !important;
+  border-radius: 0.875rem;
+
+  .capability-icon-box {
+    background-color: #e2e8f0;
+    color: var(--sc-navy);
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+// =============================================================================
+// 3. ACTIVITY CARD & CUSTOMER SELECTOR
+// =============================================================================
+.activity-card {
+  border: 1px solid var(--sc-border) !important;
+  border-radius: 1rem;
+  background-color: #ffffff;
+
+  .customer-selection-wrapper {
+    border-color: var(--sc-border) !important;
+
+    .customer-select-input {
+      font-size: 0.95rem;
+      border-color: #cbd5e1;
+      border-radius: 0.625rem;
+      background-color: #ffffff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+      &:focus {
+        border-color: var(--sc-blue);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      }
+    }
+
+    .selected-customer-pill {
+      border-color: var(--sc-border) !important;
+
+      .avatar-circle {
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        font-size: 0.85rem;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// 4. REALTIME TIMELINE FEED
+// =============================================================================
+.timeline-container {
+  .activity-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 1.25rem;
+      bottom: 1.25rem;
+      left: 1.35rem;
+      width: 2px;
+      background: linear-gradient(180deg, #cbd5e1 0%, #e2e8f0 100%);
+      z-index: 0;
+    }
+
+    .activity-timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 2.75rem 1fr;
+      gap: 1rem;
+      align-items: flex-start;
+      z-index: 1;
+
+      .timeline-node {
+        display: flex;
+        justify-content: center;
+        padding-top: 0.25rem;
+
+        .activity-icon-box {
+          width: 2.7rem;
+          height: 2.7rem;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          font-size: 1.15rem;
+          background-color: #ffffff;
+          box-shadow: 0 2px 4px rgba(15, 27, 61, 0.06);
+          border: 2px solid transparent;
+          transition: transform 0.2s ease;
+
+          &--read {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-color: #a7f3d0;
+            color: #059669;
+          }
+
+          &--delivered {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-color: #bfdbfe;
+            color: var(--sc-blue);
+          }
+
+          &--sent {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-color: #bae6fd;
+            color: #0284c7;
+          }
+
+          &--failed {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: #fecaca;
+            color: #dc2626;
+          }
+
+          &--default {
+            background-color: var(--sc-surface-subtle);
+            border-color: var(--sc-border);
+            color: var(--sc-text-muted);
+          }
+        }
+      }
+
+      .activity-card-bubble {
+        background-color: #ffffff;
+        border-color: var(--sc-border) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--sc-shadow-md);
+          border-color: #cbd5e1 !important;
+        }
+
+        .activity-campaign-title {
+          letter-spacing: -0.01em;
+        }
+
+        .failure-callout {
+          border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// 5. RESPONSIVE BREAKPOINTS
+// =============================================================================
+@media (max-width: 575.98px) {
+  .timeline-container {
+    .activity-timeline {
+      &::before {
+        left: 1rem;
+      }
+
+      .activity-timeline-item {
+        grid-template-columns: 2rem 1fr;
+        gap: 0.75rem;
+
+        .timeline-node {
+          .activity-icon-box {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.9rem;
+          }
+        }
+
+        .activity-card-bubble {
+          padding: 0.75rem;
+        }
+      }
+    }
+  }
+}

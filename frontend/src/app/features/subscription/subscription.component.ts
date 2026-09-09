@@ -1,15 +1,23 @@
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
 import { HttpErrorService } from '../../core/services/http-error.service';
+import { ToastService } from '../../core/services/toast.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
-import { CompanyPlanOverview, PlanTier, WarningThresholdStatus } from '../plans/plan.model';
+import {
+  CompanyPlanOverview,
+  MetricOverviewItem,
+  PlanDefinition,
+  PlanTier,
+  WarningThresholdStatus,
+} from '../plans/plan.model';
 import {
   BillingInterval,
   PaymentOrderResponse,
@@ -42,6 +50,7 @@ const PLAN_LEVELS: Record<string, number> = {
     DatePipe,
     DecimalPipe,
     FormsModule,
+    RouterLink,
     EmptyStateComponent,
     ErrorStateComponent,
     LoadingStateComponent,
@@ -54,6 +63,7 @@ export class SubscriptionComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly paymentService = inject(PaymentService);
   private readonly httpErrors = inject(HttpErrorService);
+  private readonly toast = inject(ToastService);
   readonly auth = inject(AuthService);
   readonly Math = Math;
 
@@ -70,6 +80,11 @@ export class SubscriptionComponent implements OnInit {
   feedbackTone: 'success' | 'warning' | 'info' = 'info';
   showPlanComparison = false;
   activeTab: 'usage' | 'subscriptionHistory' | 'paymentHistory' = 'usage';
+  pricingInterval: BillingInterval = 'MONTHLY';
+
+  // Plan Details Modal state
+  showPlanDetailsModal = false;
+  selectedPlanDetailsTier: PlanTier = 'BUSINESS';
 
   // Plan Change / Checkout modal state
   showPlanChangeModal = false;
@@ -151,6 +166,122 @@ export class SubscriptionComponent implements OnInit {
     return pricing ? pricing.formatted : 'Custom / Contact Sales';
   }
 
+  setPricingInterval(interval: BillingInterval): void {
+    this.pricingInterval = interval;
+  }
+
+  getPlanPricing(planName: PlanTier): PricingPlanItem | undefined {
+    return this.pricingMatrix?.plans?.find((p) => p.name === planName);
+  }
+
+  getPlanPriceFormatted(
+    planName: PlanTier,
+    interval: BillingInterval = this.pricingInterval
+  ): string {
+    const plan = this.getPlanPricing(planName);
+    const pricing = plan?.pricing?.[interval];
+    if (!pricing) {
+      return planName === 'ENTERPRISE' ? 'Custom Pricing' : 'Contact Sales';
+    }
+    return pricing.formatted;
+  }
+
+  getPlanPriceDisplayAmount(
+    planName: PlanTier,
+    interval: BillingInterval = this.pricingInterval
+  ): number | null {
+    const plan = this.getPlanPricing(planName);
+    const pricing = plan?.pricing?.[interval];
+    return pricing ? pricing.displayAmount : null;
+  }
+
+  getAnnualSavingsPercent(planName: PlanTier = 'BUSINESS'): number | null {
+    const plan = this.getPlanPricing(planName);
+    if (!plan || !plan.pricing?.MONTHLY || !plan.pricing?.YEARLY) return null;
+    const monthlyAnnualized = plan.pricing.MONTHLY.amount * 12;
+    const yearlyTotal = plan.pricing.YEARLY.amount;
+    if (monthlyAnnualized <= 0 || yearlyTotal >= monthlyAnnualized) return null;
+    return Math.round(((monthlyAnnualized - yearlyTotal) / monthlyAnnualized) * 100);
+  }
+
+  getPlanTagline(planName: PlanTier): string {
+    const fromPricing = this.getPlanPricing(planName)?.tagline;
+    if (fromPricing) return fromPricing;
+    const fromOverview = this.planOverview?.availablePlans?.find((p) => p.name === planName)?.tagline;
+    if (fromOverview) return fromOverview;
+    switch (planName) {
+      case 'STARTER':
+        return 'Essential WhatsApp messaging for small teams and startups.';
+      case 'BUSINESS':
+        return 'Growing businesses scaling campaigns and customer engagement.';
+      case 'PROFESSIONAL':
+        return 'High-volume marketing and multi-agent customer operations.';
+      case 'ENTERPRISE':
+        return 'Custom limits, dedicated infrastructure, and unlimited scale.';
+      default:
+        return 'Commercial messaging tier.';
+    }
+  }
+
+  getPlanLimits(planName: PlanTier): Record<string, number | null> {
+    const fromOverview = this.planOverview?.availablePlans?.find((p) => p.name === planName);
+    if (fromOverview?.limits) return fromOverview.limits;
+    const fromPricing = this.getPlanPricing(planName);
+    return fromPricing?.limits || {};
+  }
+
+  getPlanHighlights(planName: PlanTier): string[] {
+    const limits = this.getPlanLimits(planName);
+    const msg = limits['MONTHLY_MESSAGES'] !== null ? `${limits['MONTHLY_MESSAGES']?.toLocaleString()} WhatsApp messages / mo` : 'Unlimited WhatsApp messages';
+    const camp = limits['MONTHLY_CAMPAIGNS'] !== null ? `${limits['MONTHLY_CAMPAIGNS']?.toLocaleString()} campaigns / mo` : 'Unlimited campaigns';
+    const cust = limits['CUSTOMERS'] !== null ? `${limits['CUSTOMERS']?.toLocaleString()} customer contacts` : 'Unlimited contacts';
+    const tpl = limits['TEMPLATES'] !== null ? `${limits['TEMPLATES']} approved templates` : 'Unlimited templates';
+    const stor = limits['MEDIA_STORAGE_BYTES'] !== null ? `${this.formatBytes(limits['MEDIA_STORAGE_BYTES'])} media storage` : 'Unlimited media storage';
+
+    return [msg, camp, cust, tpl, stor];
+  }
+
+  getMetric(metricKey: string): MetricOverviewItem | undefined {
+    return this.planOverview?.metrics?.find((m) => m.metric === metricKey);
+  }
+
+  isCurrentPlan(planName: PlanTier): boolean {
+    return this.subscription?.plan === planName;
+  }
+
+  isFeaturedPlan(planName: PlanTier): boolean {
+    return planName === 'BUSINESS';
+  }
+
+  getCommercialPlans(): PlanDefinition[] {
+    const all = this.planOverview?.availablePlans || [];
+    return all.filter((p) => p.name !== 'ENTERPRISE');
+  }
+
+  getEnterprisePlan(): PlanDefinition | undefined {
+    return this.planOverview?.availablePlans?.find((p) => p.name === 'ENTERPRISE');
+  }
+
+  openPlanDetailsModal(plan: PlanTier): void {
+    this.selectedPlanDetailsTier = plan;
+    this.showPlanDetailsModal = true;
+  }
+
+  closePlanDetailsModal(): void {
+    this.showPlanDetailsModal = false;
+  }
+
+  upgradeFromPlanDetailsModal(): void {
+    const targetPlan = this.selectedPlanDetailsTier;
+    this.closePlanDetailsModal();
+    if (targetPlan === 'ENTERPRISE') {
+      window.location.href =
+        'mailto:sales@pranexia-connect.com?subject=Seyyon%20Connect%20Enterprise%20Plan%20Inquiry';
+    } else {
+      this.openPlanChangeModal(targetPlan);
+    }
+  }
+
   ngOnInit(): void {
     this.loadData();
   }
@@ -163,9 +294,6 @@ export class SubscriptionComponent implements OnInit {
     this.showPlanComparison = !this.showPlanComparison;
   }
 
-  /**
-   * Determine plan change direction relative to current plan
-   */
   getPlanDirection(targetPlan: PlanTier): PlanChangeDirection {
     const currentPlan = this.subscription?.plan || 'STARTER';
     const currentLevel = PLAN_LEVELS[currentPlan] || 0;
@@ -176,9 +304,6 @@ export class SubscriptionComponent implements OnInit {
     return 'SAME';
   }
 
-  /**
-   * Open Plan Change / Checkout Modal and fetch authoritative preview
-   */
   openPlanChangeModal(plan: PlanTier = 'BUSINESS'): void {
     this.selectedPlanForChange = plan;
     this.showPlanChangeModal = true;
@@ -201,9 +326,6 @@ export class SubscriptionComponent implements OnInit {
     this.loadPlanChangePreview();
   }
 
-  /**
-   * Fetch authoritative plan change preview from backend
-   */
   private loadPlanChangePreview(): void {
     if (!this.selectedPlanForChange) return;
 
@@ -223,10 +345,6 @@ export class SubscriptionComponent implements OnInit {
       });
   }
 
-  /**
-   * Start Upgrade Checkout Flow:
-   * Request server-side payment order (calculates authoritative price)
-   */
   startUpgradeCheckout(): void {
     if (!this.selectedPlanForChange) return;
 
@@ -250,9 +368,6 @@ export class SubscriptionComponent implements OnInit {
       });
   }
 
-  /**
-   * Confirm Scheduled Downgrade
-   */
   confirmDowngrade(): void {
     if (!this.selectedPlanForChange) return;
 
@@ -268,8 +383,10 @@ export class SubscriptionComponent implements OnInit {
       .subscribe({
         next: (sub) => {
           this.closePlanChangeModal();
-          this.feedbackMessage = `Plan downgrade to ${sub.pendingPlan || this.selectedPlanForChange} has been scheduled for the end of your billing cycle (${new Date(sub.pendingPlanEffectiveAt || sub.currentPeriodEnd).toLocaleDateString()}). Existing data remains safe.`;
+          const effDate = new Date(sub.pendingPlanEffectiveAt || sub.currentPeriodEnd).toLocaleDateString();
+          this.feedbackMessage = `Plan downgrade to ${sub.pendingPlan || this.selectedPlanForChange} has been scheduled for the end of your billing cycle (${effDate}). Existing data remains safe.`;
           this.feedbackTone = 'warning';
+          this.toast.warning(`Downgrade scheduled for ${effDate}`);
           this.refresh();
         },
         error: (err) => {
@@ -278,9 +395,6 @@ export class SubscriptionComponent implements OnInit {
       });
   }
 
-  /**
-   * Cancel Pending Scheduled Downgrade
-   */
   cancelPendingDowngrade(): void {
     this.isCancellingDowngrade = true;
 
@@ -291,18 +405,18 @@ export class SubscriptionComponent implements OnInit {
         next: () => {
           this.feedbackMessage = `Scheduled plan downgrade has been cancelled. Your ${this.subscription?.plan} plan remains active.`;
           this.feedbackTone = 'success';
+          this.toast.success('Scheduled downgrade cancelled successfully.');
           this.refresh();
         },
         error: (err) => {
-          this.feedbackMessage = this.httpErrors.map(err).message;
+          const msg = this.httpErrors.map(err).message;
+          this.feedbackMessage = msg;
           this.feedbackTone = 'warning';
+          this.toast.error(msg);
         },
       });
   }
 
-  /**
-   * Open Razorpay modal if window.Razorpay SDK is loaded, otherwise handle test simulation
-   */
   private handleRazorpayCheckout(order: PaymentOrderResponse): void {
     const rzpWindow = window as any;
 
@@ -319,7 +433,7 @@ export class SubscriptionComponent implements OnInit {
           email: order.companyEmail,
         },
         theme: {
-          color: '#0d6efd',
+          color: '#2563EB',
         },
         handler: (response: {
           razorpay_payment_id: string;
@@ -347,9 +461,6 @@ export class SubscriptionComponent implements OnInit {
     }
   }
 
-  /**
-   * Helper to simulate sandbox test payment verification
-   */
   simulateTestPayment(): void {
     if (!this.checkoutOrder) return;
     this.isProcessingPayment = true;
@@ -365,9 +476,6 @@ export class SubscriptionComponent implements OnInit {
     });
   }
 
-  /**
-   * Open Renewal Modal and fetch authoritative renewal preview
-   */
   openRenewalModal(interval: BillingInterval = 'MONTHLY'): void {
     this.selectedRenewalInterval = interval;
     this.showRenewalModal = true;
@@ -404,9 +512,6 @@ export class SubscriptionComponent implements OnInit {
     });
   }
 
-  /**
-   * Initiate customer renewal order with Razorpay
-   */
   startRenewalCheckout(): void {
     if (!this.subscription?.plan) return;
     this.isProcessingRenewalPayment = true;
@@ -449,7 +554,7 @@ export class SubscriptionComponent implements OnInit {
           email: order.companyEmail || user?.email || '',
         },
         theme: {
-          color: '#198754',
+          color: '#10B981',
         },
         handler: (response: {
           razorpay_payment_id: string;
@@ -477,9 +582,6 @@ export class SubscriptionComponent implements OnInit {
     }
   }
 
-  /**
-   * Sandbox simulator for renewal payment in environments without Razorpay script
-   */
   simulateRenewalPaymentSuccess(): void {
     if (!this.renewalOrder) return;
     const testPaymentId = `pay_sim_${Date.now()}`;
@@ -506,6 +608,7 @@ export class SubscriptionComponent implements OnInit {
         this.closePlanChangeModal();
         this.feedbackMessage = `Payment confirmed! Your plan has been upgraded to ${res.payment.plan}.`;
         this.feedbackTone = 'success';
+        this.toast.success(`Plan upgraded to ${res.payment.plan}!`);
         this.refresh();
       },
       error: (err) => {
@@ -528,6 +631,7 @@ export class SubscriptionComponent implements OnInit {
         this.closeRenewalModal();
         this.feedbackMessage = `Subscription renewed successfully! Next billing period active.`;
         this.feedbackTone = 'success';
+        this.toast.success('Subscription renewed successfully!');
         this.refresh();
       },
       error: (err) => {

@@ -1,10 +1,12 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { API_BASE_URL } from '../../core/config/api-config.token';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import {
   PaymentHistoryResponse,
   PaymentOrderResponse,
@@ -26,6 +28,7 @@ describe('SubscriptionComponent', () => {
   let fixture: ComponentFixture<SubscriptionComponent>;
   let subscriptionService: SubscriptionService;
   let paymentService: PaymentService;
+  let toastService: ToastService;
 
   const mockCurrentResponse: CurrentSubscriptionResponse = {
     subscription: {
@@ -182,10 +185,12 @@ describe('SubscriptionComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: API_BASE_URL, useValue: 'http://localhost:5000/api/v1' },
         { provide: AuthService, useValue: mockAuthService },
         SubscriptionService,
         PaymentService,
+        ToastService,
       ],
     }).compileComponents();
 
@@ -193,6 +198,7 @@ describe('SubscriptionComponent', () => {
     component = fixture.componentInstance;
     subscriptionService = TestBed.inject(SubscriptionService);
     paymentService = TestBed.inject(PaymentService);
+    toastService = TestBed.inject(ToastService);
   });
 
   it('should create and load initial subscription details, pricing, and history', () => {
@@ -355,5 +361,69 @@ describe('SubscriptionComponent', () => {
     expect(component.formatBytes(1024)).toBe('1 KB');
     expect(component.getProgressBarClass('NORMAL')).toBe('bg-primary');
     expect(component.getProgressBarClass('OVER_LIMIT')).toBe('bg-danger');
+  });
+
+  it('should handle pricing interval switching and plan pricing lookups', () => {
+    component.pricingMatrix = mockPricing;
+    component.planOverview = mockCurrentResponse.planOverview;
+    component.subscription = mockCurrentResponse.subscription;
+
+    expect(component.pricingInterval).toBe('MONTHLY');
+    component.setPricingInterval('YEARLY');
+    expect(component.pricingInterval).toBe('YEARLY');
+
+    expect(component.getPlanPriceFormatted('BUSINESS', 'MONTHLY')).toBe('₹2,499/mo');
+    expect(component.getPlanPriceFormatted('BUSINESS', 'YEARLY')).toBe('₹24,990/yr');
+    expect(component.getPlanPriceFormatted('ENTERPRISE')).toBe('Custom Pricing');
+
+    expect(component.getPlanPriceDisplayAmount('BUSINESS', 'MONTHLY')).toBe(2499);
+    expect(component.getPlanPriceDisplayAmount('BUSINESS', 'YEARLY')).toBe(24990);
+    expect(component.getPlanPriceDisplayAmount('ENTERPRISE')).toBeNull();
+
+    expect(component.getAnnualSavingsPercent('BUSINESS')).toBe(17);
+    expect(component.getPlanTagline('BUSINESS')).toBe('Growing business plan');
+    expect(component.getPlanTagline('ENTERPRISE')).toBe(
+      'Custom limits, dedicated infrastructure, and unlimited scale.'
+    );
+
+    expect(component.isCurrentPlan('STARTER')).toBe(true);
+    expect(component.isCurrentPlan('BUSINESS')).toBe(false);
+    expect(component.isFeaturedPlan('BUSINESS')).toBe(true);
+    expect(component.isFeaturedPlan('STARTER')).toBe(false);
+
+    expect(component.getMetric('MONTHLY_MESSAGES')?.currentUsage).toBe(1000);
+    expect(component.getMetric('NON_EXISTENT')).toBeUndefined();
+  });
+
+  it('should filter commercial plans, retrieve enterprise plan, and manage details modal', () => {
+    component.planOverview = {
+      ...mockCurrentResponse.planOverview,
+      availablePlans: [
+        { name: 'STARTER', displayName: 'Starter', tagline: 'Starter', limits: {} },
+        { name: 'BUSINESS', displayName: 'Business', tagline: 'Business', limits: {} },
+        { name: 'PROFESSIONAL', displayName: 'Professional', tagline: 'Pro', limits: {} },
+        { name: 'ENTERPRISE', displayName: 'Enterprise', tagline: 'Enterprise', limits: {} },
+      ],
+    };
+
+    const commercial = component.getCommercialPlans();
+    expect(commercial.length).toBe(3);
+    expect(commercial.map((p) => p.name)).toEqual(['STARTER', 'BUSINESS', 'PROFESSIONAL']);
+
+    const enterprise = component.getEnterprisePlan();
+    expect(enterprise?.name).toBe('ENTERPRISE');
+
+    expect(component.showPlanDetailsModal).toBe(false);
+    component.openPlanDetailsModal('BUSINESS');
+    expect(component.showPlanDetailsModal).toBe(true);
+    expect(component.selectedPlanDetailsTier).toBe('BUSINESS');
+
+    component.closePlanDetailsModal();
+    expect(component.showPlanDetailsModal).toBe(false);
+
+    spyOn(component, 'openPlanChangeModal');
+    component.selectedPlanDetailsTier = 'BUSINESS';
+    component.upgradeFromPlanDetailsModal();
+    expect(component.openPlanChangeModal).toHaveBeenCalledWith('BUSINESS');
   });
 });
