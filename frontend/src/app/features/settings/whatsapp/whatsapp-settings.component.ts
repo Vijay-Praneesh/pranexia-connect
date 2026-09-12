@@ -1,5 +1,6 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -47,6 +48,8 @@ declare global {
   standalone: true,
   imports: [
     DatePipe,
+    NgClass,
+    RouterLink,
     ErrorStateComponent,
     LoadingStateComponent,
     StatusBadgeComponent,
@@ -64,6 +67,12 @@ export class WhatsAppSettingsComponent implements OnInit, OnDestroy {
   actionLoading = false;
   errorMessage = '';
   successMessage = '';
+  copiedField: string | null = null;
+  showDisconnectModal = false;
+  openFaqs: Record<string, boolean> = {
+    faq1: true,
+  };
+  private copyTimeout: any = null;
   private messageListener?: (event: MessageEvent<MetaSignupMessage>) => void;
   private signupCode = '';
 
@@ -129,6 +138,48 @@ export class WhatsAppSettingsComponent implements OnInit, OnDestroy {
         },
       );
     });
+  }
+
+  refresh(): void {
+    this.load();
+  }
+
+  copyToClipboard(text: string, fieldKey: string): void {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(
+      () => {
+        this.copiedField = fieldKey;
+        if (this.copyTimeout) clearTimeout(this.copyTimeout);
+        this.copyTimeout = setTimeout(() => {
+          this.copiedField = null;
+        }, 2000);
+      },
+      () => {
+        // Fallback if clipboard API fails
+        this.copiedField = fieldKey;
+        if (this.copyTimeout) clearTimeout(this.copyTimeout);
+        this.copyTimeout = setTimeout(() => {
+          this.copiedField = null;
+        }, 2000);
+      },
+    );
+  }
+
+  toggleFaq(faqKey: string): void {
+    this.openFaqs[faqKey] = !this.openFaqs[faqKey];
+  }
+
+  openDisconnectModal(): void {
+    this.showDisconnectModal = true;
+  }
+
+  closeDisconnectModal(): void {
+    this.showDisconnectModal = false;
+  }
+
+  confirmDisconnect(): void {
+    this.showDisconnectModal = false;
+    this.disconnect();
   }
 
   disconnect(): void {

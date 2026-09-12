@@ -22,3 +22,235 @@
   border-radius: var(--pc-radius);
   background: var(--pc-surface);
 }
+
+// -----------------------------------------------------------------------------
+// Universal Table Typography & Spacing (No-Wrap across all project tables)
+// -----------------------------------------------------------------------------
+table,
+.table,
+.crm-table,
+.saas-table,
+.studio-table,
+.comparison-table,
+.history-table,
+.recipient-table {
+  th,
+  td {
+    white-space: nowrap !important;
+    vertical-align: middle;
+  }
+
+  // Allow explicit wrapping only when explicitly targeted with .text-wrap
+  th.text-wrap,
+  td.text-wrap,
+  .text-wrap {
+    white-space: normal !important;
+  }
+}
+
+.table-responsive {
+  scrollbar-width: thin;
+
+  table th,
+  table td,
+  th,
+  td {
+    white-space: nowrap !important;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Universal Button Hover Contrast Safeguards
+// Prevents text/icon from becoming invisible when hovering outline / white buttons
+// -----------------------------------------------------------------------------
+.btn {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+
+  &.btn-outline-primary {
+    &:hover:not(:disabled),
+    &:active:not(:disabled),
+    &.active {
+      background-color: var(--bs-primary, #4f46e5) !important;
+      border-color: var(--bs-primary, #4f46e5) !important;
+      color: #ffffff !important;
+
+      i, span, strong, small {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  &.btn-outline-success {
+    &:hover:not(:disabled),
+    &:active:not(:disabled),
+    &.active {
+      background-color: #059669 !important;
+      border-color: #059669 !important;
+      color: #ffffff !important;
+
+      i, span, strong, small {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  &.btn-outline-secondary {
+    &:hover:not(:disabled),
+    &:active:not(:disabled),
+    &.active {
+      background-color: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #0f1b3d !important;
+
+      i, span, strong, small {
+        color: #0f1b3d !important;
+      }
+    }
+  }
+
+  &.btn-outline-danger {
+    &:hover:not(:disabled),
+    &:active:not(:disabled),
+    &.active {
+      background-color: #dc2626 !important;
+      border-color: #dc2626 !important;
+      color: #ffffff !important;
+
+      i, span, strong, small {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  &.btn-outline-warning {
+    &:hover:not(:disabled),
+    &:active:not(:disabled),
+    &.active {
+      background-color: #f59e0b !important;
+      border-color: #f59e0b !important;
+      color: #ffffff !important;
+
+      i, span, strong, small {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  &.btn-outline-dark {
+    &:hover:not(:disabled),
+    &:active:not(:disabled),
+    &.active {
+      background-color: #0f1b3d !important;
+      border-color: #0f1b3d !important;
+      color: #ffffff !important;
+
+      i, span, strong, small {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  &.btn-outline-light {
+    &:hover:not(:disabled),
+    &:active:not(:disabled),
+    &.active {
+      background-color: rgba(255, 255, 255, 0.25) !important;
+      border-color: rgba(255, 255, 255, 0.6) !important;
+      color: #ffffff !important;
+
+      i, span, strong, small {
+        color: #ffffff !important;
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Universal Cool Modal Design System
+// -----------------------------------------------------------------------------
+.modal-glass-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1055;
+  background-color: rgba(15, 27, 61, 0.65) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: backdropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-cool-card {
+  border-radius: 1.25rem !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow:
+    0 25px 60px -12px rgba(15, 27, 61, 0.28),
+    0 4px 12px rgba(15, 27, 61, 0.08) !important;
+  background-color: #ffffff !important;
+  animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-glow-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.btn-close-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 0.875rem;
+
+  &:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    color: #0f1b3d;
+    border-color: #cbd5e1;
+    transform: rotate(90deg) scale(1.05);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.shadow-2xs {
+  box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04) !important;
+}
+
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(15, 27, 61, 0.25) !important;
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+

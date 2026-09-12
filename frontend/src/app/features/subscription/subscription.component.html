@@ -2,71 +2,73 @@
   <!-- ========================================================================= -->
   <!-- 1. EXECUTIVE PAGE HERO & STATUS BANNER                                    -->
   <!-- ========================================================================= -->
-  <div class="page-header d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
-    <div>
-      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-        <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
-          <i class="bi bi-credit-card-2-front"></i>
-          <span>Plans & Billing Intelligence</span>
-        </span>
-
-        @if (subscription) {
-          <span class="badge rounded-pill bg-navy text-white px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm">
-            <i class="bi bi-award-fill text-gold"></i>
-            <span>{{ subscription.plan }} Plan Active</span>
+  <header class="subscription-header mb-4 pb-2">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+      <div>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <span class="badge rounded-pill bg-indigo-subtle text-indigo border border-indigo-subtle px-3 py-1 fw-semibold d-inline-flex align-items-center gap-2">
+            <i class="bi bi-credit-card-2-front"></i>
+            <span>Plans &amp; Billing Intelligence</span>
           </span>
-        }
+
+          @if (subscription) {
+            <span class="badge rounded-pill bg-navy text-white px-3 py-1 fw-semibold d-inline-flex align-items-center gap-2 shadow-2xs">
+              <i class="bi bi-award-fill text-gold"></i>
+              <span>{{ subscription.plan }} Plan Active</span>
+            </span>
+          }
+        </div>
+
+        <h1 class="h2 page-title fw-bold text-navy mb-2">Plans &amp; Billing</h1>
+        <p class="text-body-secondary small mb-0">
+          Choose the plan that fits your messaging needs. Upgrade, downgrade, or manage billing anytime.
+          @if (subscription) {
+            <strong class="text-navy ms-1">You're currently on the {{ subscription.plan }} Plan.</strong>
+          }
+        </p>
       </div>
 
-      <h1 class="h2 page-title fw-bold text-navy mb-1">Plans & Billing</h1>
-      <p class="text-body-secondary mb-0">
-        Choose the plan that fits your messaging needs. Upgrade, downgrade, or manage billing anytime.
-        @if (subscription) {
-          <strong class="text-navy ms-1">You're currently on the {{ subscription.plan }} Plan.</strong>
+      <!-- Header Action Controls -->
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        @if (isRenewalDue && isRenewalEligible) {
+          <button
+            class="btn btn-success d-inline-flex align-items-center gap-2 shadow-2xs fw-semibold action-btn"
+            type="button"
+            (click)="openRenewalModal()"
+          >
+            <i class="bi bi-arrow-repeat"></i>
+            <span>Renew Subscription</span>
+          </button>
         }
-      </p>
-    </div>
 
-    <!-- Header Action Controls -->
-    <div class="d-flex flex-wrap align-items-center gap-2.5">
-      @if (isRenewalDue && isRenewalEligible) {
         <button
-          class="btn btn-success d-inline-flex align-items-center gap-1.5 shadow-sm fw-semibold action-btn"
+          class="btn btn-outline-primary d-inline-flex align-items-center gap-2 shadow-2xs fw-semibold action-btn"
           type="button"
-          (click)="openRenewalModal()"
+          (click)="togglePlanComparison()"
+          [attr.aria-expanded]="showPlanComparison"
         >
-          <i class="bi bi-arrow-repeat"></i>
-          <span>Renew Subscription</span>
+          <i class="bi" [ngClass]="showPlanComparison ? 'bi-x-circle' : 'bi-grid-3x3-gap'"></i>
+          <span>{{ showPlanComparison ? 'Hide Comparison' : 'Compare All Features' }}</span>
         </button>
-      }
 
-      <button
-        class="btn btn-outline-primary d-inline-flex align-items-center gap-1.5 shadow-sm fw-medium action-btn"
-        type="button"
-        (click)="togglePlanComparison()"
-        [attr.aria-expanded]="showPlanComparison"
-      >
-        <i class="bi" [ngClass]="showPlanComparison ? 'bi-x-circle' : 'bi-grid-3x3-gap'"></i>
-        <span>{{ showPlanComparison ? 'Hide Comparison' : 'Compare All Features' }}</span>
-      </button>
-
-      <button
-        class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center p-2 shadow-sm action-btn icon-only-btn"
-        type="button"
-        (click)="refresh()"
-        [disabled]="loading || refreshing"
-        title="Refresh subscription status and pricing"
-        aria-label="Refresh subscription"
-      >
-        <i class="bi bi-arrow-clockwise fs-5" [class.spin]="refreshing"></i>
-      </button>
+        <button
+          class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center shadow-2xs action-btn icon-only-btn"
+          type="button"
+          (click)="refresh()"
+          [disabled]="loading || refreshing"
+          title="Refresh subscription status and pricing"
+          aria-label="Refresh subscription"
+        >
+          <i class="bi bi-arrow-clockwise fs-5" [class.spin]="refreshing"></i>
+        </button>
+      </div>
     </div>
-  </div>
+  </header>
 
   <!-- Global Feedback Toast / Alert if present -->
   @if (feedbackMessage) {
     <div
-      class="alert alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4 d-flex align-items-center gap-3 p-3.5"
+      class="alert alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4 d-flex align-items-center gap-3 p-4"
       [ngClass]="'alert-' + feedbackTone"
       role="alert"
     >
@@ -80,31 +82,35 @@
   <!-- 2. LOADING & ERROR STATES                                                 -->
   <!-- ========================================================================= -->
   @if (loading) {
-    <app-loading-state message="Loading subscription plans, active allowances, and billing history..." />
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center my-4">
+      <app-loading-state message="Loading subscription plans, active allowances, and billing history..." />
+    </div>
   } @else if (errorMessage) {
-    <app-error-state
-      title="Unable to load subscription information"
-      [message]="errorMessage"
-      [retryable]="true"
-      (retry)="refresh()"
-    />
+    <div class="card border-0 shadow-sm rounded-4 p-4 my-4">
+      <app-error-state
+        title="Unable to load subscription information"
+        [message]="errorMessage"
+        [retryable]="true"
+        (retry)="refresh()"
+      />
+    </div>
   } @else {
     <!-- ========================================================================= -->
     <!-- 3. CURRENT PLAN COMMAND HERO CARD                                         -->
     <!-- ========================================================================= -->
     @if (subscription) {
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 current-plan-hero">
-        <div class="card-body p-4 p-xl-4.5">
+        <div class="card-body p-4 p-md-4">
           <div class="row g-4 align-items-center justify-content-between">
             <!-- Left: Plan Tier & Meta -->
-            <div class="col-12 col-lg-6 col-xl-5">
-              <div class="d-flex align-items-center gap-3 mb-2">
-                <div class="plan-hero-icon bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
+            <div class="col-12 col-lg-5 col-xl-5">
+              <div class="d-flex align-items-start gap-3 mb-2">
+                <div class="plan-hero-icon rounded-4 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0 shadow-2xs">
                   <i class="bi bi-award-fill fs-3 text-primary"></i>
                 </div>
-                <div>
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="text-uppercase tracking-wider fw-bold text-muted small">Current Subscription</span>
+                <div class="min-w-0">
+                  <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <span class="hero-eyebrow text-uppercase fw-bold text-muted small">Current Subscription</span>
                     <app-status-badge [status]="subscription.status" />
                   </div>
                   <h3 class="h4 fw-extrabold text-navy mb-0">
@@ -112,35 +118,30 @@
                   </h3>
                 </div>
               </div>
-              <p class="text-body-secondary small mb-0 ms-lg-5 ps-lg-2">
-                {{ getPlanTagline(subscription.plan) }}
-              </p>
             </div>
 
             <!-- Center: Billing Period & Expiry -->
-            <div class="col-12 col-sm-6 col-lg-3 col-xl-3 border-start-lg border-end-lg">
-              <span class="text-uppercase tracking-wider fw-bold text-muted small d-block mb-1">Billing Period</span>
-              <div class="fw-bold text-navy">
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-4 hero-divider-col">
+              <span class="hero-eyebrow text-uppercase fw-bold text-muted small d-block mb-1">Billing Period</span>
+              <div class="fw-bold text-navy fs-6 mb-1">
                 {{ subscription.currentPeriodStart | date: 'mediumDate' }} – {{ subscription.currentPeriodEnd | date: 'mediumDate' }}
               </div>
-              <div class="d-flex align-items-center gap-1.5 text-muted small mt-1">
+              <div class="d-inline-flex align-items-center gap-2 text-muted small py-1 px-2.5 rounded-pill bg-white border shadow-2xs">
                 <i class="bi bi-hourglass-split text-primary"></i>
                 <span><strong>{{ daysRemainingInPeriod }}</strong> days remaining in current cycle</span>
               </div>
             </div>
 
             <!-- Right: Rate & Actions -->
-            <div class="col-12 col-sm-6 col-lg-3 col-xl-4 text-lg-end">
-              <div class="mb-2">
-                <span class="text-muted small d-block">Current Investment</span>
-                <span class="fs-3 fw-extrabold text-navy">
-                  {{ getPlanPriceFormatted(subscription.plan) }}
-                </span>
+            <div class="col-12 col-sm-6 col-lg-3 col-xl-3 text-start text-sm-end">
+              <span class="hero-eyebrow text-uppercase fw-bold text-muted small d-block mb-1">Current Investment</span>
+              <div class="fs-3 fw-extrabold text-navy mb-2">
+                {{ getPlanPriceFormatted(subscription.plan) }}
               </div>
 
               @if (isRenewalDue && isRenewalEligible) {
                 <button
-                  class="btn btn-success btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm fw-semibold rounded-3 px-3 py-2"
+                  class="btn btn-success btn-sm d-inline-flex align-items-center gap-2 shadow-2xs fw-semibold rounded-3 px-3 py-2"
                   type="button"
                   (click)="openRenewalModal()"
                 >
@@ -153,9 +154,9 @@
 
           <!-- Pending Downgrade Warning Bar if applicable -->
           @if (hasPendingDowngrade) {
-            <div class="alert alert-warning border-0 rounded-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mt-4 mb-0 p-3">
+            <div class="alert alert-warning border-0 rounded-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mt-4 mb-0 p-3.5 shadow-2xs">
               <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-calendar-event fs-5 flex-shrink-0"></i>
+                <i class="bi bi-calendar-event fs-5 flex-shrink-0 text-warning-emphasis"></i>
                 <div class="small">
                   <strong>Scheduled Downgrade:</strong> Your plan is scheduled to switch to
                   <strong>{{ subscription.pendingPlan }}</strong> on
@@ -164,7 +165,7 @@
                 </div>
               </div>
               <button
-                class="btn btn-sm btn-outline-dark fw-semibold text-nowrap"
+                class="btn btn-sm btn-outline-dark fw-semibold text-nowrap rounded-3 px-3 py-2"
                 type="button"
                 (click)="cancelPendingDowngrade()"
                 [disabled]="isCancellingDowngrade"
@@ -181,12 +182,12 @@
 
           <!-- Real-time Current Allowances Strip -->
           @if (planOverview?.metrics; as metrics) {
-            <div class="row g-3 border-top pt-3.5 mt-3">
+            <div class="row g-3 border-top pt-4 mt-4">
               @for (m of metrics.slice(0, 4); track m.metric) {
                 <div class="col-12 col-sm-6 col-xl-3">
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="small fw-semibold text-navy">{{ m.label }}</span>
-                    <span class="small text-muted">
+                  <div class="d-flex justify-content-between align-items-center mb-1.5">
+                    <span class="small fw-bold text-navy">{{ m.label }}</span>
+                    <span class="small text-muted fw-medium">
                       @if (m.unit === 'bytes') {
                         {{ formatBytes(m.currentUsage) }} / {{ m.limit !== null ? formatBytes(m.limit) : '∞' }}
                       } @else {
@@ -194,7 +195,7 @@
                       }
                     </span>
                   </div>
-                  <div class="progress rounded-pill" style="height: 5px;" role="progressbar" [attr.aria-valuenow]="m.percentage || 0" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress rounded-pill" style="height: 7px;" role="progressbar" [attr.aria-valuenow]="m.percentage || 0" aria-valuemin="0" aria-valuemax="100">
                     <div
                       class="progress-bar rounded-pill"
                       [ngClass]="getProgressBarClass(m.status)"
@@ -213,11 +214,11 @@
     <!-- 4. BILLING FREQUENCY SELECTOR TOGGLE                                      -->
     <!-- ========================================================================= -->
     <div class="billing-interval-selector-wrapper text-center my-4 py-2">
-      <div class="d-inline-flex align-items-center bg-white p-1.5 rounded-pill border shadow-xs">
+      <div class="d-inline-flex align-items-center bg-white p-1 rounded-pill border shadow-xs">
         <button
           type="button"
           class="btn btn-sm rounded-pill px-4 py-2 fw-semibold interval-toggle-btn"
-          [class.btn-primary]="pricingInterval === 'MONTHLY'"
+          [class.active-interval]="pricingInterval === 'MONTHLY'"
           [class.text-muted]="pricingInterval !== 'MONTHLY'"
           (click)="setPricingInterval('MONTHLY')"
         >
@@ -227,12 +228,12 @@
         <button
           type="button"
           class="btn btn-sm rounded-pill px-4 py-2 fw-semibold interval-toggle-btn position-relative"
-          [class.btn-primary]="pricingInterval === 'YEARLY'"
+          [class.active-interval]="pricingInterval === 'YEARLY'"
           [class.text-muted]="pricingInterval !== 'YEARLY'"
           (click)="setPricingInterval('YEARLY')"
         >
           <span>Yearly Billing</span>
-          <span class="badge bg-success text-white rounded-pill ms-1.5 px-2 py-0.5" style="font-size: 10px;">
+          <span class="badge bg-success text-white rounded-pill ms-2 px-2 py-0.5" style="font-size: 10px;">
             Save ~16%
           </span>
         </button>
@@ -254,30 +255,30 @@
             >
               <!-- Most Popular Pill for Business -->
               @if (isFeaturedPlan(plan.name)) {
-                <div class="popular-badge-ribbon text-center py-1">
+                <div class="popular-badge-ribbon text-center py-1.5">
                   <span class="badge bg-gold text-dark rounded-pill fw-bold text-uppercase px-3 py-1 shadow-xs tracking-wider" style="font-size: 11px;">
                     <i class="bi bi-star-fill me-1"></i>Most Popular
                   </span>
                 </div>
               }
 
-              <div class="card-body p-4 p-xl-4.5 d-flex flex-column justify-content-between">
+              <div class="card-body p-4 d-flex flex-column justify-content-between">
                 <div>
                   <!-- Tier Header -->
                   <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
                     <div>
-                      <h4 class="h5 fw-extrabold text-navy mb-0">{{ plan.displayName }}</h4>
-                      <small class="text-body-secondary d-block mt-0.5">{{ plan.tagline }}</small>
+                      <h4 class="h5 fw-extrabold text-navy mb-1">{{ plan.displayName }}</h4>
+                      <small class="text-body-secondary d-block">{{ plan.tagline }}</small>
                     </div>
                     @if (isCurrentPlan(plan.name)) {
-                      <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small fw-bold">
+                      <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 small fw-bold">
                         Current Plan
                       </span>
                     }
                   </div>
 
                   <!-- Rate Display -->
-                  <div class="rate-block my-3.5 pb-3 border-bottom">
+                  <div class="rate-block my-3 pb-3 border-bottom">
                     <div class="d-flex align-items-baseline gap-1">
                       <span class="fs-2 fw-extrabold text-navy">
                         {{ getPlanPriceFormatted(plan.name, pricingInterval) }}
@@ -296,10 +297,10 @@
 
                   <!-- Feature & Quota Highlights -->
                   <div class="features-list mb-4">
-                    <span class="text-uppercase tracking-wider fw-bold text-muted small d-block mb-2.5">
+                    <span class="text-uppercase tracking-wider fw-bold text-muted small d-block mb-3">
                       Included Allowances
                     </span>
-                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2.5">
                       @for (highlight of getPlanHighlights(plan.name); track highlight) {
                         <li class="d-flex align-items-center gap-2 small text-navy">
                           <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
@@ -316,7 +317,7 @@
                     <!-- View Details Modal Button -->
                     <button
                       type="button"
-                      class="btn btn-outline-secondary w-50 fw-semibold rounded-3 py-2.5"
+                      class="btn btn-outline-secondary w-50 fw-semibold rounded-3 py-2"
                       (click)="openPlanDetailsModal(plan.name)"
                     >
                       <i class="bi bi-info-circle me-1"></i>Details
@@ -326,7 +327,7 @@
                     @if (isCurrentPlan(plan.name)) {
                       <button
                         type="button"
-                        class="btn btn-secondary w-50 fw-semibold rounded-3 py-2.5 opacity-75"
+                        class="btn btn-secondary w-50 fw-semibold rounded-3 py-2 opacity-75"
                         disabled
                       >
                         <i class="bi bi-check-lg me-1"></i>Active
@@ -334,7 +335,7 @@
                     } @else if (getPlanDirection(plan.name) === 'UPGRADE') {
                       <button
                         type="button"
-                        class="btn btn-primary w-50 fw-semibold rounded-3 py-2.5 shadow-sm d-inline-flex align-items-center justify-content-center gap-1"
+                        class="btn btn-primary w-50 fw-semibold rounded-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-1"
                         (click)="openPlanChangeModal(plan.name)"
                       >
                         <span>Upgrade</span>
@@ -343,7 +344,7 @@
                     } @else {
                       <button
                         type="button"
-                        class="btn btn-outline-dark w-50 fw-semibold rounded-3 py-2.5"
+                        class="btn btn-outline-dark w-50 fw-semibold rounded-3 py-2"
                         (click)="openPlanChangeModal(plan.name)"
                       >
                         <span>Downgrade</span>
@@ -360,7 +361,7 @@
       <!-- Row 2: Enterprise Tier Full Width VIP Card Below -->
       @if (getEnterprisePlan(); as entPlan) {
         <div class="card border-0 shadow-sm rounded-4 enterprise-vip-card overflow-hidden">
-          <div class="card-body p-4 p-xl-4.5">
+          <div class="card-body p-4 p-md-4">
             <div class="row g-4 align-items-center justify-content-between">
               <!-- Left: Enterprise Meta -->
               <div class="col-12 col-lg-7">
@@ -369,29 +370,29 @@
                     <i class="bi bi-shield-shaded me-1"></i>ENTERPRISE SCALE
                   </span>
                   @if (isCurrentPlan(entPlan.name)) {
-                    <span class="badge bg-success text-white rounded-pill px-2.5 py-1 small fw-bold">Current Plan</span>
+                    <span class="badge bg-success text-white rounded-pill px-3 py-1 small fw-bold">Current Plan</span>
                   }
                 </div>
                 <h3 class="h4 fw-extrabold text-white mb-1">{{ entPlan.displayName }} Tier</h3>
-                <p class="text-white-50 mb-3">
+                <p class="text-white-50 mb-3 small">
                   Dedicated infrastructure, multi-million message throughput, custom WABA limits, and bespoke SLA guarantees.
                 </p>
 
                 <!-- Enterprise Highlights Grid -->
                 <div class="row g-2 text-white small">
-                  <div class="col-6 col-sm-3 d-flex align-items-center gap-1.5">
+                  <div class="col-6 col-sm-3 d-flex align-items-center gap-2">
                     <i class="bi bi-check2-circle text-gold"></i>
                     <span>Unlimited Messages</span>
                   </div>
-                  <div class="col-6 col-sm-3 d-flex align-items-center gap-1.5">
+                  <div class="col-6 col-sm-3 d-flex align-items-center gap-2">
                     <i class="bi bi-check2-circle text-gold"></i>
                     <span>Dedicated Instance</span>
                   </div>
-                  <div class="col-6 col-sm-3 d-flex align-items-center gap-1.5">
+                  <div class="col-6 col-sm-3 d-flex align-items-center gap-2">
                     <i class="bi bi-check2-circle text-gold"></i>
                     <span>24/7 SLA Support</span>
                   </div>
-                  <div class="col-6 col-sm-3 d-flex align-items-center gap-1.5">
+                  <div class="col-6 col-sm-3 d-flex align-items-center gap-2">
                     <i class="bi bi-check2-circle text-gold"></i>
                     <span>Custom Integrations</span>
                   </div>
@@ -399,14 +400,14 @@
               </div>
 
               <!-- Right: Pricing & Sales CTA -->
-              <div class="col-12 col-lg-4 text-lg-end">
+              <div class="col-12 col-lg-4 text-start text-lg-end">
                 <div class="fs-2 fw-extrabold text-gold mb-1">Custom Pricing</div>
                 <small class="text-white-50 d-block mb-3">Tailored to your monthly message volume</small>
 
-                <div class="d-flex justify-content-lg-end gap-2">
+                <div class="d-flex justify-content-start justify-content-lg-end gap-2">
                   <button
                     type="button"
-                    class="btn btn-outline-light rounded-3 px-3 py-2.5 fw-semibold"
+                    class="btn btn-outline-light rounded-3 px-3 py-2 fw-semibold"
                     (click)="openPlanDetailsModal('ENTERPRISE')"
                   >
                     View Limits
@@ -414,7 +415,7 @@
 
                   <a
                     href="mailto:sales@pranexia-connect.com?subject=Seyyon%20Connect%20Enterprise%20Plan%20Inquiry"
-                    class="btn btn-gold text-dark fw-bold rounded-3 px-4 py-2.5 shadow-sm d-inline-flex align-items-center gap-2"
+                    class="btn btn-gold text-dark fw-bold rounded-3 px-4 py-2 shadow-sm d-inline-flex align-items-center gap-2"
                   >
                     <i class="bi bi-headset"></i>
                     <span>Contact Sales</span>
@@ -434,9 +435,9 @@
       <div class="card border-0 shadow-sm rounded-4 mb-5 plan-comparison-card overflow-hidden">
         <div class="card-header bg-navy text-white d-flex align-items-center justify-content-between p-4">
           <div>
-            <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-white">
+            <h5 class="card-title mb-1 fw-bold d-flex align-items-center gap-2 text-white">
               <i class="bi bi-grid-3x3-gap text-gold"></i>
-              <span>Comprehensive Feature & Limit Matrix</span>
+              <span>Comprehensive Feature &amp; Limit Matrix</span>
             </h5>
             <small class="text-white-50">Compare authoritative quotas across all Seyyon Connect tiers</small>
           </div>
@@ -450,12 +451,12 @@
             <table class="table table-hover align-middle mb-0 comparison-table">
               <thead class="bg-surface-subtle">
                 <tr>
-                  <th class="ps-4" style="min-width: 220px;">Feature / Allowance</th>
+                  <th class="ps-4 py-3" style="min-width: 220px;">Feature / Allowance</th>
                   @for (p of planOverview.availablePlans; track p.name) {
                     <th class="text-center py-3" [class.current-plan-header]="p.name === subscription?.plan" style="min-width: 150px;">
                       <div class="fw-bold fs-6 text-navy">{{ p.displayName }}</div>
                       @if (p.name === subscription?.plan) {
-                        <span class="badge bg-primary text-white mt-1 px-2.5 py-1 rounded-pill small">Current Plan</span>
+                        <span class="badge bg-primary text-white mt-1 px-3 py-1 rounded-pill small">Current Plan</span>
                       }
                     </th>
                   }
@@ -463,65 +464,65 @@
               </thead>
               <tbody>
                 <tr>
-                  <td class="ps-4 fw-semibold text-navy"><i class="bi bi-chat-dots me-2 text-primary"></i>Monthly Messages</td>
+                  <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-chat-dots me-2 text-primary"></i>Monthly Messages</td>
                   @for (p of planOverview.availablePlans; track p.name) {
-                    <td class="text-center" [class.current-plan-col]="p.name === subscription?.plan">
+                    <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                       {{ p.limits['MONTHLY_MESSAGES'] !== null ? (p.limits['MONTHLY_MESSAGES'] | number) : 'Unlimited' }}
                     </td>
                   }
                 </tr>
                 <tr>
-                  <td class="ps-4 fw-semibold text-navy"><i class="bi bi-megaphone me-2 text-info"></i>Monthly Campaigns</td>
+                  <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-megaphone me-2 text-info"></i>Monthly Campaigns</td>
                   @for (p of planOverview.availablePlans; track p.name) {
-                    <td class="text-center" [class.current-plan-col]="p.name === subscription?.plan">
+                    <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                       {{ p.limits['MONTHLY_CAMPAIGNS'] !== null ? (p.limits['MONTHLY_CAMPAIGNS'] | number) : 'Unlimited' }}
                     </td>
                   }
                 </tr>
                 <tr>
-                  <td class="ps-4 fw-semibold text-navy"><i class="bi bi-people me-2 text-success"></i>Contacts / Customers</td>
+                  <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-people me-2 text-success"></i>Contacts / Customers</td>
                   @for (p of planOverview.availablePlans; track p.name) {
-                    <td class="text-center" [class.current-plan-col]="p.name === subscription?.plan">
+                    <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                       {{ p.limits['CUSTOMERS'] !== null ? (p.limits['CUSTOMERS'] | number) : 'Unlimited' }}
                     </td>
                   }
                 </tr>
                 <tr>
-                  <td class="ps-4 fw-semibold text-navy"><i class="bi bi-file-earmark-text me-2 text-primary"></i>Templates</td>
+                  <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-file-earmark-text me-2 text-primary"></i>Templates</td>
                   @for (p of planOverview.availablePlans; track p.name) {
-                    <td class="text-center" [class.current-plan-col]="p.name === subscription?.plan">
+                    <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                       {{ p.limits['TEMPLATES'] !== null ? (p.limits['TEMPLATES'] | number) : 'Unlimited' }}
                     </td>
                   }
                 </tr>
                 <tr>
-                  <td class="ps-4 fw-semibold text-navy"><i class="bi bi-hdd-network me-2 text-warning"></i>Media Storage</td>
+                  <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-hdd-network me-2 text-warning"></i>Media Storage</td>
                   @for (p of planOverview.availablePlans; track p.name) {
-                    <td class="text-center" [class.current-plan-col]="p.name === subscription?.plan">
+                    <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                       {{ p.limits['MEDIA_STORAGE_BYTES'] !== null ? formatBytes(p.limits['MEDIA_STORAGE_BYTES'] || 0) : 'Unlimited' }}
                     </td>
                   }
                 </tr>
                 <tr>
-                  <td class="ps-4 fw-semibold text-navy"><i class="bi bi-cloud-arrow-up me-2 text-info"></i>Monthly Media Uploads</td>
+                  <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-cloud-arrow-up me-2 text-info"></i>Monthly Media Uploads</td>
                   @for (p of planOverview.availablePlans; track p.name) {
-                    <td class="text-center" [class.current-plan-col]="p.name === subscription?.plan">
+                    <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                       {{ p.limits['MONTHLY_MEDIA_UPLOADS'] !== null ? (p.limits['MONTHLY_MEDIA_UPLOADS'] | number) : 'Unlimited' }}
                     </td>
                   }
                 </tr>
                 <tr>
-                  <td class="ps-4 fw-semibold text-navy"><i class="bi bi-person-badge me-2 text-secondary"></i>Team Members</td>
+                  <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-person-badge me-2 text-secondary"></i>Team Members</td>
                   @for (p of planOverview.availablePlans; track p.name) {
-                    <td class="text-center" [class.current-plan-col]="p.name === subscription?.plan">
+                    <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                       {{ p.limits['TEAM_MEMBERS'] !== null ? p.limits['TEAM_MEMBERS'] : 'Unlimited' }}
                     </td>
                   }
                 </tr>
                 <tr>
-                  <td class="ps-4 fw-semibold text-navy"><i class="bi bi-whatsapp me-2 text-success"></i>WhatsApp Connections</td>
+                  <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-whatsapp me-2 text-success"></i>WhatsApp Connections</td>
                   @for (p of planOverview.availablePlans; track p.name) {
-                    <td class="text-center" [class.current-plan-col]="p.name === subscription?.plan">
+                    <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                       {{ p.limits['WHATSAPP_CONNECTIONS'] !== null ? p.limits['WHATSAPP_CONNECTIONS'] : 'Unlimited' }}
                     </td>
                   }
@@ -557,7 +558,7 @@
     <!-- 7. AUDIT & BILLING HISTORY TABS (TIMELINE & INVOICES)                     -->
     <!-- ========================================================================= -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-      <div class="card-header bg-white border-bottom p-3.5 d-flex align-items-center justify-content-between">
+      <div class="card-header bg-white border-bottom p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
         <ul class="nav nav-pills gap-2" role="tablist">
           <li class="nav-item" role="presentation">
             <button
@@ -566,7 +567,7 @@
               (click)="activeTab = 'usage'"
               type="button"
             >
-              <i class="bi bi-speedometer2 me-1.5"></i>Usage Quotas
+              <i class="bi bi-speedometer2 me-2"></i>Usage Quotas
             </button>
           </li>
           <li class="nav-item" role="presentation">
@@ -576,7 +577,7 @@
               (click)="activeTab = 'subscriptionHistory'"
               type="button"
             >
-              <i class="bi bi-clock-history me-1.5"></i>Subscription Timeline
+              <i class="bi bi-clock-history me-2"></i>Subscription Timeline
             </button>
           </li>
           <li class="nav-item" role="presentation">
@@ -586,14 +587,14 @@
               (click)="activeTab = 'paymentHistory'"
               type="button"
             >
-              <i class="bi bi-receipt me-1.5"></i>Payment History & Invoices
+              <i class="bi bi-receipt me-2"></i>Payment History &amp; Invoices
             </button>
           </li>
         </ul>
 
-        <a routerLink="/usage" class="btn btn-sm btn-outline-primary fw-medium rounded-3 d-none d-md-inline-flex align-items-center gap-1">
+        <a routerLink="/usage" class="btn btn-outline-primary fw-semibold rounded-3 d-none d-md-inline-flex align-items-center gap-2 px-3 py-2">
           <span>Full Usage Analytics</span>
-          <i class="bi bi-arrow-right-short"></i>
+          <i class="bi bi-arrow-right small"></i>
         </a>
       </div>
 
@@ -605,13 +606,13 @@
               <div class="row g-3">
                 @for (m of metrics; track m.metric) {
                   <div class="col-12 col-md-6 col-xl-3">
-                    <div class="p-3 bg-light rounded-3 border h-100 d-flex flex-column justify-content-between">
+                    <div class="p-3.5 bg-surface-subtle rounded-3 border h-100 d-flex flex-column justify-content-between">
                       <div>
                         <div class="d-flex justify-content-between align-items-start mb-2">
                           <span class="fw-bold text-navy small">{{ m.label }}</span>
                           <app-status-badge [status]="m.status" />
                         </div>
-                        <div class="fs-4 fw-extrabold text-navy my-1">
+                        <div class="fs-4 fw-extrabold text-navy my-2">
                           @if (m.unit === 'bytes') {
                             {{ formatBytes(m.currentUsage) }}
                           } @else {
@@ -648,31 +649,32 @@
         @if (activeTab === 'subscriptionHistory') {
           @if (history.length === 0) {
             <div class="p-5 text-center text-muted">
-              <i class="bi bi-clock fs-1 opacity-50 d-block mb-2"></i>
-              <span>No subscription changes recorded yet.</span>
+              <i class="bi bi-clock fs-1 opacity-50 d-block mb-3"></i>
+              <h6 class="fw-bold text-navy mb-1">No subscription history recorded yet</h6>
+              <p class="small text-muted mb-0">Plan changes and renewals will be audited chronologically here.</p>
             </div>
           } @else {
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
                 <thead class="bg-surface-subtle">
                   <tr>
-                    <th class="ps-4">Timestamp</th>
-                    <th>Action</th>
-                    <th>Previous Tier</th>
-                    <th>New Tier</th>
-                    <th>Status</th>
-                    <th>Source</th>
+                    <th class="ps-4 py-3">Timestamp</th>
+                    <th class="py-3">Action</th>
+                    <th class="py-3">Previous Tier</th>
+                    <th class="py-3">New Tier</th>
+                    <th class="py-3">Status</th>
+                    <th class="pe-4 py-3">Source</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (item of history; track item.id) {
                     <tr>
-                      <td class="ps-4 fw-semibold text-navy">{{ item.createdAt | date: 'medium' }}</td>
-                      <td><span class="badge bg-light text-navy border">{{ item.action }}</span></td>
-                      <td>{{ item.previousPlan || '—' }}</td>
-                      <td class="fw-bold text-primary">{{ item.newPlan }}</td>
-                      <td><app-status-badge [status]="item.newStatus" /></td>
-                      <td><small class="text-muted">{{ item.source }}</small></td>
+                      <td class="ps-4 py-3 fw-semibold text-navy">{{ item.createdAt | date: 'medium' }}</td>
+                      <td class="py-3"><span class="badge bg-light text-navy border px-2.5 py-1">{{ item.action }}</span></td>
+                      <td class="py-3">{{ item.previousPlan || '—' }}</td>
+                      <td class="py-3 fw-bold text-primary">{{ item.newPlan }}</td>
+                      <td class="py-3"><app-status-badge [status]="item.newStatus" /></td>
+                      <td class="pe-4 py-3"><small class="text-muted">{{ item.source }}</small></td>
                     </tr>
                   }
                 </tbody>
@@ -685,33 +687,34 @@
         @if (activeTab === 'paymentHistory') {
           @if (paymentHistory.length === 0) {
             <div class="p-5 text-center text-muted">
-              <i class="bi bi-receipt fs-1 opacity-50 d-block mb-2"></i>
-              <span>No online transaction records recorded yet.</span>
+              <i class="bi bi-receipt fs-1 opacity-50 d-block mb-3"></i>
+              <h6 class="fw-bold text-navy mb-1">No online transactions recorded yet</h6>
+              <p class="small text-muted mb-0">Completed payments and invoices will appear here.</p>
             </div>
           } @else {
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
                 <thead class="bg-surface-subtle">
                   <tr>
-                    <th class="ps-4">Date</th>
-                    <th>Order ID</th>
-                    <th>Plan Tier</th>
-                    <th>Interval</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Receipt / Reference</th>
+                    <th class="ps-4 py-3">Date</th>
+                    <th class="py-3">Order ID</th>
+                    <th class="py-3">Plan Tier</th>
+                    <th class="py-3">Interval</th>
+                    <th class="py-3">Amount</th>
+                    <th class="py-3">Status</th>
+                    <th class="pe-4 py-3">Receipt / Reference</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (p of paymentHistory; track p.id) {
                     <tr>
-                      <td class="ps-4 fw-semibold text-navy">{{ p.createdAt | date: 'mediumDate' }}</td>
-                      <td><code class="small text-navy">{{ p.providerOrderId || p.id }}</code></td>
-                      <td class="fw-bold text-primary">{{ p.plan }}</td>
-                      <td><span class="badge bg-light text-navy border">{{ p.billingInterval }}</span></td>
-                      <td class="fw-bold text-success">{{ p.currency }} {{ (p.amount / 100) | number: '1.2-2' }}</td>
-                      <td><app-status-badge [status]="p.status" /></td>
-                      <td><small class="text-muted">{{ p.providerPaymentId || '—' }}</small></td>
+                      <td class="ps-4 py-3 fw-semibold text-navy">{{ p.createdAt | date: 'mediumDate' }}</td>
+                      <td class="py-3"><code class="small text-navy">{{ p.providerOrderId || p.id }}</code></td>
+                      <td class="py-3 fw-bold text-primary">{{ p.plan }}</td>
+                      <td class="py-3"><span class="badge bg-light text-navy border px-2.5 py-1">{{ p.billingInterval }}</span></td>
+                      <td class="py-3 fw-bold text-success">{{ p.currency }} {{ (p.amount / 100) | number: '1.2-2' }}</td>
+                      <td class="py-3"><app-status-badge [status]="p.status" /></td>
+                      <td class="pe-4 py-3"><small class="text-muted">{{ p.providerPaymentId || '—' }}</small></td>
                     </tr>
                   }
                 </tbody>
@@ -724,70 +727,85 @@
   }
 
   <!-- ========================================================================= -->
-  <!-- 8. PLAN DETAILS MODAL                                                     -->
+  <!-- 8. PLAN DETAILS MODAL (NEW COOL UI DESIGN)                                -->
   <!-- ========================================================================= -->
   @if (showPlanDetailsModal) {
-    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true" style="background: rgba(15, 27, 61, 0.7);">
+    <div class="modal fade show d-block modal-glass-backdrop" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-          <div class="modal-header bg-navy text-white px-4 py-3.5">
+        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden modal-cool-card">
+          <!-- Modern Light Header -->
+          <div class="modal-header bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
-              <div class="plan-modal-icon bg-gold text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold">
-                <i class="bi bi-award-fill"></i>
+              <div class="modal-glow-icon bg-primary-subtle text-primary rounded-4 d-flex align-items-center justify-content-center flex-shrink-0">
+                <i class="bi bi-award-fill fs-4 text-primary"></i>
               </div>
               <div>
-                <h5 class="modal-title fw-bold text-white mb-0">{{ selectedPlanDetailsTier }} Plan Allowances</h5>
-                <small class="text-white-50">{{ getPlanTagline(selectedPlanDetailsTier) }}</small>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge bg-indigo-subtle text-indigo rounded-pill px-2.5 py-0.5 small fw-bold">PLAN SPECIFICATIONS</span>
+                </div>
+                <h5 class="modal-title fw-extrabold text-navy mb-0 fs-5">{{ selectedPlanDetailsTier }} Plan Allowances</h5>
+                <small class="text-body-secondary">{{ getPlanTagline(selectedPlanDetailsTier) }}</small>
               </div>
             </div>
-            <button type="button" class="btn-close btn-close-white" (click)="closePlanDetailsModal()" aria-label="Close"></button>
+            <button type="button" class="btn-close-circle" (click)="closePlanDetailsModal()" aria-label="Close">
+              <i class="bi bi-x-lg"></i>
+            </button>
           </div>
 
-          <div class="modal-body p-4 p-xl-4.5">
-            <div class="d-flex align-items-baseline justify-content-between border-bottom pb-3 mb-4">
+          <div class="modal-body p-4">
+            <!-- Hero Investment Banner inside Modal -->
+            <div class="modal-hero-rate-box p-3.5 rounded-4 mb-4 border d-flex flex-wrap align-items-center justify-content-between gap-3">
               <div>
-                <span class="text-muted small d-block">Investment</span>
-                <span class="fs-3 fw-extrabold text-navy">{{ getPlanPriceFormatted(selectedPlanDetailsTier) }}</span>
-                <span class="text-muted small"> / {{ pricingInterval === 'MONTHLY' ? 'month' : 'year' }}</span>
+                <span class="text-uppercase tracking-wider fw-bold text-muted small d-block mb-1">Commercial Rate</span>
+                <div class="d-flex align-items-baseline gap-2">
+                  <span class="fs-2 fw-extrabold text-navy">{{ getPlanPriceFormatted(selectedPlanDetailsTier) }}</span>
+                  <span class="text-muted small fw-medium">/ {{ pricingInterval === 'MONTHLY' ? 'month' : 'year' }}</span>
+                </div>
               </div>
               @if (isCurrentPlan(selectedPlanDetailsTier)) {
-                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fw-bold">
-                  Currently Active Plan
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-bold d-inline-flex align-items-center gap-2 shadow-2xs">
+                  <span class="pulse-dot bg-success"></span>
+                  <span>Currently Active Plan</span>
                 </span>
               }
             </div>
 
-            <!-- Limits Breakdown -->
-            <h6 class="fw-bold text-navy mb-3">Resource Quotas & Limits</h6>
+            <!-- Resource Quotas & Limits (4x2 / 3x3 Grid of Clean Styled Cards) -->
+            <h6 class="fw-bold text-navy mb-3 d-flex align-items-center gap-2">
+              <i class="bi bi-shield-check text-primary"></i>
+              <span>Resource Quotas &amp; Capacities</span>
+            </h6>
             <div class="row g-3">
-              @for (entry of getPlanLimits(selectedPlanDetailsTier) | keyvalue; track entry.key) {
-                <div class="col-6 col-md-4">
-                  <div class="p-3 bg-light rounded-3 border">
-                    <small class="text-muted d-block text-truncate">{{ entry.key }}</small>
-                    <strong class="fs-6 text-navy">
-                      @if (entry.value === null) {
-                        Unlimited
-                      } @else if (entry.key.includes('BYTES')) {
-                        {{ formatBytes(entry.value) }}
-                      } @else {
-                        {{ entry.value | number }}
-                      }
-                    </strong>
+              @for (item of getFormattedPlanLimits(selectedPlanDetailsTier); track item.key) {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                  <div class="modal-quota-card p-3 rounded-3 bg-white border h-100 d-flex flex-column justify-content-between shadow-2xs">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <div class="quota-mini-icon rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" [ngClass]="item.iconBgClass">
+                        <i class="bi {{ item.icon }}"></i>
+                      </div>
+                      <small class="text-muted fw-semibold text-truncate" [title]="item.label">{{ item.label }}</small>
+                    </div>
+                    <div class="fs-5 fw-extrabold text-navy mt-1">
+                      {{ item.valueFormatted }}
+                    </div>
                   </div>
                 </div>
               }
             </div>
           </div>
 
-          <div class="modal-footer border-top bg-light px-4 py-3 d-flex justify-content-between">
-            <button type="button" class="btn btn-outline-secondary" (click)="closePlanDetailsModal()">Close</button>
+          <div class="modal-footer border-top bg-surface-subtle px-4 py-3 d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-semibold" (click)="closePlanDetailsModal()">
+              Close
+            </button>
             @if (!isCurrentPlan(selectedPlanDetailsTier)) {
               <button
                 type="button"
-                class="btn btn-primary fw-semibold px-4"
+                class="btn btn-primary fw-bold px-4 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-2"
                 (click)="upgradeFromPlanDetailsModal()"
               >
-                {{ selectedPlanDetailsTier === 'ENTERPRISE' ? 'Contact Sales' : 'Select ' + selectedPlanDetailsTier }}
+                <span>{{ selectedPlanDetailsTier === 'ENTERPRISE' ? 'Contact Sales' : 'Select ' + selectedPlanDetailsTier + ' Plan' }}</span>
+                <i class="bi bi-arrow-right"></i>
               </button>
             }
           </div>
@@ -797,98 +815,102 @@
   }
 
   <!-- ========================================================================= -->
-  <!-- 9. PLAN CHANGE / CHECKOUT MODAL                                           -->
+  <!-- 9. PLAN CHANGE / CHECKOUT MODAL (NEW COOL UI DESIGN)                      -->
   <!-- ========================================================================= -->
   @if (showPlanChangeModal) {
-    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true" style="background: rgba(15, 27, 61, 0.7);">
+    <div class="modal fade show d-block modal-glass-backdrop" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-          <div class="modal-header border-bottom bg-light px-4 py-3.5">
+        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden modal-cool-card">
+          <div class="modal-header bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
-              <div class="plan-modal-icon bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center">
-                <i class="bi bi-arrow-left-right fs-5"></i>
+              <div class="modal-glow-icon bg-indigo-subtle text-indigo rounded-4 d-flex align-items-center justify-content-center flex-shrink-0">
+                <i class="bi bi-arrow-left-right fs-4"></i>
               </div>
               <div>
-                <h5 class="modal-title fw-bold text-navy mb-0">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-0.5 small fw-bold">
+                    {{ planChangePreview?.direction === 'UPGRADE' ? 'PLAN UPGRADE' : 'PLAN ADJUSTMENT' }}
+                  </span>
+                </div>
+                <h5 class="modal-title fw-extrabold text-navy mb-0 fs-5">
                   {{ planChangePreview?.direction === 'UPGRADE' ? 'Upgrade to ' : 'Downgrade to ' }}
                   {{ selectedPlanForChange }} Plan
                 </h5>
-                <small class="text-body-secondary">Authoritative pricing & quota impact calculation</small>
+                <small class="text-body-secondary">Authoritative pricing &amp; quota impact calculation</small>
               </div>
             </div>
-            <button type="button" class="btn-close" (click)="closePlanChangeModal()" [disabled]="isProcessingPayment || isConfirmingDowngrade" aria-label="Close"></button>
+            <button type="button" class="btn-close-circle" (click)="closePlanChangeModal()" [disabled]="isProcessingPayment || isConfirmingDowngrade" aria-label="Close">
+              <i class="bi bi-x-lg"></i>
+            </button>
           </div>
 
-          <div class="modal-body p-4 p-xl-4.5">
+          <div class="modal-body p-4">
             @if (modalError) {
-              <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
-                <i class="bi bi-exclamation-octagon-fill flex-shrink-0"></i>
+              <div class="alert alert-danger d-flex align-items-center gap-2 mb-3 p-3 rounded-3 shadow-2xs">
+                <i class="bi bi-exclamation-octagon-fill flex-shrink-0 fs-5"></i>
                 <span>{{ modalError }}</span>
               </div>
             }
 
             @if (isLoadingPreview) {
               <div class="text-center py-5">
-                <div class="spinner-border text-primary mb-2" role="status"></div>
-                <div class="text-body-secondary small">Calculating plan impact and pricing...</div>
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <div class="text-navy fw-semibold">Calculating plan impact and pricing...</div>
+                <small class="text-muted">Fetching live quota ledger from billing engine</small>
               </div>
             } @else if (planChangePreview) {
-              <!-- Billing Interval Selector -->
+              <!-- Billing Interval Selector Pills -->
               <div class="mb-4">
-                <label class="form-label fw-semibold text-navy small text-uppercase tracking-wider">Billing Frequency</label>
-                <div class="btn-group w-100" role="group">
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    name="intervalRadio"
-                    id="intervalMonthly"
-                    value="MONTHLY"
-                    [ngModel]="selectedInterval"
-                    (ngModelChange)="onIntervalChanged($event)"
-                  />
-                  <label class="btn btn-outline-primary py-2.5" for="intervalMonthly">
+                <label class="form-label fw-bold text-navy small text-uppercase tracking-wider d-block mb-2">Billing Frequency</label>
+                <div class="d-inline-flex align-items-center bg-white p-1 rounded-pill border shadow-xs w-100">
+                  <button
+                    type="button"
+                    class="btn btn-sm rounded-pill w-50 py-2 fw-bold interval-modal-btn"
+                    [class.active-modal-btn]="selectedInterval === 'MONTHLY'"
+                    [class.text-muted]="selectedInterval !== 'MONTHLY'"
+                    (click)="onIntervalChanged('MONTHLY')"
+                  >
                     Monthly Billing
-                  </label>
-
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    name="intervalRadio"
-                    id="intervalYearly"
-                    value="YEARLY"
-                    [ngModel]="selectedInterval"
-                    (ngModelChange)="onIntervalChanged($event)"
-                  />
-                  <label class="btn btn-outline-primary py-2.5" for="intervalYearly">
-                    Yearly Billing <span class="badge bg-success ms-1.5">Save ~16%</span>
-                  </label>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm rounded-pill w-50 py-2 fw-bold interval-modal-btn position-relative"
+                    [class.active-modal-btn]="selectedInterval === 'YEARLY'"
+                    [class.text-muted]="selectedInterval !== 'YEARLY'"
+                    (click)="onIntervalChanged('YEARLY')"
+                  >
+                    <span>Yearly Billing</span>
+                    <span class="badge bg-success text-white rounded-pill ms-2 px-2 py-0.5" style="font-size: 10px;">
+                      Save ~16%
+                    </span>
+                  </button>
                 </div>
               </div>
 
               <!-- UPGRADE VIEW -->
               @if (planChangePreview.direction === 'UPGRADE') {
-                <div class="p-3.5 bg-light rounded-3 border mb-4">
-                  <div class="d-flex justify-content-between align-items-center">
+                <div class="p-4 bg-surface-subtle rounded-4 border mb-4 shadow-2xs">
+                  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                      <div class="fw-bold text-navy fs-6">{{ planChangePreview.targetDisplayName }} Tier Upgrade</div>
+                      <div class="fw-bold text-navy fs-5 mb-1">{{ planChangePreview.targetDisplayName }} Tier Upgrade</div>
                       <small class="text-body-secondary">Instant activation with higher message, contact, and template limits.</small>
                     </div>
-                    <div class="fs-4 fw-bold text-success">
+                    <div class="fs-3 fw-extrabold text-success">
                       {{ planChangePreview.price?.formatted || 'Custom' }}
                     </div>
                   </div>
                 </div>
 
-                <div class="alert alert-info small d-flex align-items-center gap-2 mb-0">
-                  <i class="bi bi-info-circle-fill fs-5"></i>
+                <div class="alert alert-info small d-flex align-items-center gap-3 mb-0 p-3 rounded-3 bg-white border border-info-subtle shadow-2xs">
+                  <i class="bi bi-info-circle-fill fs-4 text-primary flex-shrink-0"></i>
                   <span>Upgrades take effect immediately upon payment confirmation via Razorpay.</span>
                 </div>
               }
 
               <!-- DOWNGRADE VIEW -->
               @if (planChangePreview.direction === 'DOWNGRADE') {
-                <div class="alert alert-warning d-flex align-items-start gap-3 mb-4">
-                  <i class="bi bi-calendar-event fs-4 flex-shrink-0"></i>
+                <div class="alert alert-warning d-flex align-items-start gap-3 mb-4 p-3.5 rounded-3 border border-warning-subtle shadow-2xs">
+                  <i class="bi bi-calendar-event fs-4 flex-shrink-0 text-warning-emphasis"></i>
                   <div>
                     <h6 class="alert-heading mb-1 fw-bold">Scheduled at Billing Period End</h6>
                     <p class="small mb-0">
@@ -899,8 +921,8 @@
                   </div>
                 </div>
 
-                <div class="p-3.5 bg-light rounded-3 border mb-3">
-                  <div class="d-flex align-items-center gap-2 text-success fw-semibold mb-1">
+                <div class="p-4 bg-surface-subtle rounded-4 border mb-3 shadow-2xs">
+                  <div class="d-flex align-items-center gap-2 text-success fw-bold mb-1">
                     <i class="bi bi-shield-check fs-5"></i>
                     <span>Your Data is 100% Safe (Non-Destructive)</span>
                   </div>
@@ -912,7 +934,7 @@
 
               <!-- Simulated Sandbox Button if order exists -->
               @if (checkoutOrder) {
-                <div class="alert alert-info py-2.5 px-3 small d-flex justify-content-between align-items-center mt-3 mb-0">
+                <div class="alert alert-info py-2.5 px-3 small d-flex justify-content-between align-items-center mt-3 mb-0 rounded-3 shadow-2xs">
                   <span>Order <code>{{ checkoutOrder.orderId }}</code> generated.</span>
                   <button
                     class="btn btn-sm btn-outline-dark"
@@ -926,10 +948,10 @@
             }
           </div>
 
-          <div class="modal-footer border-top bg-light d-flex justify-content-between px-4 py-3">
+          <div class="modal-footer border-top bg-surface-subtle d-flex justify-content-between px-4 py-3 align-items-center">
             <button
               type="button"
-              class="btn btn-outline-secondary"
+              class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-semibold"
               (click)="closePlanChangeModal()"
               [disabled]="isProcessingPayment || isConfirmingDowngrade"
             >
@@ -939,7 +961,7 @@
             @if (planChangePreview?.direction === 'UPGRADE') {
               <button
                 type="button"
-                class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-semibold"
+                class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-2 rounded-3 shadow-sm fw-bold"
                 (click)="startUpgradeCheckout()"
                 [disabled]="isProcessingPayment || isLoadingPreview"
               >
@@ -948,13 +970,13 @@
                   <span>Processing Payment...</span>
                 } @else {
                   <i class="bi bi-lock-fill"></i>
-                  <span>Pay & Upgrade ({{ planChangePreview?.price?.formatted }})</span>
+                  <span>Pay &amp; Upgrade ({{ planChangePreview?.price?.formatted }})</span>
                 }
               </button>
             } @else if (planChangePreview?.direction === 'DOWNGRADE') {
               <button
                 type="button"
-                class="btn btn-warning d-inline-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-semibold text-dark"
+                class="btn btn-warning d-inline-flex align-items-center gap-2 px-4 py-2 rounded-3 shadow-sm fw-bold text-dark"
                 (click)="confirmDowngrade()"
                 [disabled]="isConfirmingDowngrade || isLoadingPreview"
               >
@@ -974,63 +996,66 @@
   }
 
   <!-- ========================================================================= -->
-  <!-- 10. RENEWAL MODAL                                                         -->
+  <!-- 10. RENEWAL MODAL (NEW COOL UI DESIGN)                                    -->
   <!-- ========================================================================= -->
   @if (showRenewalModal) {
-    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true" style="background: rgba(15, 27, 61, 0.7);">
+    <div class="modal fade show d-block modal-glass-backdrop" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-          <div class="modal-header border-bottom bg-light px-4 py-3.5">
+        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden modal-cool-card">
+          <div class="modal-header bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
-              <div class="plan-modal-icon bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center">
-                <i class="bi bi-arrow-repeat fs-5"></i>
+              <div class="modal-glow-icon bg-success-subtle text-success rounded-4 d-flex align-items-center justify-content-center flex-shrink-0">
+                <i class="bi bi-arrow-repeat fs-4"></i>
               </div>
               <div>
-                <h5 class="modal-title fw-bold text-navy mb-0">Renew Subscription</h5>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-0.5 small fw-bold">SUBSCRIPTION EXTENSION</span>
+                </div>
+                <h5 class="modal-title fw-extrabold text-navy mb-0 fs-5">Renew Subscription</h5>
                 <small class="text-body-secondary">Extend your {{ subscription?.plan }} plan billing cycle</small>
               </div>
             </div>
-            <button type="button" class="btn-close" (click)="closeRenewalModal()" [disabled]="isProcessingRenewalPayment" aria-label="Close"></button>
+            <button type="button" class="btn-close-circle" (click)="closeRenewalModal()" [disabled]="isProcessingRenewalPayment" aria-label="Close">
+              <i class="bi bi-x-lg"></i>
+            </button>
           </div>
 
-          <div class="modal-body p-4 p-xl-4.5">
+          <div class="modal-body p-4">
             @if (renewalModalError) {
-              <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
-                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+              <div class="alert alert-danger d-flex align-items-center gap-2 mb-3 p-3 rounded-3 shadow-2xs">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 fs-5"></i>
                 <div>{{ renewalModalError }}</div>
               </div>
             }
 
             @if (isLoadingRenewalPreview) {
               <div class="text-center py-5">
-                <div class="spinner-border text-primary mb-2" role="status"></div>
-                <p class="text-body-secondary small mb-0">Calculating renewal pricing and dates...</p>
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <p class="text-navy fw-semibold mb-0">Calculating renewal pricing and dates...</p>
               </div>
             } @else if (renewalPreview) {
               <!-- Billing Interval Selection -->
               <div class="mb-4">
-                <label class="form-label fw-semibold text-uppercase small text-muted">Select Billing Interval</label>
-                <div class="row g-2">
+                <label class="form-label fw-bold text-uppercase small text-muted d-block mb-2">Select Billing Interval</label>
+                <div class="row g-3">
                   <div class="col-6">
                     <div
-                      class="card h-100 p-3 border cursor-pointer interval-option text-center rounded-3"
-                      [class.border-primary]="selectedRenewalInterval === 'MONTHLY'"
-                      [class.bg-primary-subtle]="selectedRenewalInterval === 'MONTHLY'"
+                      class="card h-100 p-3.5 border cursor-pointer interval-option text-center rounded-3 shadow-2xs"
+                      [class.active-interval-card]="selectedRenewalInterval === 'MONTHLY'"
                       (click)="onRenewalIntervalChanged('MONTHLY')"
                     >
-                      <span class="fw-bold d-block text-navy">Monthly Billing</span>
+                      <span class="fw-extrabold d-block text-navy fs-6">Monthly Billing</span>
                       <small class="text-muted">Billed every month</small>
                     </div>
                   </div>
                   <div class="col-6">
                     <div
-                      class="card h-100 p-3 border cursor-pointer interval-option text-center position-relative rounded-3"
-                      [class.border-primary]="selectedRenewalInterval === 'YEARLY'"
-                      [class.bg-primary-subtle]="selectedRenewalInterval === 'YEARLY'"
+                      class="card h-100 p-3.5 border cursor-pointer interval-option text-center position-relative rounded-3 shadow-2xs"
+                      [class.active-interval-card]="selectedRenewalInterval === 'YEARLY'"
                       (click)="onRenewalIntervalChanged('YEARLY')"
                     >
                       <span class="badge bg-success position-absolute top-0 end-0 m-2">Save ~16%</span>
-                      <span class="fw-bold d-block text-navy">Yearly Billing</span>
+                      <span class="fw-extrabold d-block text-navy fs-6">Yearly Billing</span>
                       <small class="text-muted">2 months free included</small>
                     </div>
                   </div>
@@ -1038,30 +1063,30 @@
               </div>
 
               <!-- Renewal Summary Breakdown Card -->
-              <div class="card border bg-light p-3.5 mb-3 rounded-3">
+              <div class="card border bg-surface-subtle p-4 mb-3 rounded-4 shadow-2xs">
                 <h6 class="fw-bold text-uppercase small text-muted mb-3">Renewal Period Breakdown</h6>
                 <div class="row g-3">
                   <div class="col-12 col-sm-6">
-                    <span class="text-muted small d-block">Current Period End</span>
-                    <strong class="text-navy">{{ renewalPreview.currentPeriodEnd | date: 'mediumDate' }}</strong>
+                    <span class="text-muted small d-block mb-1">Current Period End</span>
+                    <strong class="text-navy fs-6">{{ renewalPreview.currentPeriodEnd | date: 'mediumDate' }}</strong>
                   </div>
                   <div class="col-12 col-sm-6">
-                    <span class="text-muted small d-block">New Period End (After Renewal)</span>
-                    <strong class="text-success">{{ renewalPreview.nextPeriodEnd | date: 'mediumDate' }}</strong>
+                    <span class="text-muted small d-block mb-1">New Period End (After Renewal)</span>
+                    <strong class="text-success fs-6">{{ renewalPreview.nextPeriodEnd | date: 'mediumDate' }}</strong>
                   </div>
                   <div class="col-12 col-sm-6">
-                    <span class="text-muted small d-block">Plan Tier</span>
-                    <strong class="text-primary">{{ renewalPreview.planDisplayName }}</strong>
+                    <span class="text-muted small d-block mb-1">Plan Tier</span>
+                    <strong class="text-primary fs-6">{{ renewalPreview.planDisplayName }}</strong>
                   </div>
                   <div class="col-12 col-sm-6">
-                    <span class="text-muted small d-block">Authoritative Renewal Price</span>
-                    <h4 class="h4 mb-0 fw-bold text-navy">{{ renewalPreview.price?.formatted || 'Custom Pricing' }}</h4>
+                    <span class="text-muted small d-block mb-1">Authoritative Renewal Price</span>
+                    <h4 class="h4 mb-0 fw-extrabold text-navy">{{ renewalPreview.price?.formatted || 'Custom Pricing' }}</h4>
                   </div>
                 </div>
               </div>
 
               @if (renewalOrder) {
-                <div class="alert alert-info py-2.5 px-3 small d-flex justify-content-between align-items-center mt-3 mb-0">
+                <div class="alert alert-info py-2.5 px-3 small d-flex justify-content-between align-items-center mt-3 mb-0 rounded-3 shadow-2xs">
                   <span>Renewal Order <code>{{ renewalOrder.orderId }}</code> active.</span>
                   <button
                     class="btn btn-sm btn-outline-dark"
@@ -1075,13 +1100,13 @@
             }
           </div>
 
-          <div class="modal-footer border-top bg-light d-flex justify-content-between px-4 py-3">
-            <button type="button" class="btn btn-outline-secondary" (click)="closeRenewalModal()" [disabled]="isProcessingRenewalPayment">
+          <div class="modal-footer border-top bg-surface-subtle d-flex justify-content-between px-4 py-3 align-items-center">
+            <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-semibold" (click)="closeRenewalModal()" [disabled]="isProcessingRenewalPayment">
               Cancel
             </button>
             <button
               type="button"
-              class="btn btn-success d-inline-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-semibold"
+              class="btn btn-success d-inline-flex align-items-center gap-2 px-4 py-2 rounded-3 shadow-sm fw-bold"
               (click)="startRenewalCheckout()"
               [disabled]="isProcessingRenewalPayment || isLoadingRenewalPreview"
             >
@@ -1090,7 +1115,7 @@
                 <span>Processing Renewal...</span>
               } @else {
                 <i class="bi bi-lock-fill"></i>
-                <span>Pay & Renew ({{ renewalPreview?.price?.formatted }})</span>
+                <span>Pay &amp; Renew ({{ renewalPreview?.price?.formatted }})</span>
               }
             </button>
           </div>

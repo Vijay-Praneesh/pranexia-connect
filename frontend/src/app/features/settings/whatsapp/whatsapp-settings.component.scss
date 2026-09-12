@@ -1,46 +1,430 @@
-.settings-page {
-  max-width: 68rem;
-  margin-inline: auto;
+// =============================================================================
+// Seyyon Connect — WhatsApp Business Settings & Cloud API Command Hub
+// Color Palette: Deep Navy #0F1B3D, WhatsApp Emerald #25D366, Forest #075E54, Blue #2563EB, Gold #F4B728
+// =============================================================================
+
+$navy: #0f1b3d;
+$navy-dark: #0a1229;
+$navy-light: #1e293b;
+$emerald: #10b981;
+$emerald-whatsapp: #25d366;
+$emerald-dark: #075e54;
+$emerald-subtle: #ecfdf5;
+$emerald-border: #a7f3d0;
+$primary-blue: #2563eb;
+$gold: #f4b728;
+$text-dark: #172033;
+$text-muted: #64748b;
+$border-light: #e2e8f0;
+$surface-subtle: #f8fafc;
+$surface-card: #ffffff;
+
+.whatsapp-settings-container {
+  padding-bottom: 2.5rem;
+  color: $text-dark;
 }
-.connection-card {
-  max-width: 48rem;
+
+// -----------------------------------------------------------------------------
+// Global Badges & Utility Colors
+// -----------------------------------------------------------------------------
+.text-navy {
+  color: $navy !important;
 }
-.connection-list > div {
-  display: grid;
-  grid-template-columns: minmax(9rem, 1fr) minmax(12rem, 2fr);
-  gap: 1rem;
-  padding-block: 0.85rem;
-  border-bottom: 1px solid var(--bs-border-color);
+
+.bg-navy {
+  background-color: $navy !important;
 }
-.connection-list > div:last-child {
-  border-bottom: 0;
+
+.text-emerald {
+  color: #059669 !important;
 }
-.connection-list dt {
-  color: var(--bs-secondary-color);
-  font-weight: 500;
+
+.bg-emerald {
+  background-color: #10b981 !important;
 }
-.connection-list dd {
-  margin: 0;
-  font-weight: 600;
-  overflow-wrap: anywhere;
+
+.bg-emerald-subtle {
+  background-color: $emerald-subtle !important;
 }
-.not-connected {
-  padding: 2rem 0 1rem;
-  text-align: center;
+
+.border-emerald-subtle {
+  border-color: $emerald-border !important;
 }
-.not-connected > i {
-  display: block;
-  color: #25d366;
-  font-size: 3rem;
-  margin-bottom: 1rem;
+
+.bg-gold {
+  background-color: $gold !important;
 }
-.not-connected p {
-  color: var(--bs-secondary-color);
-  margin-bottom: 1.25rem;
+
+.text-gold {
+  color: $gold !important;
 }
-@media (max-width: 575.98px) {
-  .connection-list > div {
-    grid-template-columns: 1fr;
-    gap: 0.25rem;
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+// -----------------------------------------------------------------------------
+// Live Pulsing Status Beacon
+// -----------------------------------------------------------------------------
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulse-ring 1.8s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+
+  &.bg-warning {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+    animation: pulse-ring-warning 1.8s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes pulse-ring-warning {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 7px rgba(245, 158, 11, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Header Elements & Actions
+// -----------------------------------------------------------------------------
+.page-title {
+  letter-spacing: -0.02em;
+}
+
+.refresh-btn {
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+}
+
+.spin-active {
+  display: inline-block;
+  animation: spin 0.85s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Alert Icon Boxes
+// -----------------------------------------------------------------------------
+.alert-icon-box {
+  width: 36px;
+  height: 36px;
+}
+
+// -----------------------------------------------------------------------------
+// Main Connection Card
+// -----------------------------------------------------------------------------
+.main-connection-card {
+  background: #ffffff;
+  border: 1px solid $border-light !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 27, 61, 0.05) !important;
+
+  .whatsapp-brand-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// STATE A: CONNECTED DASHBOARD STYLES
+// -----------------------------------------------------------------------------
+.connected-dashboard {
+  .verified-identity-banner {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #ffffff 100%);
+    border: 1px solid $emerald-border;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+
+    .verified-avatar-ring {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+  }
+
+  .credential-tile {
+    background: #f8fafc;
+    border: 1px solid $border-light;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(15, 27, 61, 0.06);
+    }
+
+    .credential-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: $text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .credential-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .btn-copy-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      border: 1px solid $border-light;
+      background: #ffffff;
+      color: $text-muted;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: #f1f5f9;
+        color: $navy;
+        border-color: #cbd5e1;
+      }
+    }
+  }
+
+  .telemetry-bar {
+    background: #f8fafc;
+    border: 1px solid $border-light;
+  }
+
+  .quick-action-card {
+    background: #ffffff;
+    border: 1px solid $border-light;
+    transition: all 0.2s ease;
+
+    .action-icon {
+      width: 44px;
+      height: 44px;
+    }
+
+    &:hover {
+      border-color: $primary-blue;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(15, 27, 61, 0.08);
+
+      i.bi-chevron-right,
+      i.bi-box-arrow-up-right {
+        transform: translateX(2px);
+        color: $primary-blue !important;
+      }
+    }
+
+    i.bi-chevron-right,
+    i.bi-box-arrow-up-right {
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// STATE B: DISCONNECTED / ONBOARDING HUB STYLES
+// -----------------------------------------------------------------------------
+.not-connected-hub {
+  .connect-hero-banner {
+    background: radial-gradient(circle at 50% 0%, rgba(37, 211, 102, 0.08) 0%, rgba(248, 250, 252, 0.8) 70%, #ffffff 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    position: relative;
+    overflow: hidden;
+
+    .max-w-lg {
+      max-width: 38rem;
+    }
+
+    .hero-orb-container {
+      width: 88px;
+      height: 88px;
+
+      .hero-orb-glow {
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        right: -8px;
+        bottom: -8px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(37, 211, 102, 0.4) 0%, rgba(37, 211, 102, 0) 70%);
+        animation: glow-pulse 3s ease-in-out infinite;
+      }
+
+      .hero-orb-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        font-size: 2.75rem;
+      }
+    }
+
+    .btn-whatsapp-cta {
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+      border: none;
+      color: #ffffff;
+      border-radius: 0.75rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+        color: #ffffff;
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+    }
+
+    .security-badge-strip {
+      .bullet-separator {
+        opacity: 0.3;
+      }
+    }
+  }
+
+  .setup-guide-card {
+    background: #ffffff;
+    border: 1px solid $border-light;
+
+    .step-card {
+      background: #f8fafc;
+      border: 1px solid $border-light;
+      padding: 20px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+      }
+
+      .step-badge {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .feature-tile {
+    background: #ffffff;
+    border: 1px solid $border-light;
+    padding: 20px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(15, 27, 61, 0.06);
+      border-color: #cbd5e1;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+    }
+  }
+
+  .faq-section-card {
+    background: #ffffff;
+    border: 1px solid $border-light;
+
+    .faq-item {
+      overflow: hidden;
+      transition: border-color 0.2s ease;
+
+      &:hover {
+        border-color: #cbd5e1;
+      }
+
+      .faq-question-btn {
+        cursor: pointer;
+        outline: none;
+
+        &:focus-visible {
+          background-color: #f1f5f9;
+        }
+      }
+    }
+  }
+}
+
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 0.9;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Responsive Adjustments
+// -----------------------------------------------------------------------------
+@media (max-width: 767.98px) {
+  .whatsapp-settings-container {
+    .connect-hero-banner {
+      padding: 2rem 1.25rem !important;
+    }
+
+    .verified-identity-banner {
+      .text-md-end {
+        text-align: left !important;
+        margin-top: 0.75rem;
+      }
+    }
   }
 }

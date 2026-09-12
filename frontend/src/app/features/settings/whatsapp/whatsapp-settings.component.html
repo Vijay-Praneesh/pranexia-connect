@@ -1,84 +1,615 @@
-<section class="settings-page" aria-labelledby="whatsapp-title">
-  <header class="mb-4">
-    <p class="text-body-secondary small mb-1">Settings</p>
-    <h1 id="whatsapp-title" class="h3 mb-2">WhatsApp Business</h1>
-    <p class="text-body-secondary mb-0">
-      Connect your WhatsApp Business account to start sending campaigns.
-    </p>
-  </header>
-  @if (successMessage) {
-    <div class="alert alert-success" role="status">{{ successMessage }}</div>
-  }
-  @if (loading) {
-    <app-loading-state message="Checking WhatsApp connection..." />
-  } @else if (errorMessage && !connection) {
-    <app-error-state
-      title="WhatsApp connection unavailable"
-      [message]="errorMessage"
-      [retryable]="true"
-      (retry)="load()"
-    />
-  } @else {
-    <article class="card border-0 shadow-sm connection-card">
-      <div class="card-body p-4">
-        <div
-          class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4"
-        >
-          <div>
-            <h2 class="h5 mb-1">WhatsApp Business</h2>
-            <p class="text-body-secondary mb-0">Your company connection</p>
-          </div>
-          <app-status-badge [status]="status" />
-        </div>
-        @if (status === "CONNECTED" && connection) {
-          <dl class="connection-list mb-4">
-            <div>
-              <dt>Business Account</dt>
-              <dd>{{ connection.verifiedName || connection.wabaId }}</dd>
-            </div>
-            <div>
-              <dt>Phone Number</dt>
-              <dd>
-                {{ connection.displayPhoneNumber || connection.phoneNumberId }}
-              </dd>
-            </div>
-            <div>
-              <dt>Connected</dt>
-              <dd>{{ connection.connectedAt | date: "medium" }}</dd>
-            </div>
-          </dl>
-          <button
-            class="btn btn-outline-danger"
-            type="button"
-            (click)="disconnect()"
-            [disabled]="actionLoading"
-          >
-            <i class="bi bi-link-45deg me-1" aria-hidden="true"></i
-            >{{ actionLoading ? "Disconnecting..." : "Disconnect" }}
-          </button>
-        } @else {
-          <div class="not-connected">
-            <i class="bi bi-whatsapp" aria-hidden="true"></i>
-            <p>
-              Connect your WhatsApp Business account to start sending campaigns.
-            </p>
-            <button
-              class="btn btn-primary"
-              type="button"
-              (click)="connect()"
-              [disabled]="actionLoading"
-            >
-              <i class="bi bi-link-45deg me-1" aria-hidden="true"></i
-              >{{ actionLoading ? "Connecting..." : "Connect WhatsApp" }}
-            </button>
-          </div>
-        }
-        @if (errorMessage) {
-          <div class="alert alert-warning mt-4 mb-0" role="alert">
-            {{ errorMessage }}
-          </div>
+<section class="whatsapp-settings-container container-fluid px-0" aria-labelledby="whatsapp-title">
+  <!-- ===================================================================== -->
+  <!-- 01: PAGE HEADER & EXECUTIVE TITLE BAR                                 -->
+  <!-- ===================================================================== -->
+  <header class="page-header d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div class="header-text-block">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <span
+          class="badge rounded-pill bg-emerald-subtle text-emerald border border-emerald-subtle px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+          <i class="bi bi-whatsapp"></i>
+          <span>Meta Cloud API v20.0</span>
+        </span>
+
+        @if (status === 'CONNECTED' && connection) {
+        <span
+          class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+          <span class="pulse-dot bg-success"></span>
+          <span>Live &amp; Operational</span>
+        </span>
+        } @else if (status === 'CONNECTING') {
+        <span
+          class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+          <span class="pulse-dot bg-warning"></span>
+          <span>Handshake in Progress</span>
+        </span>
         }
       </div>
-    </article>
+
+      <h1 id="whatsapp-title" class="h2 page-title fw-bold text-navy mb-1">WhatsApp Business</h1>
+      <p class="text-body-secondary mb-0">
+        Connect your WhatsApp Business account to start sending campaigns.
+      </p>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <button class="btn btn-outline-secondary d-inline-flex align-items-center gap-1.5 shadow-sm fw-medium refresh-btn"
+        type="button" (click)="refresh()" [disabled]="loading || actionLoading"
+        title="Refresh WhatsApp connection status" aria-label="Refresh WhatsApp status">
+        <i class="bi bi-arrow-clockwise fs-5" [class.spin-active]="loading"></i>
+        <span>{{ loading ? 'Checking…' : 'Sync Status' }}</span>
+      </button>
+
+      <a href="https://developers.facebook.com/docs/whatsapp/cloud-api" target="_blank" rel="noopener noreferrer"
+        class="btn btn-outline-primary d-inline-flex align-items-center gap-1.5 shadow-sm fw-medium">
+        <i class="bi bi-box-arrow-up-right"></i>
+        <span>Meta Docs</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- 02: NOTIFICATION & ALERT BANNERS                                      -->
+  <!-- ===================================================================== -->
+  @if (successMessage) {
+  <div
+    class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center gap-3 p-3.5"
+    role="status">
+    <div
+      class="alert-icon-box bg-success text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0">
+      <i class="bi bi-check-lg fs-5"></i>
+    </div>
+    <div class="flex-grow-1 fw-medium">{{ successMessage }}</div>
+    <button type="button" class="btn-close" (click)="successMessage = ''" aria-label="Close"></button>
+  </div>
+  }
+
+  @if (errorMessage && connection) {
+  <div
+    class="alert alert-warning alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center gap-3 p-3.5"
+    role="alert">
+    <div
+      class="alert-icon-box bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center flex-shrink-0">
+      <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    </div>
+    <div class="flex-grow-1 fw-medium">{{ errorMessage }}</div>
+    <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+  </div>
+  }
+
+  <!-- ===================================================================== -->
+  <!-- 03: FULL LOADING & ERROR STATES                                       -->
+  <!-- ===================================================================== -->
+  @if (loading && !connection) {
+  <div class="card border-0 shadow-sm rounded-4 p-5 text-center my-4">
+    <app-loading-state message="Verifying WhatsApp Cloud API connection status…" />
+  </div>
+  } @else if (errorMessage && !connection) {
+  <div class="card border-0 shadow-sm rounded-4 p-4 my-4">
+    <app-error-state title="WhatsApp connection unavailable" [message]="errorMessage" [retryable]="true"
+      (retry)="load()" />
+  </div>
+  } @else {
+  <!-- ===================================================================== -->
+  <!-- 04: MAIN CONNECTION COMMAND CARD                                      -->
+  <!-- ===================================================================== -->
+  <div class="card border-0 shadow-sm rounded-4 main-connection-card overflow-hidden mb-4">
+    <!-- Card Header Strip -->
+    <div
+      class="card-header bg-white border-bottom p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="whatsapp-brand-avatar d-flex align-items-center justify-content-center flex-shrink-0">
+          <i class="bi bi-whatsapp fs-3"></i>
+        </div>
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <h2 class="h5 fw-bold text-navy mb-0">WhatsApp Business</h2>
+            @if (status === 'CONNECTED') {
+            <span class="badge bg-emerald-subtle text-emerald rounded-pill px-2.5 py-0.5 small fw-semibold">
+              <i class="bi bi-patch-check-fill me-1"></i>Official API
+            </span>
+            }
+          </div>
+          <p class="text-body-secondary small mb-0">Your company connection &amp; Cloud API gateway</p>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2.5">
+        <app-status-badge [status]="status" />
+      </div>
+    </div>
+
+    <!-- Card Body -->
+    <div class="card-body p-4 p-xl-4.5">
+      <!-- ================================================================= -->
+      <!-- STATE A: CONNECTED ACTIVE DASHBOARD                               -->
+      <!-- ================================================================= -->
+      @if (status === 'CONNECTED' && connection) {
+      <div class="connected-dashboard">
+        <!-- Top Verified Identity Banner -->
+        <div class="verified-identity-banner p-3.5 p-md-4 rounded-4 mb-4">
+          <div class="row g-3 align-items-center justify-content-between">
+            <div class="col-12 col-md-7">
+              <div class="d-flex align-items-center gap-3">
+                <div
+                  class="verified-avatar-ring bg-emerald text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm">
+                  <i class="bi bi-shield-check fs-3"></i>
+                </div>
+                <div>
+                  <div class="d-flex align-items-center gap-2">
+                    <h3 class="h5 fw-extrabold text-navy mb-0">
+                      {{ connection.verifiedName || connection.wabaId }}
+                    </h3>
+                    <i class="bi bi-patch-check-fill text-emerald fs-5" title="Verified WhatsApp Business"></i>
+                  </div>
+                  <span class="text-emerald fw-semibold small d-inline-flex align-items-center gap-1 mt-0.5">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Meta Cloud API Channel Active</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-5 text-md-end">
+              <div class="d-inline-flex flex-column align-items-md-end">
+                <span class="text-muted small">Registered Phone Number</span>
+                <span class="fs-5 fw-bold text-navy d-inline-flex align-items-center gap-1.5">
+                  <i class="bi bi-telephone-fill text-emerald small"></i>
+                  <span>{{ connection.displayPhoneNumber || connection.phoneNumberId }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Credentials & Parameters Grid -->
+        <div class="row g-3 mb-4">
+          <!-- Business Account Details -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="credential-tile p-3.5 rounded-3 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-flex align-items-center justify-content-between mb-1.5">
+                  <span class="credential-label">Business Account</span>
+                  <i class="bi bi-building text-muted"></i>
+                </div>
+                <div class="credential-value text-navy text-truncate"
+                  title="{{ connection.verifiedName || connection.wabaId }}">
+                  {{ connection.verifiedName || connection.wabaId }}
+                </div>
+              </div>
+              <small class="text-muted mt-2 d-block">Meta Verified Profile</small>
+            </div>
+          </div>
+
+          <!-- Phone Number Details -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="credential-tile p-3.5 rounded-3 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-flex align-items-center justify-content-between mb-1.5">
+                  <span class="credential-label">Phone Number</span>
+                  <i class="bi bi-phone text-muted"></i>
+                </div>
+                <div class="credential-value text-navy text-truncate">
+                  {{ connection.displayPhoneNumber || connection.phoneNumberId }}
+                </div>
+              </div>
+              <small class="text-muted mt-2 d-block">Display Sender ID</small>
+            </div>
+          </div>
+
+          <!-- WABA ID with Copy -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="credential-tile p-3.5 rounded-3 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-flex align-items-center justify-content-between mb-1.5">
+                  <span class="credential-label">WABA ID</span>
+                  <button type="button" class="btn-copy-chip" (click)="copyToClipboard(connection.wabaId, 'wabaId')"
+                    title="Copy WABA ID" aria-label="Copy WABA ID">
+                    <i class="bi" [ngClass]="copiedField === 'wabaId' ? 'bi-check2 text-emerald' : 'bi-copy'"></i>
+                    <span>{{ copiedField === 'wabaId' ? 'Copied' : 'Copy' }}</span>
+                  </button>
+                </div>
+                <div class="credential-value font-monospace text-navy text-truncate" title="{{ connection.wabaId }}">
+                  {{ connection.wabaId }}
+                </div>
+              </div>
+              <small class="text-muted mt-2 d-block">WhatsApp Business Account ID</small>
+            </div>
+          </div>
+
+          <!-- Phone Number ID with Copy -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="credential-tile p-3.5 rounded-3 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-flex align-items-center justify-content-between mb-1.5">
+                  <span class="credential-label">Phone Number ID</span>
+                  <button type="button" class="btn-copy-chip"
+                    (click)="copyToClipboard(connection.phoneNumberId, 'phoneId')" title="Copy Phone Number ID"
+                    aria-label="Copy Phone Number ID">
+                    <i class="bi" [ngClass]="copiedField === 'phoneId' ? 'bi-check2 text-emerald' : 'bi-copy'"></i>
+                    <span>{{ copiedField === 'phoneId' ? 'Copied' : 'Copy' }}</span>
+                  </button>
+                </div>
+                <div class="credential-value font-monospace text-navy text-truncate"
+                  title="{{ connection.phoneNumberId }}">
+                  {{ connection.phoneNumberId }}
+                </div>
+              </div>
+              <small class="text-muted mt-2 d-block">Meta Graph Sender ID</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connection Telemetry & Connected Timestamp Bar -->
+        <div
+          class="telemetry-bar p-3.5 rounded-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+          <div class="d-flex flex-wrap align-items-center gap-4">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-calendar-check text-emerald fs-5"></i>
+              <div>
+                <span class="d-block small text-muted">Connected Since</span>
+                <strong class="text-navy small">{{ connection.connectedAt | date: 'medium' }}</strong>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-activity text-primary fs-5"></i>
+              <div>
+                <span class="d-block small text-muted">Webhook Delivery</span>
+                <strong class="text-success small">Subscribed &amp; Active</strong>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-shield-lock text-navy fs-5"></i>
+              <div>
+                <span class="d-block small text-muted">Data Encryption</span>
+                <strong class="text-navy small">256-bit TLS Gateway</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Disconnect Trigger Button -->
+          <button
+            class="btn btn-outline-danger d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm fw-semibold px-3 py-2"
+            type="button" (click)="openDisconnectModal()" [disabled]="actionLoading">
+            <i class="bi bi-link-45deg fs-5" aria-hidden="true"></i>
+            <span>{{ actionLoading ? 'Disconnecting…' : 'Disconnect' }}</span>
+          </button>
+        </div>
+
+        <!-- Quick Action Hub for Connected State -->
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <a routerLink="/templates"
+              class="quick-action-card p-3.5 rounded-3 d-flex align-items-center gap-3 text-decoration-none">
+              <div
+                class="action-icon bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
+                <i class="bi bi-file-earmark-text fs-4"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-bold text-navy small">Sync &amp; Manage Templates</div>
+                <small class="text-muted">Review Meta-approved message formats</small>
+              </div>
+              <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <a routerLink="/campaigns"
+              class="quick-action-card p-3.5 rounded-3 d-flex align-items-center gap-3 text-decoration-none">
+              <div
+                class="action-icon bg-emerald-subtle text-emerald rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
+                <i class="bi bi-megaphone fs-4"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-bold text-navy small">Launch New Campaign</div>
+                <small class="text-muted">Broadcast interactive messages</small>
+              </div>
+              <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <a href="https://business.facebook.com/wa/manage/phone-numbers/" target="_blank" rel="noopener noreferrer"
+              class="quick-action-card p-3.5 rounded-3 d-flex align-items-center gap-3 text-decoration-none">
+              <div
+                class="action-icon bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
+                <i class="bi bi-gear fs-4"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-bold text-navy small">Meta Business Manager</div>
+                <small class="text-muted">Manage profile, payment &amp; limits</small>
+              </div>
+              <i class="bi bi-box-arrow-up-right text-muted"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      } @else {
+      <!-- ================================================================= -->
+      <!-- STATE B: DISCONNECTED / ONBOARDING COMMAND HUB                   -->
+      <!-- ================================================================= -->
+      <div class="not-connected-hub">
+        <!-- Hero Connect Banner -->
+        <div class="connect-hero-banner p-4 p-md-5 rounded-4 text-center mb-4">
+          <h2 class="h3 fw-extrabold text-navy mb-2">
+            Connect Official WhatsApp Cloud API
+          </h2>
+          <p class="text-body-secondary max-w-lg mx-auto mb-4">
+            Connect your WhatsApp Business account to start sending campaigns.
+            Enjoy seamless Meta Embedded Signup with high delivery rates, verified sender badge, and direct Cloud API
+            integration.
+          </p>
+
+          <div class="d-flex flex-column flex-sm-row align-items-center justify-content-center gap-3 mb-4">
+            <button
+              class="btn btn-whatsapp-cta btn-lg d-inline-flex align-items-center justify-content-center gap-2 px-4 py-3 shadow-md fw-bold"
+              type="button" (click)="connect()" [disabled]="actionLoading">
+              @if (actionLoading) {
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span>Connecting…</span>
+              } @else {
+              <i class="bi bi-whatsapp fs-5" aria-hidden="true"></i>
+              <span>Connect WhatsApp</span>
+              }
+            </button>
+          </div>
+
+          <div
+            class="d-inline-flex flex-wrap align-items-center justify-content-center gap-3 text-muted small security-badge-strip">
+            <span class="d-inline-flex align-items-center gap-1">
+              <i class="bi bi-shield-check text-emerald"></i>
+              <span>Official Meta Partner</span>
+            </span>
+            <span class="bullet-separator">•</span>
+            <span class="d-inline-flex align-items-center gap-1">
+              <i class="bi bi-lock-fill text-emerald"></i>
+              <span>End-to-End Encryption</span>
+            </span>
+            <span class="bullet-separator">•</span>
+            <span class="d-inline-flex align-items-center gap-1">
+              <i class="bi bi-lightning-charge-fill text-emerald"></i>
+              <span>Instant 60s Setup</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Visual 3-Step Guided Track -->
+        <div class="setup-guide-card p-4 rounded-4 mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-3.5">
+            <div>
+              <h3 class="h6 fw-bold text-navy mb-0">How Connection Works</h3>
+              <small class="text-muted">3 quick steps to activate your official WhatsApp channel</small>
+            </div>
+            <span class="badge bg-navy text-white rounded-pill px-3 py-1 text-uppercase tracking-wider small">
+              Quick Flow
+            </span>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <div class="step-card rounded-3 h-100">
+                <div
+                  class="step-badge bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold mb-2.5">
+                  1
+                </div>
+                <div class="fw-bold text-navy small mb-1">Authenticate with Meta</div>
+                <p class="text-muted small mb-0">
+                  Sign in with your Facebook account and select your Meta Business Portfolio.
+                </p>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <div class="step-card rounded-3 h-100">
+                <div
+                  class="step-badge bg-emerald text-white rounded-circle d-flex align-items-center justify-content-center fw-bold mb-2.5">
+                  2
+                </div>
+                <div class="fw-bold text-navy small mb-1">Select or Create WABA</div>
+                <p class="text-muted small mb-0">
+                  Choose your WhatsApp Business Profile and verify your business phone number.
+                </p>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <div class="step-card rounded-3 h-100">
+                <div
+                  class="step-badge bg-gold text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold mb-2.5">
+                  3
+                </div>
+                <div class="fw-bold text-navy small mb-1">Broadcast &amp; Engage</div>
+                <p class="text-muted small mb-0">
+                  Sync pre-approved interactive templates and launch scheduled campaigns immediately.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature & Capability Showcase Grid -->
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="feature-tile rounded-3 h-100">
+              <div
+                class="feature-icon bg-emerald-subtle text-emerald rounded-3 d-flex align-items-center justify-content-center mb-2.5">
+                <i class="bi bi-speedometer fs-4"></i>
+              </div>
+              <div class="fw-bold text-navy small mb-1">High-Throughput Delivery</div>
+              <p class="text-muted small mb-0">
+                Direct Meta Cloud API pipeline with 99.9% uptime and high message delivery throughput.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="feature-tile rounded-3 h-100">
+              <div
+                class="feature-icon bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center mb-2.5">
+                <i class="bi bi-chat-heart fs-4"></i>
+              </div>
+              <div class="fw-bold text-navy small mb-1">Interactive Rich Media</div>
+              <p class="text-muted small mb-0">
+                Broadcast CTA buttons, quick replies, catalog links, images, video, and PDF documents.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="feature-tile rounded-3 h-100">
+              <div
+                class="feature-icon bg-info-subtle text-info rounded-3 d-flex align-items-center justify-content-center mb-2.5">
+                <i class="bi bi-graph-up-arrow fs-4"></i>
+              </div>
+              <div class="fw-bold text-navy small mb-1">Real-time Webhook Tracking</div>
+              <p class="text-muted small mb-0">
+                Instant delivery telemetry for Sent, Delivered, Read, and Failed message statuses.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-lg-3">
+            <div class="feature-tile rounded-3 h-100">
+              <div
+                class="feature-icon bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center mb-2.5">
+                <i class="bi bi-shield-lock-fill fs-4"></i>
+              </div>
+              <div class="fw-bold text-navy small mb-1">Enterprise Compliance</div>
+              <p class="text-muted small mb-0">
+                Compliant with Meta Commerce Policies and eligible for Official Business Verification.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapsible FAQ Accordion -->
+        <div class="faq-section-card p-4 rounded-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-question-circle-fill text-primary fs-5"></i>
+            <h3 class="h6 fw-bold text-navy mb-0">Frequently Asked Questions</h3>
+          </div>
+
+          <div class="faq-list d-flex flex-column gap-2">
+            <!-- FAQ 1 -->
+            <div class="faq-item rounded-3 border">
+              <button type="button"
+                class="faq-question-btn p-3 w-100 text-start d-flex align-items-center justify-content-between border-0 bg-transparent"
+                (click)="toggleFaq('faq1')">
+                <span class="fw-semibold text-navy small">What do I need before connecting WhatsApp Business?</span>
+                <i class="bi text-muted" [ngClass]="openFaqs['faq1'] ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+              </button>
+              @if (openFaqs['faq1']) {
+              <div class="faq-answer-body p-3 pt-0 text-muted small border-top bg-light">
+                You will need an active Facebook account with admin permissions to a Meta Business Manager, and a phone
+                number that is not currently registered with any personal WhatsApp app.
+              </div>
+              }
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="faq-item rounded-3 border">
+              <button type="button"
+                class="faq-question-btn p-3 w-100 text-start d-flex align-items-center justify-content-between border-0 bg-transparent"
+                (click)="toggleFaq('faq2')">
+                <span class="fw-semibold text-navy small">Can I use my existing personal WhatsApp phone number?</span>
+                <i class="bi text-muted" [ngClass]="openFaqs['faq2'] ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+              </button>
+              @if (openFaqs['faq2']) {
+              <div class="faq-answer-body p-3 pt-0 text-muted small border-top bg-light">
+                A phone number can only be registered to one WhatsApp service at a time. If your number is currently
+                linked to WhatsApp on your mobile phone, you must delete or migrate the consumer account before
+                connecting it to the Cloud API.
+              </div>
+              }
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="faq-item rounded-3 border">
+              <button type="button"
+                class="faq-question-btn p-3 w-100 text-start d-flex align-items-center justify-content-between border-0 bg-transparent"
+                (click)="toggleFaq('faq3')">
+                <span class="fw-semibold text-navy small">How are messaging limits and quality rating determined?</span>
+                <i class="bi text-muted" [ngClass]="openFaqs['faq3'] ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+              </button>
+              @if (openFaqs['faq3']) {
+              <div class="faq-answer-body p-3 pt-0 text-muted small border-top bg-light">
+                Meta automatically manages your messaging tier starting at Tier 1 (1,000 unique recipients per 24
+                hours). As your sending quality remains high, Meta automatically upgrades your limits to Tier 2 (10k),
+                Tier 3 (100k), and Unlimited.
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- ===================================================================== -->
+  <!-- 05: DISCONNECT CONFIRMATION SAFETY MODAL                              -->
+  <!-- ===================================================================== -->
+  @if (showDisconnectModal) {
+    <div class="modal fade show d-block modal-glass-backdrop" tabindex="-1" role="dialog" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden modal-cool-card">
+          <!-- Light Header with Squircle Glow Icon -->
+          <div class="modal-header bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+              <div class="modal-glow-icon bg-danger-subtle text-danger rounded-4 d-flex align-items-center justify-content-center flex-shrink-0">
+                <i class="bi bi-exclamation-triangle-fill fs-4 text-danger"></i>
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge bg-danger-subtle text-danger rounded-pill px-2.5 py-0.5 small fw-bold">SAFETY CHECK</span>
+                </div>
+                <h5 class="modal-title fw-extrabold text-navy mb-0 fs-5">Disconnect WhatsApp?</h5>
+                <small class="text-body-secondary">Confirm official account disconnection</small>
+              </div>
+            </div>
+            <button type="button" class="btn-close-circle" (click)="closeDisconnectModal()" aria-label="Close">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body p-4">
+            <p class="text-navy fw-semibold mb-3">
+              Are you sure you want to disconnect your WhatsApp Business Account?
+            </p>
+            <div class="alert alert-warning border border-warning-subtle rounded-3 small mb-0 p-3 shadow-2xs">
+              <ul class="mb-0 ps-3 d-flex flex-column gap-1.5">
+                <li>Active and scheduled campaigns will be paused.</li>
+                <li>Incoming customer webhook messages will not be received.</li>
+                <li>You can reconnect anytime using Meta Embedded Signup.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="modal-footer border-top bg-surface-subtle px-4 py-3 d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-outline-secondary fw-semibold rounded-3 px-3.5 py-2" (click)="closeDisconnectModal()">
+              Keep Connected
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger fw-bold rounded-3 px-4 py-2 shadow-sm d-inline-flex align-items-center gap-2"
+              (click)="confirmDisconnect()"
+              [disabled]="actionLoading"
+            >
+              @if (actionLoading) {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Disconnecting…</span>
+              } @else {
+                <i class="bi bi-link-45deg fs-5"></i>
+                <span>Disconnect Now</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   }
 </section>

@@ -230,6 +230,82 @@ export class SubscriptionComponent implements OnInit {
     return fromPricing?.limits || {};
   }
 
+  getFormattedPlanLimits(planName: PlanTier): Array<{
+    key: string;
+    label: string;
+    valueFormatted: string;
+    icon: string;
+    iconBgClass: string;
+  }> {
+    const limits = this.getPlanLimits(planName);
+    const configs = [
+      {
+        key: 'MONTHLY_MESSAGES',
+        label: 'Monthly Messages',
+        icon: 'bi-whatsapp',
+        iconBgClass: 'bg-emerald-subtle text-emerald',
+      },
+      {
+        key: 'MONTHLY_CAMPAIGNS',
+        label: 'Monthly Campaigns',
+        icon: 'bi-megaphone-fill',
+        iconBgClass: 'bg-primary-subtle text-primary',
+      },
+      {
+        key: 'CUSTOMERS',
+        label: 'Contacts / Customers',
+        icon: 'bi-people-fill',
+        iconBgClass: 'bg-indigo-subtle text-indigo',
+      },
+      {
+        key: 'TEMPLATES',
+        label: 'Approved Templates',
+        icon: 'bi-file-earmark-text-fill',
+        iconBgClass: 'bg-primary-subtle text-primary',
+      },
+      {
+        key: 'MEDIA_STORAGE_BYTES',
+        label: 'Media Storage',
+        icon: 'bi-database-fill',
+        iconBgClass: 'bg-warning-subtle text-warning-emphasis',
+        isBytes: true,
+      },
+      {
+        key: 'MONTHLY_MEDIA_UPLOADS',
+        label: 'Monthly Uploads',
+        icon: 'bi-cloud-arrow-up-fill',
+        iconBgClass: 'bg-primary-subtle text-primary',
+      },
+      {
+        key: 'TEAM_MEMBERS',
+        label: 'Team Members',
+        icon: 'bi-person-badge-fill',
+        iconBgClass: 'bg-secondary-subtle text-secondary',
+      },
+      {
+        key: 'WHATSAPP_CONNECTIONS',
+        label: 'WhatsApp Numbers',
+        icon: 'bi-whatsapp',
+        iconBgClass: 'bg-emerald-subtle text-emerald',
+      },
+    ];
+
+    return configs.map((cfg) => {
+      const val = limits[cfg.key];
+      let valFormatted = 'Unlimited';
+      if (val !== null && val !== undefined) {
+        valFormatted = cfg.isBytes ? this.formatBytes(val) : val.toLocaleString();
+      }
+      return {
+        key: cfg.key,
+        label: cfg.label,
+        valueFormatted: valFormatted,
+        icon: cfg.icon,
+        iconBgClass: cfg.iconBgClass,
+      };
+    });
+  }
+
   getPlanHighlights(planName: PlanTier): string[] {
     const limits = this.getPlanLimits(planName);
     const msg = limits['MONTHLY_MESSAGES'] !== null ? `${limits['MONTHLY_MESSAGES']?.toLocaleString()} WhatsApp messages / mo` : 'Unlimited WhatsApp messages';

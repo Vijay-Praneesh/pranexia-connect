@@ -1,6 +1,6 @@
 // =============================================================================
 // Seyyon Connect — Plans & Billing Command Center Styles
-// Color Palette: Deep Navy #0F1B3D, Blue #2563EB, Indigo #4338CA, Gold #F4B728
+// Color Palette: Deep Navy #0F1B3D, Blue #2563EB, Indigo #4338CA, Gold #F4B728, Emerald #10B981
 // =============================================================================
 
 $navy: #0f1b3d;
@@ -10,6 +10,7 @@ $primary-hover: #1d4ed8;
 $indigo: #4338ca;
 $indigo-accent: #6366f1;
 $gold: #f4b728;
+$emerald: #10b981;
 $text-dark: #172033;
 $text-muted: #64748b;
 $border-light: #e2e8f0;
@@ -17,12 +18,13 @@ $surface-subtle: #f8fafc;
 $surface-hover: #f1f5f9;
 
 .subscription-command-center {
-  padding-bottom: 2.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 4rem;
   color: $text-dark;
 }
 
 // -----------------------------------------------------------------------------
-// Typography & Colors
+// Typography & Utility Tokens
 // -----------------------------------------------------------------------------
 .text-navy {
   color: $navy !important;
@@ -30,6 +32,18 @@ $surface-hover: #f1f5f9;
 
 .text-gold {
   color: $gold !important;
+}
+
+.text-indigo {
+  color: $indigo-accent !important;
+}
+
+.text-emerald {
+  color: #059669 !important;
+}
+
+.bg-emerald-subtle {
+  background-color: #d1fae5 !important;
 }
 
 .bg-navy {
@@ -40,24 +54,40 @@ $surface-hover: #f1f5f9;
   background-color: $gold !important;
 }
 
-.btn-gold {
-  background-color: $gold;
-  border-color: $gold;
-  color: #0f1b3d;
-
-  &:hover {
-    background-color: darken($gold, 6%);
-    border-color: darken($gold, 6%);
-    color: #0a1229;
-  }
-}
-
 .bg-surface-subtle {
   background-color: $surface-subtle !important;
 }
 
+.bg-indigo-subtle {
+  background-color: #eef2ff !important;
+}
+
+.shadow-2xs {
+  box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04) !important;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 3px rgba(15, 27, 61, 0.08) !important;
+}
+
+.btn-gold {
+  background-color: $gold !important;
+  border-color: $gold !important;
+  color: #0f1b3d !important;
+  font-weight: 700;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: darken($gold, 8%) !important;
+    border-color: darken($gold, 8%) !important;
+    color: #0a1229 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(244, 183, 40, 0.35);
+  }
+}
+
 .tracking-wider {
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em !important;
 }
 
 .cursor-pointer {
@@ -65,50 +95,173 @@ $surface-hover: #f1f5f9;
 }
 
 // -----------------------------------------------------------------------------
-// Header Elements
+// Header Elements & Actions Bar
 // -----------------------------------------------------------------------------
-.page-title {
-  letter-spacing: -0.02em;
-}
+.subscription-header {
+  .page-title {
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    font-weight: 800;
+    color: $navy;
+    margin-bottom: 0.5rem;
+  }
 
-.action-btn {
-  font-size: 0.875rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
+  .action-btn {
+    font-size: 0.875rem;
+    height: 42px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    border: 1px solid $border-light;
 
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
+    i {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    &.btn-outline-primary {
+      color: $primary-blue;
+      border-color: #bfdbfe;
+      background-color: #ffffff;
+
+      i {
+        color: $primary-blue;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: $primary-blue !important;
+        border-color: $primary-blue !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+
+        i,
+        span {
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    &.btn-success {
+      background-color: #059669;
+      border-color: #059669;
+      color: #ffffff;
+
+      &:hover:not(:disabled) {
+        background-color: #047857;
+        border-color: #047857;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+      }
+    }
+
+    &.btn-outline-secondary {
+      color: #475569;
+      border-color: $border-light;
+      background-color: #ffffff;
+
+      i {
+        color: #475569;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: $navy !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(15, 27, 61, 0.06);
+
+        i,
+        span {
+          color: $navy !important;
+        }
+      }
+    }
+
+    &.icon-only-btn {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+    }
   }
 }
 
-.icon-only-btn {
-  width: 38px;
-  height: 38px;
-}
-
 // -----------------------------------------------------------------------------
-// Current Plan Hero Command Banner
+// Executive Current Plan Hero Command Banner
 // -----------------------------------------------------------------------------
 .current-plan-hero {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  box-shadow: 0 4px 20px -2px rgba(15, 27, 61, 0.04) !important;
+  background: radial-gradient(circle at 92% 50%, rgba(219, 234, 254, 0.65) 0%, rgba(238, 242, 255, 0.35) 45%, rgba(255, 255, 255, 0) 75%),
+    linear-gradient(105deg, #ffffff 0%, #f7faff 60%, #edf3fe 100%) !important;
+  border: 1px solid rgba(219, 234, 254, 0.95) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 27, 61, 0.04), 0 1px 3px rgba(15, 27, 61, 0.02) !important;
+  position: relative;
+  transition: all 0.25s ease;
+
+  .card-body {
+    padding: 1.75rem 2rem !important;
+  }
 
   .plan-hero-icon {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #eff6ff;
+    color: $primary-blue;
+    border: 1px solid rgba(199, 210, 254, 0.6);
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+  }
+
+  .hero-eyebrow {
+    font-size: 0.725rem;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .hero-plan-tagline-text {
+    font-size: 0.825rem;
+    color: #475569;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    i {
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+  }
+
+  .progress {
+    background-color: rgba(219, 234, 254, 0.5);
+    height: 7px !important;
+
+    .progress-bar {
+      background-color: $primary-blue;
+    }
   }
 }
 
 @media (min-width: 992px) {
-  .border-start-lg {
-    border-left: 1px solid $border-light !important;
-    padding-left: 1.5rem !important;
-  }
-  .border-end-lg {
-    border-right: 1px solid $border-light !important;
-    padding-right: 1.5rem !important;
+  .hero-divider-col {
+    border-left: 1px solid rgba(219, 234, 254, 0.9) !important;
+    border-right: 1px solid rgba(219, 234, 254, 0.9) !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
   }
 }
 
@@ -118,7 +271,18 @@ $surface-hover: #f1f5f9;
 .billing-interval-selector-wrapper {
   .interval-toggle-btn {
     transition: all 0.2s ease;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.55rem 1.35rem;
+    border: none;
+    background: transparent;
+    color: #64748b;
+
+    &.active-interval {
+      background-color: $primary-blue !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    }
   }
 }
 
@@ -128,20 +292,25 @@ $surface-hover: #f1f5f9;
 .pricing-tier-card {
   background: #ffffff;
   border: 1px solid $border-light !important;
+  border-radius: 1.1rem !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  .card-body {
+    padding: 1.75rem !important;
+  }
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 28px -4px rgba(15, 27, 61, 0.1) !important;
+    box-shadow: 0 14px 32px -4px rgba(15, 27, 61, 0.1) !important;
   }
 
   &.featured-plan-card {
     border: 2px solid $primary-blue !important;
-    box-shadow: 0 8px 24px -2px rgba(37, 99, 235, 0.12) !important;
+    box-shadow: 0 8px 24px -2px rgba(37, 99, 235, 0.15) !important;
 
     .popular-badge-ribbon {
-      background: rgba(244, 183, 40, 0.15);
-      border-bottom: 1px solid rgba(244, 183, 40, 0.3);
+      background: linear-gradient(135deg, rgba(244, 183, 40, 0.2) 0%, rgba(217, 119, 6, 0.15) 100%);
+      border-bottom: 1px solid rgba(244, 183, 40, 0.35);
     }
   }
 
@@ -160,15 +329,22 @@ $surface-hover: #f1f5f9;
 // Enterprise VIP Full-Width Banner Below
 // -----------------------------------------------------------------------------
 .enterprise-vip-card {
-  background: linear-gradient(135deg, $navy 0%, $navy-dark 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 8px 30px rgba(15, 27, 61, 0.15) !important;
+  background: linear-gradient(135deg, $navy 0%, #1e1b4b 55%, $navy-dark 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 1.1rem !important;
+  box-shadow: 0 8px 30px rgba(15, 27, 61, 0.18) !important;
+
+  .card-body {
+    padding: 2rem 2.25rem !important;
+  }
 
   .btn-outline-light {
     border-color: rgba(255, 255, 255, 0.3);
+
     &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      border-color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.15) !important;
+      border-color: #ffffff !important;
+      color: #ffffff !important;
     }
   }
 }
@@ -179,9 +355,15 @@ $surface-hover: #f1f5f9;
 .plan-comparison-card {
   border: 1px solid $border-light !important;
 
+  .card-header {
+    padding: 1.5rem 1.75rem !important;
+  }
+
   .comparison-table {
-    th, td {
-      padding: 1.1rem 1.25rem;
+
+    th,
+    td {
+      padding: 1.15rem 1.35rem;
       border-color: $border-light;
     }
 
@@ -203,17 +385,172 @@ $surface-hover: #f1f5f9;
 }
 
 // -----------------------------------------------------------------------------
-// Modals Styling
+// Audit & History Tabs Navigation
 // -----------------------------------------------------------------------------
-.plan-modal-icon {
-  width: 42px;
-  height: 42px;
+.nav-pills {
+  .nav-link {
+    font-weight: 600;
+    color: #475569;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+
+    &:hover:not(.active) {
+      background-color: $surface-hover;
+      color: $navy;
+    }
+
+    &.active {
+      background-color: $primary-blue !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+  }
 }
 
-.interval-option {
-  transition: all 0.2s ease;
+// -----------------------------------------------------------------------------
+// Modals Styling (New Cool UI Design System)
+// -----------------------------------------------------------------------------
+.modal-glass-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1055;
+  background-color: rgba(15, 27, 61, 0.65) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: backdropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-cool-card {
+  border-radius: 1.25rem !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow:
+    0 25px 60px -12px rgba(15, 27, 61, 0.28),
+    0 4px 12px rgba(15, 27, 61, 0.08) !important;
+  background-color: #ffffff !important;
+  animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-glow-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.btn-close-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f8fafc;
+  border: 1px solid $border-light;
+  color: $text-muted;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 0.875rem;
+
+  &:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    color: $navy;
+    border-color: #cbd5e1;
+    transform: rotate(90deg) scale(1.05);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.modal-hero-rate-box {
+  background: linear-gradient(135deg, #f8faff 0%, #eff6ff 100%) !important;
+  border: 1px solid #dbeafe !important;
+  border-radius: 1rem !important;
+}
+
+.modal-quota-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.875rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
   &:hover {
-    border-color: $primary-blue !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -2px rgba(15, 27, 61, 0.08) !important;
+    border-color: #cbd5e1;
+  }
+}
+
+.quota-mini-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 0.9rem;
+}
+
+.interval-modal-btn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.2s ease;
+
+  &.active-modal-btn {
+    background-color: $primary-blue !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+  }
+}
+
+.active-interval-card {
+  border: 2px solid $primary-blue !important;
+  background-color: #eff6ff !important;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulseDotAnimation 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseDotAnimation {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -228,6 +565,7 @@ $surface-hover: #f1f5f9;
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

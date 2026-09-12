@@ -1,6 +1,6 @@
 // =============================================================================
 // Seyyon Connect — Usage & Costs Command Center Styles
-// Color Palette: Deep Navy #0F1B3D, Blue #2563EB, Indigo #4338CA, Gold #F4B728
+// Color Palette: Deep Navy #0F1B3D, Blue #2563EB, Indigo #4338CA, Gold #F4B728, Emerald #10B981
 // =============================================================================
 
 $navy: #0f1b3d;
@@ -10,6 +10,7 @@ $primary-hover: #1d4ed8;
 $indigo: #4338ca;
 $indigo-accent: #6366f1;
 $gold: #f4b728;
+$emerald: #10b981;
 $text-dark: #172033;
 $text-muted: #64748b;
 $border-light: #e2e8f0;
@@ -17,12 +18,13 @@ $surface-subtle: #f8fafc;
 $surface-hover: #f1f5f9;
 
 .usage-command-center {
-  padding-bottom: 2rem;
+  padding-top: 0.25rem;
+  padding-bottom: 4rem;
   color: $text-dark;
 }
 
 // -----------------------------------------------------------------------------
-// Typography & Utility Classes
+// Typography & Utility Tokens
 // -----------------------------------------------------------------------------
 .text-navy {
   color: $navy !important;
@@ -34,6 +36,18 @@ $surface-hover: #f1f5f9;
 
 .text-indigo {
   color: $indigo-accent !important;
+}
+
+.text-emerald {
+  color: #059669 !important;
+}
+
+.bg-emerald {
+  background-color: #059669 !important;
+}
+
+.bg-emerald-subtle {
+  background-color: #d1fae5 !important;
 }
 
 .bg-navy {
@@ -48,74 +62,454 @@ $surface-hover: #f1f5f9;
   background-color: #eef2ff !important;
 }
 
+.shadow-2xs {
+  box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04) !important;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 3px rgba(15, 27, 61, 0.08) !important;
+}
+
+.min-w-160 {
+  min-width: 160px;
+}
+
+.min-w-200 {
+  min-width: 200px;
+}
+
 .tracking-wider {
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em !important;
 }
 
 .cursor-pointer {
   cursor: pointer;
 }
 
-// -----------------------------------------------------------------------------
-// Header Elements
-// -----------------------------------------------------------------------------
-.page-title {
-  letter-spacing: -0.02em;
-}
-
-.active-plan-link {
-  transition: all 0.2s ease;
-  &:hover {
-    background-color: $navy-dark !important;
-    transform: translateY(-1px);
+// Flex Gap Assurance Fallbacks
+.d-flex,
+.d-inline-flex {
+  &.gap-1 {
+    gap: 0.25rem !important;
+  }
+  &.gap-1\.5,
+  &.gap-1-5 {
+    gap: 0.375rem !important;
+  }
+  &.gap-2 {
+    gap: 0.5rem !important;
+  }
+  &.gap-3 {
+    gap: 1rem !important;
+  }
+  &.gap-4 {
+    gap: 1.5rem !important;
   }
 }
 
-.period-selector-group {
-  min-width: 220px;
+// -----------------------------------------------------------------------------
+// Live Pulsing Status Beacon
+// -----------------------------------------------------------------------------
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
 
-  .input-group-text {
-    border-color: $border-light;
+  &.bg-success {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse-ring-success 1.8s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
 
-  .form-select {
-    border-color: $border-light;
+  &.bg-info {
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+    animation: pulse-ring-info 1.8s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+
+  &.bg-warning {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+    animation: pulse-ring-warning 1.8s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+
+  &.bg-danger {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    animation: pulse-ring-danger 1.8s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+
+  &.bg-dark {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+    animation: pulse-ring-warning 1.8s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+
+  &.bg-white {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    animation: pulse-ring-danger 1.8s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+}
+
+@keyframes pulse-ring-success {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes pulse-ring-info {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(6, 182, 212, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0);
+  }
+}
+
+@keyframes pulse-ring-warning {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+@keyframes pulse-ring-danger {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Header Elements & Actions Bar
+// -----------------------------------------------------------------------------
+.usage-header {
+  .breadcrumb-link {
+    font-size: 0.8125rem;
+    color: #64748b;
+    font-weight: 500;
+    transition: color 0.15s ease;
+    text-decoration: none;
+
+    i {
+      line-height: 1;
+    }
+
+    &:hover {
+      color: $primary-blue !important;
+    }
+  }
+
+  .page-title {
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    font-weight: 800;
+    color: $navy;
+    margin-bottom: 0.5rem;
+  }
+
+  .period-selector-wrapper {
+    min-width: 260px;
+
+    .input-group {
+      height: 42px;
+    }
+
+    .input-group-text {
+      border-color: $border-light;
+      background-color: #ffffff;
+      padding-left: 0.85rem;
+      padding-right: 0.85rem;
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    .form-select {
+      border-color: $border-light;
+      font-size: 0.875rem;
+      height: 42px;
+      padding-left: 0.5rem;
+
+      &:focus {
+        border-color: $primary-blue;
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+      }
+    }
+  }
+
+  .toolbar-btn {
     font-size: 0.875rem;
+    height: 42px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    border: 1px solid $border-light;
 
-    &:focus {
-      border-color: $primary-blue;
-      box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+    i {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    &.btn-outline-primary {
+      color: $primary-blue;
+      border-color: #bfdbfe;
+      background-color: #ffffff;
+
+      i {
+        color: $primary-blue;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: $primary-blue !important;
+        border-color: $primary-blue !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+
+        i, span {
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    &.btn-outline-success {
+      color: #059669;
+      border-color: #a7f3d0;
+      background-color: #ffffff;
+
+      i {
+        color: #059669;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #059669 !important;
+        border-color: #059669 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+
+        i, span {
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    &.btn-outline-secondary {
+      color: #475569;
+      border-color: $border-light;
+      background-color: #ffffff;
+
+      i {
+        color: #475569;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: $navy !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(15, 27, 61, 0.06);
+
+        i, span {
+          color: $navy !important;
+        }
+      }
+    }
+
+    &.icon-btn {
+      width: 42px;
+      height: 42px;
+      padding: 0;
     }
   }
 }
 
-.action-btn {
-  font-size: 0.875rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
+// -----------------------------------------------------------------------------
+// Executive Period Hero Banner (Matching Exact Reference Design)
+// -----------------------------------------------------------------------------
+.period-hero-banner {
+  background: radial-gradient(circle at 92% 50%, rgba(219, 234, 254, 0.65) 0%, rgba(238, 242, 255, 0.35) 45%, rgba(255, 255, 255, 0) 75%),
+              linear-gradient(105deg, #ffffff 0%, #f7faff 60%, #edf3fe 100%) !important;
+  border: 1px solid rgba(219, 234, 254, 0.95) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 27, 61, 0.04), 0 1px 3px rgba(15, 27, 61, 0.02) !important;
+  position: relative;
+  transition: all 0.25s ease;
 
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
+  .card-body {
+    padding: 1.75rem 2rem !important;
   }
-}
-
-.icon-only-btn {
-  width: 38px;
-  height: 38px;
-}
-
-// -----------------------------------------------------------------------------
-// Hero Context Banner
-// -----------------------------------------------------------------------------
-.period-context-hero {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
-  box-shadow: 0 4px 20px -2px rgba(15, 27, 61, 0.04) !important;
 
   .period-icon-badge {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #eff6ff;
+    color: $primary-blue;
+    border: 1px solid rgba(199, 210, 254, 0.6);
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+  }
+
+  .hero-eyebrow {
+    font-size: 0.725rem;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .cycle-pill-chip {
+    font-size: 0.725rem;
+    font-weight: 600;
+    color: #475569;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    padding: 0.2rem 0.65rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    i {
+      font-size: 0.8rem;
+      line-height: 1;
+    }
+  }
+
+  .hero-date-range {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: $navy;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-plan-tagline-text {
+    font-size: 0.825rem;
+    color: #475569;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    i {
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+  }
+
+  .hero-status-box {
+    min-width: 140px;
+  }
+
+  .status-pill-badge {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    padding: 0.45rem 0.95rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &.status-healthy {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    &.status-info {
+      background-color: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    &.status-warning {
+      background-color: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+
+    &.status-danger {
+      background-color: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+  }
+
+  .btn-hero-cta {
+    background-color: $primary-blue !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 0.65rem 1.4rem;
+    border-radius: 0.65rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    box-shadow: 0 4px 12px -1px rgba(37, 99, 235, 0.35);
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    .hero-cta-arrow {
+      transition: transform 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    &:hover {
+      background-color: $primary-hover !important;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px -2px rgba(37, 99, 235, 0.45);
+
+      .hero-cta-arrow {
+        transform: translateX(3px);
+      }
+    }
   }
 }
 
@@ -126,50 +520,81 @@ $surface-hover: #f1f5f9;
   background: #fffbeb;
   border: 1px solid #fde68a !important;
 
+  .card-body {
+    padding: 1.25rem 1.5rem !important;
+  }
+
   .alert-icon-wrap {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
   }
 }
 
 // -----------------------------------------------------------------------------
-// Metric Quota Cards
+// Clean Metric Quota Cards (3 per row, 3x3 Grid)
 // -----------------------------------------------------------------------------
 .limit-metric-card {
   background: #ffffff;
-  border: 1px solid $border-light !important;
+  border: 1px solid #f1f5f9 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 1px 3px rgba(15, 27, 61, 0.04) !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  .card-body {
+    padding: 1.6rem 1.75rem !important;
+  }
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px -3px rgba(15, 27, 61, 0.08) !important;
+    box-shadow: 0 10px 24px -4px rgba(15, 27, 61, 0.08) !important;
   }
 
   .metric-icon-circle {
-    width: 38px;
-    height: 38px;
-    font-size: 1.1rem;
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      line-height: 1;
+    }
   }
 
-  &.status-over_limit,
-  &.status-exhausted {
-    border-top: 3px solid #ef4444 !important;
+  .metric-title-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $navy;
+    line-height: 1.35;
   }
 
-  &.status-critical {
-    border-top: 3px solid #f59e0b !important;
+  .metric-status-badge {
+    background-color: #059669 !important;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    padding: 0.28rem 0.75rem;
+    border-radius: 9999px;
   }
 
-  &.status-warning {
-    border-top: 3px solid #06b6d4 !important;
+  .usage-numbers {
+    margin: 1.25rem 0 0.85rem 0;
   }
 
-  &.status-normal {
-    border-top: 3px solid $primary-blue !important;
+  .progress {
+    background-color: #f1f5f9;
+    height: 7px !important;
+
+    .progress-bar {
+      background-color: $primary-blue;
+    }
   }
 
   .link-hover {
     transition: color 0.15s ease, transform 0.15s ease;
+
     &:hover {
       color: $primary-hover !important;
       transform: translateX(2px);
@@ -178,21 +603,235 @@ $surface-hover: #f1f5f9;
 }
 
 // -----------------------------------------------------------------------------
-// Meta Cost & WABA Command Card
+// Upgrade Promo Card (9th Card in 3x3 Grid)
+// -----------------------------------------------------------------------------
+.upgrade-promo-card {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%) !important;
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 18px -2px rgba(67, 56, 202, 0.3) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 1.75rem !important;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px -3px rgba(67, 56, 202, 0.4) !important;
+  }
+
+  .promo-crown-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+
+    i {
+      font-size: 1.5rem;
+      color: $gold;
+      line-height: 1;
+    }
+  }
+
+  .promo-btn {
+    background-color: #ffffff !important;
+    color: #4338ca !important;
+    border: none !important;
+    font-size: 0.875rem;
+    font-weight: 700;
+    padding: 0.6rem 1.35rem;
+    border-radius: 9999px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:hover {
+      background-color: #f8fafc !important;
+      transform: scale(1.03);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Meta Cost & WABA Command Card (Stacked Top / Down)
 // -----------------------------------------------------------------------------
 .meta-cost-command-card {
   border: 1px solid $border-light !important;
 
-  .waba-logo-badge {
-    width: 48px;
-    height: 48px;
+  .card-header {
+    padding: 1.5rem 1.75rem !important;
+
+    .sync-graph-btn {
+      background-color: #ffffff;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+
+      i {
+        color: #059669;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #059669 !important;
+        border-color: #059669 !important;
+        color: #ffffff !important;
+
+        i, span {
+          color: #ffffff !important;
+        }
+      }
+    }
   }
 
-  .category-stat-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  .card-body {
+    padding: 1.75rem !important;
+  }
+
+  .waba-logo-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+    color: #059669;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+  }
+
+  .meta-top-box {
+    background: #f8fafc;
+    border: 1px solid $border-light;
+    padding: 1.75rem !important;
+    border-radius: 1rem !important;
+    margin-bottom: 1.5rem !important;
+
+    .meta-cost-content {
+      margin-top: 0.5rem;
+    }
+
+    .meta-direct-billing-badge {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+      padding: 0.45rem 1rem !important;
+      border-radius: 9999px !important;
+      font-size: 0.875rem !important;
+      font-weight: 700 !important;
+      background-color: #eef2ff !important;
+      color: #4f46e5 !important;
+      border: 1px solid #c7d2fe !important;
+      margin-bottom: 0.85rem !important;
+
+      i {
+        font-size: 1.05rem;
+        line-height: 1;
+      }
+    }
+
+    p {
+      font-size: 0.85rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .meta-telemetry-tile {
+      padding: 1.15rem 1.35rem !important;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04);
+    }
+  }
+
+  .meta-bottom-box {
+    background: #f8fafc;
+    border: 1px solid $border-light;
+    padding: 1.75rem !important;
+    border-radius: 1rem !important;
+
+    .meta-bottom-header {
+      margin-bottom: 1.5rem !important;
+    }
+
+    .category-stat-card {
+      background: #ffffff;
+      border: 1px solid $border-light;
+      border-radius: 0.875rem !important;
+      padding: 1.75rem 1.25rem !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      height: 100%;
+      box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(15, 27, 61, 0.08) !important;
+        border-color: #cbd5e1;
+      }
+
+      .category-icon-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.1rem auto;
+        font-size: 1.35rem;
+
+        i {
+          line-height: 1;
+        }
+      }
+
+      .category-stat-number {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: $navy;
+        line-height: 1.1;
+        margin: 0 0 0.5rem 0;
+      }
+
+      .category-stat-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        margin: 0;
+      }
+    }
+
+    .meta-category-info-alert {
+      margin-top: 1.5rem !important;
+      padding: 0.9rem 1.25rem !important;
+      border-radius: 0.75rem !important;
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.75rem !important;
+      font-size: 0.825rem !important;
+      color: #475569 !important;
+
+      i {
+        font-size: 1.15rem;
+        color: $primary-blue;
+        flex-shrink: 0;
+      }
     }
   }
 }
@@ -202,6 +841,14 @@ $surface-hover: #f1f5f9;
 // -----------------------------------------------------------------------------
 .chart-card {
   border: 1px solid $border-light !important;
+
+  .card-header {
+    padding: 1.5rem 1.75rem !important;
+  }
+
+  .card-body {
+    padding: 1.75rem !important;
+  }
 }
 
 .donut-center-badge {
@@ -226,9 +873,14 @@ $surface-hover: #f1f5f9;
 .plan-comparison-card {
   border: 1px solid $border-light !important;
 
+  .card-header {
+    padding: 1.5rem 1.75rem !important;
+  }
+
   .comparison-table {
-    th, td {
-      padding: 1rem 1.25rem;
+    th,
+    td {
+      padding: 1.15rem 1.35rem;
       border-color: $border-light;
     }
 
@@ -255,19 +907,43 @@ $surface-hover: #f1f5f9;
 .history-table-card {
   border: 1px solid $border-light !important;
 
+  .card-header {
+    padding: 1.5rem 1.75rem !important;
+
+    .export-history-btn {
+      background-color: #ffffff;
+      color: #475569;
+      border: 1px solid $border-light;
+
+      i {
+        color: #475569;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: $navy !important;
+
+        i, span {
+          color: $navy !important;
+        }
+      }
+    }
+  }
+
   .history-table {
     th {
       font-size: 0.8125rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.04em;
       color: $text-muted;
-      padding: 1rem 1.25rem;
+      padding: 1.15rem 1.35rem;
       border-bottom: 1px solid $border-light;
     }
 
     td {
-      padding: 1.1rem 1.25rem;
+      padding: 1.15rem 1.35rem;
       border-bottom: 1px solid $border-light;
       font-size: 0.875rem;
     }
@@ -305,20 +981,49 @@ $surface-hover: #f1f5f9;
 // -----------------------------------------------------------------------------
 // Responsive Breakpoints
 // -----------------------------------------------------------------------------
+@media (max-width: 1199.98px) {
+  .usage-header {
+    .header-actions {
+      width: 100%;
+      justify-content: flex-start;
+
+      .period-selector-wrapper {
+        flex: 1 1 250px;
+      }
+
+      .btn-cluster {
+        flex-wrap: wrap;
+      }
+    }
+  }
+}
+
 @media (max-width: 991.98px) {
-  .period-selector-group {
-    width: 100%;
-    min-width: 0;
+  .period-hero-banner {
+    .hero-status-box {
+      text-align: left !important;
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .period-hero-banner {
+    .period-icon-badge {
+      width: 44px;
+      height: 44px;
+      font-size: 1rem;
+    }
+
+    .hero-date-range {
+      font-size: 1.15rem;
+    }
   }
 }
 
 @media (max-width: 575.98px) {
-  .page-header {
-    .d-flex.gap-2\.5 {
+  .period-hero-banner {
+    .btn-hero-cta {
       width: 100%;
-      button, .period-selector-group {
-        flex: 1 1 auto;
-      }
     }
   }
 }

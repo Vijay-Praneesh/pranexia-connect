@@ -352,7 +352,8 @@ export class UsageComponent implements OnInit, OnDestroy, AfterViewChecked {
   getMetricIcon(metric: string): string {
     switch (metric) {
       case 'MONTHLY_MESSAGES':
-        return 'bi-chat-dots';
+      case 'WHATSAPP_CONNECTIONS':
+        return 'bi-whatsapp';
       case 'MONTHLY_CAMPAIGNS':
         return 'bi-megaphone';
       case 'CUSTOMERS':
@@ -360,15 +361,25 @@ export class UsageComponent implements OnInit, OnDestroy, AfterViewChecked {
       case 'TEMPLATES':
         return 'bi-file-earmark-text';
       case 'MEDIA_STORAGE_BYTES':
-        return 'bi-hdd-network';
+        return 'bi-database';
       case 'MONTHLY_MEDIA_UPLOADS':
         return 'bi-cloud-arrow-up';
       case 'TEAM_MEMBERS':
-        return 'bi-person-badge';
-      case 'WHATSAPP_CONNECTIONS':
-        return 'bi-whatsapp';
+        return 'bi-people-fill';
       default:
         return 'bi-speedometer2';
+    }
+  }
+
+  getMetricIconBgClass(metric: string): string {
+    switch (metric) {
+      case 'MONTHLY_MESSAGES':
+      case 'WHATSAPP_CONNECTIONS':
+        return 'bg-emerald-subtle text-emerald';
+      case 'MONTHLY_MEDIA_UPLOADS':
+        return 'bg-primary-subtle text-primary';
+      default:
+        return 'bg-indigo-subtle text-indigo';
     }
   }
 
