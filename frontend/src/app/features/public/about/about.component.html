@@ -1,0 +1,476 @@
+<div class="public-about-page">
+  <!-- ======================================================================= -->
+  <!-- 1. HERO BANNER SECTION (MATCHING HOME PAGE THEME & COMPOSITION)        -->
+  <!-- ======================================================================= -->
+  <section class="hero-section" aria-labelledby="about-hero-heading">
+    <div class="hero-container">
+      <!-- LEFT COLUMN: CONTENT, ACTIONS & EXPERT WIDGET -->
+      <div class="hero-content-col">
+        <!-- Eyebrow -->
+        <span class="hero-eyebrow">ABOUT SEYYON CONNECT</span>
+
+        <!-- Main H1 Headline -->
+        <h1 id="about-hero-heading" class="hero-title">
+          Connecting Businesses<br />
+          Through <span class="highlight-orange">Smart Communication</span>
+        </h1>
+
+        <!-- Subtitle / Description -->
+        <p class="hero-desc">
+          Seyyon Connect is an enterprise-grade customer engagement and WhatsApp broadcast automation platform. Built
+          directly on the official Meta Cloud API infrastructure, we bridge the gap between businesses and audiences
+          with high-throughput deliverability, intelligent segmentation, and real-time campaign insights.
+        </p>
+
+        <!-- CTA Action Buttons -->
+        <div class="hero-actions">
+          <a routerLink="/products" class="btn-primary-orange" aria-label="Explore Seyyon Connect Solutions">
+            Explore Solutions
+          </a>
+          <a routerLink="/contact" class="btn-outline-dark" aria-label="Contact Our Team">
+            Contact Team
+          </a>
+        </div>
+
+        <!-- Bottom Row: Consult Our Experts + Scroll Down -->
+        <div class="hero-bottom-row">
+          <!-- Consult Experts Widget -->
+          <a routerLink="/contact" class="expert-widget" aria-label="Questions? Consult Our Experts">
+            <div class="expert-avatar-box">
+              <img src="assets/public-website/home/expert-avatar.jpg" alt="Communication Specialist" class="expert-avatar-img" />
+            </div>
+            <div class="expert-text-box">
+              <span class="expert-sub">Have Questions?</span>
+              <span class="expert-title">Talk to Our Specialists</span>
+            </div>
+          </a>
+
+          <!-- Scroll Down Indicator -->
+          <div class="scroll-down-widget" (click)="scrollToSection('who-we-are')" role="button" tabindex="0"
+            aria-label="Scroll down to Who We Are" (keydown.enter)="scrollToSection('who-we-are')">
+            <div class="scroll-arrow-box">
+              <i class="bi bi-arrow-down" aria-hidden="true"></i>
+            </div>
+            <span class="scroll-label">EXPLORE MORE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: PHOTO COMPOSITION & USER METRIC BADGES -->
+      <div class="hero-visual-col" aria-hidden="false">
+        <div class="hero-composition-grid">
+          <!-- Top Row (Left Sub-column with Verified Badge & Team Card + Right Sub-column with Tall Story Card) -->
+          <div class="composition-top-row">
+            <!-- Top Left: Happy Users Badge + Collaboration Card -->
+            <div class="composition-top-left">
+              <!-- Floating Happy Users / Cloud Native Badge -->
+              <div class="clients-badge-card" aria-label="Official Meta Cloud API Infrastructure">
+                <div class="verified-badge-content">
+                  <div class="badge-icon-pill">
+                    <i class="bi bi-shield-check"></i>
+                  </div>
+                  <div class="badge-copy">
+                    <span class="badge-title">100% Meta Native</span>
+                    <span class="badge-meta">Direct Cloud API Access</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Innovation Image -->
+              <div class="banner-card card-work">
+                <img src="assets/public-website/home/banner-2.jpg" alt="Seyyon Connect Engineering" class="card-photo" />
+                <div class="card-gradient-overlay">
+                  <span class="overlay-tag">Reliability First</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top Right: Tall Workspace Image -->
+            <div class="banner-card card-home">
+              <img src="assets/public-website/home/banner-1.jpg" alt="Seyyon Connect Teamwork" class="card-photo" />
+              <div class="card-gradient-overlay">
+                <span class="overlay-tag">Enterprise Scale</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Row: Wide Global Connectivity Card -->
+          <div class="banner-card card-entertainment">
+            <img src="assets/public-website/home/banner-3.jpg" alt="Global Connectivity" class="card-photo" />
+            <div class="card-gradient-overlay">
+              <span class="overlay-tag">Global Audience Reach</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 2. WHO WE ARE & COMPANY STORY (2-COLUMN HIGHLIGHT WITH ORANGE FRAME)    -->
+  <!-- ======================================================================= -->
+  <section id="who-we-are" class="who-we-are-section" aria-labelledby="who-we-are-heading">
+    <!-- Subtle Background Network Graphic Watermark -->
+    <div class="section-bg-watermark" aria-hidden="true">
+      <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M200 40 L200 360 M120 360 L280 360 M140 280 L260 280 M160 200 L240 200 M180 120 L220 120"
+          stroke="#F96614" stroke-width="1.5" stroke-opacity="0.12" stroke-linecap="round" />
+        <path d="M120 360 L200 120 L280 360" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.12" />
+        <circle cx="200" cy="40" r="10" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.15" />
+        <circle cx="200" cy="40" r="30" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.08"
+          stroke-dasharray="4 4" />
+      </svg>
+    </div>
+
+    <div class="who-we-are-container">
+      <!-- LEFT COLUMN: SPOTLIGHT CARD WITH ORANGE OFFSET ACCENT FRAME -->
+      <div class="who-we-are-left">
+        <div class="testimonial-frame-wrapper">
+          <!-- Orange Backdrop Accent Outline -->
+          <div class="orange-frame-accent" aria-hidden="true"></div>
+
+          <!-- Main Story Spotlight Card -->
+          <div class="story-spotlight-card">
+            <img [src]="spotlight.image" [alt]="spotlight.title" class="story-bg-img" />
+            <div class="story-overlay" aria-hidden="true"></div>
+
+            <!-- Card Bottom Content -->
+            <div class="story-card-content">
+              <div class="story-quote-icon">
+                <i class="bi bi-quote"></i>
+              </div>
+              <p class="story-quote-text">
+                "{{ spotlight.quote }}"
+              </p>
+              <div class="story-author-info">
+                <span class="author-name">{{ spotlight.author }}</span>
+                <span class="author-role">{{ spotlight.role }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: WHO WE ARE COPY, 2X2 HIGHLIGHT GRID & CTA -->
+      <div class="who-we-are-right">
+        <!-- Eyebrow -->
+        <span class="section-eyebrow">WHO WE ARE</span>
+
+        <!-- Main Heading -->
+        <h2 id="who-we-are-heading" class="section-title">
+          Pioneering Intelligent <span class="highlight-orange">Customer Engagement</span>
+        </h2>
+
+        <!-- Paragraph Description -->
+        <p class="section-desc">
+          Founded with a clear vision to simplify enterprise communication, Seyyon Connect combines cloud scalability
+          with conversational intelligence. We empower organizations of all sizes to broadcast critical updates, deliver
+          personalized promotional messages, and organize contact relationships without technical hurdles or compliance risks.
+        </p>
+
+        <!-- 2x2 Feature Highlights Grid -->
+        <div class="features-2x2-grid">
+          @for (item of keyPillars; track item.title) {
+          <div class="feature-item">
+            <div class="feature-icon-box">
+              <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+            </div>
+            <div class="feature-info">
+              <h3 class="feature-title">{{ item.title }}</h3>
+              <p class="feature-desc">{{ item.description }}</p>
+            </div>
+          </div>
+          }
+        </div>
+
+        <!-- Action Button -->
+        <div class="section-action">
+          <a routerLink="/pricing" class="btn-primary-orange" aria-label="View Seyyon Connect Plans and Pricing">
+            View Plans & Pricing
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 3. OUR CORE VALUES (4-CARD SERVICE GRID THEME WITH HOVER TRANSFORM)     -->
+  <!-- ======================================================================= -->
+  <section class="values-section" aria-labelledby="values-heading">
+    <div class="values-container">
+      <!-- Section Header -->
+      <div class="values-header">
+        <span class="section-eyebrow">OUR CORE VALUES</span>
+        <h2 id="values-heading" class="values-title">
+          The Principles That <span class="highlight-orange">Drive Our Innovation</span>
+        </h2>
+        <p class="values-subtitle">
+          Everything we design and engineer revolves around delivering high confidence, ironclad reliability, and seamless experiences for your business.
+        </p>
+      </div>
+
+      <!-- Values 4-Card Grid -->
+      <div class="values-grid">
+        @for (val of coreValues; track val.number) {
+        <div class="value-card" tabindex="0">
+          <!-- Background Network Graphic Overlay -->
+          <div class="card-bg-mesh" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="155" cy="45" r="3.5" fill="currentColor" />
+              <circle cx="185" cy="85" r="2.5" fill="currentColor" />
+              <circle cx="125" cy="115" r="2" fill="currentColor" />
+              <circle cx="170" cy="140" r="3" fill="currentColor" />
+              <line x1="155" y1="45" x2="185" y2="85" stroke="currentColor" stroke-width="0.8" />
+              <line x1="185" y1="85" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
+              <line x1="155" y1="45" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
+              <line x1="125" y1="115" x2="170" y2="140" stroke="currentColor" stroke-width="0.8" />
+            </svg>
+          </div>
+
+          <!-- Big Watermark Number -->
+          <div class="value-number" aria-hidden="true">{{ val.number }}</div>
+
+          <!-- Icon Box -->
+          <div class="value-icon-box">
+            <i class="bi {{ val.icon }}" aria-hidden="true"></i>
+          </div>
+
+          <!-- Title -->
+          <h3 class="value-title">
+            <span class="title-bar" aria-hidden="true">|</span> {{ val.title }}
+          </h3>
+
+          <!-- Description -->
+          <p class="value-desc">
+            {{ val.description }}
+          </p>
+
+          <!-- Learn More Indicator Link -->
+          <div class="value-link">
+            <span class="link-text">{{ val.tagline }}</span>
+            <i class="bi bi-arrow-right link-arrow" aria-hidden="true"></i>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 4. WHY CHOOSE SEYYON CONNECT (3-COLUMN CAPABILITIES MATRIX)             -->
+  <!-- ======================================================================= -->
+  <section class="why-choose-section" aria-labelledby="why-choose-heading">
+    <div class="why-choose-container">
+      <div class="why-choose-header">
+        <span class="section-eyebrow">WHY CHOOSE US</span>
+        <h2 id="why-choose-heading" class="section-title">
+          Engineered For Enterprise <span class="highlight-orange">Scale & Simplicity</span>
+        </h2>
+        <p class="section-desc">
+          Compare how our modern cloud infrastructure outperforms traditional bulk SMS and disconnected messaging tools.
+        </p>
+      </div>
+
+      <div class="capabilities-grid">
+        @for (item of whyChooseUs; track item.id) {
+        <div class="capability-card" tabindex="0">
+          <div class="card-badge-row">
+            <div class="cap-icon-box">
+              <i class="bi {{ item.icon }}"></i>
+            </div>
+            <span class="cap-pill">{{ item.badge }}</span>
+          </div>
+
+          <h3 class="cap-title">{{ item.title }}</h3>
+          <p class="cap-desc">{{ item.description }}</p>
+
+          <ul class="cap-bullets">
+            @for (bullet of item.bullets; track bullet) {
+            <li>
+              <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+              <span>{{ bullet }}</span>
+            </li>
+            }
+          </ul>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 5. LEADERSHIP & EXPERT TEAM SECTION                                     -->
+  <!-- ======================================================================= -->
+  <section class="team-section" aria-labelledby="team-heading">
+    <div class="team-container">
+      <div class="team-header">
+        <span class="section-eyebrow">OUR LEADERSHIP</span>
+        <h2 id="team-heading" class="section-title">
+          Meet The Minds Behind <span class="highlight-orange">Seyyon Connect</span>
+        </h2>
+        <p class="section-desc">
+          A dedicated team of cloud architects, telecom engineers, and product specialists passionate about elevating your customer engagement.
+        </p>
+      </div>
+
+      <div class="team-grid">
+        @for (member of teamMembers; track member.name) {
+        <div class="team-card" tabindex="0">
+          <div class="member-avatar-wrapper">
+            <img [src]="member.image" [alt]="member.name" class="member-photo" />
+            <div class="member-social-overlay" aria-label="Social profiles">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="LinkedIn Profile">
+                <i class="bi bi-linkedin"></i>
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="Twitter Profile">
+                <i class="bi bi-twitter-x"></i>
+              </a>
+              <a [href]="'mailto:' + member.email" class="social-icon-btn" aria-label="Email Member">
+                <i class="bi bi-envelope-fill"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="member-info">
+            <h3 class="member-name">{{ member.name }}</h3>
+            <span class="member-role">{{ member.role }}</span>
+            <p class="member-bio">{{ member.bio }}</p>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 6. IMPACT STATS & LIVE METRIC HIGHLIGHTS STRIP                          -->
+  <!-- ======================================================================= -->
+  <section class="stats-section" aria-label="Impact and Achievements">
+    <div class="stats-container">
+      <div class="stats-strip-card">
+        @for (stat of impactStats; track stat.label; let last = $last) {
+        <div class="stat-item">
+          <span class="stat-number">{{ stat.value }}<span class="stat-unit">{{ stat.unit }}</span></span>
+          <span class="stat-label">{{ stat.label }}</span>
+        </div>
+        @if (!last) {
+        <div class="stat-divider" aria-hidden="true"></div>
+        }
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 7. ULTRA-FAST CTA SECTION (MATCHING HOME PAGE DARK GLOW THEME)          -->
+  <!-- ======================================================================= -->
+  <section class="cta-section" aria-labelledby="about-cta-heading">
+    <div class="cta-container">
+      <div class="cta-card-wrapper">
+        <!-- Ambient Glowing Background Radial Blobs -->
+        <div class="cta-glow-blob top-right" aria-hidden="true"></div>
+        <div class="cta-glow-blob bottom-left" aria-hidden="true"></div>
+
+        <!-- Main Top Row: Left Copy + Right 3D Visual -->
+        <div class="cta-main-grid">
+          <!-- Left Column: Copy & Actions -->
+          <div class="cta-content-col">
+            <div class="cta-live-badge">
+              <span class="pulse-dot"></span>
+              <span>GROW WITH SEYYON CONNECT</span>
+            </div>
+
+            <h2 id="about-cta-heading" class="cta-title">
+              Ready To Transform Your<br />
+              <span class="highlight-orange">Customer Communication?</span>
+            </h2>
+
+            <p class="cta-desc">
+              Join thousands of fast-growing businesses that rely on Seyyon Connect for guaranteed WhatsApp deliverability, verified templates, and actionable audience insights.
+            </p>
+
+            <!-- Feature Checkpoints -->
+            <div class="cta-features-list">
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>Instant Meta Cloud API Verification</span>
+              </div>
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>High-Throughput Campaign Automation</span>
+              </div>
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>24/7 Priority Engineering & Onboarding Support</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="cta-actions-group">
+              <a routerLink="/contact" class="btn-cta-primary" aria-label="Get Started with Seyyon Connect">
+                <span>Get Started Now</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </a>
+              <a routerLink="/products" class="btn-cta-secondary" aria-label="Explore All Features">
+                <span>Explore Solutions</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Column: Visual Hub with Floating Live Metrics -->
+          <div class="cta-visual-col">
+            <div class="cta-visual-wrapper">
+              <img src="assets/public-website/home/cta-network-hub.jpg" alt="Seyyon Connect High Speed Communication Hub"
+                class="cta-hub-img" />
+
+              <!-- Floating Live Metric Badge 1 -->
+              <div class="floating-badge badge-top-left" aria-hidden="true">
+                <div class="badge-icon-box bg-orange">
+                  <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="badge-text-box">
+                  <span class="badge-val">Zero Lag</span>
+                  <span class="badge-lbl">Cloud API Dispatch</span>
+                </div>
+              </div>
+
+              <!-- Floating Live Metric Badge 2 -->
+              <div class="floating-badge badge-bottom-right" aria-hidden="true">
+                <div class="badge-icon-box bg-green">
+                  <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="badge-text-box">
+                  <span class="badge-val">99.99%</span>
+                  <span class="badge-lbl">Guaranteed Uptime</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row: 4 Metric Highlights Strip Inside Card -->
+        <div class="cta-metrics-strip">
+          <div class="metric-item">
+            <span class="metric-number">500<span class="metric-unit">K+</span></span>
+            <span class="metric-label">Broadcast Campaigns</span>
+          </div>
+          <div class="metric-divider" aria-hidden="true"></div>
+          <div class="metric-item">
+            <span class="metric-number">8<span class="metric-unit">M+</span></span>
+            <span class="metric-label">Audiences Reached</span>
+          </div>
+          <div class="metric-divider" aria-hidden="true"></div>
+          <div class="metric-item">
+            <span class="metric-number">99.9<span class="metric-unit">%</span></span>
+            <span class="metric-label">Direct Delivery SLA</span>
+          </div>
+          <div class="metric-divider" aria-hidden="true"></div>
+          <div class="metric-item">
+            <span class="metric-number">24/7</span>
+            <span class="metric-label">Support Availability</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

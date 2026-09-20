@@ -106,28 +106,28 @@ export class HomeComponent implements OnInit {
 
   readonly blogs: BlogPost[] = [
     {
-      id: 'budget-friendly-ott-platforms',
-      title: 'Best Online Budget-Friendly OTT Platforms For Your Family',
+      id: 'how-whatsapp-campaigns-improve-customer-engagement',
+      title: 'How WhatsApp Campaigns Can Improve Customer Engagement',
       description:
-        'Enim ut tellus elementum sagittis vitae et. Sagittis orci a scelerisque purus. Eget egestas purus viverra accumsan in nisl...',
-      image: 'assets/public-website/blog/blog-1.jpg',
-      link: '/products',
+        'Explore how structured broadcast campaigns, certified Meta templates, and delivery telemetry build consistent audience engagement...',
+      image: 'assets/blog/blog-01.jpg',
+      link: '/blogs/how-whatsapp-campaigns-improve-customer-engagement',
     },
     {
-      id: 'everybody-connected-internet',
-      title: 'Everybody In The World Is Connected Through The Internet',
+      id: 'managing-customers-and-campaigns-in-one-platform',
+      title: 'A Practical Guide to Managing Customers and Campaigns in One Platform',
       description:
-        'Tristique et egestas quis ipsum suspendisse ultrices gravida dictum. Aenean euismod elementum nisi quis eleifend. Amet mattis vulputate enim...',
-      image: 'assets/public-website/blog/blog-2.jpg',
-      link: '/products',
+        'Learn how unifying contact records, custom audience segmentation, and broadcast workflows eliminates data silos and boosts productivity...',
+      image: 'assets/blog/blog-02.jpg',
+      link: '/blogs/managing-customers-and-campaigns-in-one-platform',
     },
     {
-      id: 'internet-benefit-agricultural-industry',
-      title: 'How The Internet Can Benefit The Agricultural Industry?',
+      id: 'understanding-whatsapp-campaign-performance-and-analytics',
+      title: 'Understanding WhatsApp Campaign Performance and Analytics',
       description:
-        'Arcu vitae elementum curabitur vitae nunc sed velit. Elit at imperdiet dui accumsan sit amet nulla facilisi. Dolor morbi...',
-      image: 'assets/public-website/blog/blog-3.jpg',
-      link: '/products',
+        'A deep dive into message delivery lifecycles, error diagnostics, read receipts, and how telemetry data optimizes communication...',
+      image: 'assets/blog/blog-03.jpg',
+      link: '/blogs/understanding-whatsapp-campaign-performance-and-analytics',
     },
   ];
 

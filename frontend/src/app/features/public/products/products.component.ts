@@ -3,8 +3,16 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../../core/services/seo.service';
 
-interface ProductDetail {
+export interface ProductCategoryTab {
   id: string;
+  label: string;
+  icon: string;
+}
+
+export interface ProductDetail {
+  id: string;
+  number: string;
+  category: string;
   icon: string;
   title: string;
   badge: string;
@@ -12,239 +20,240 @@ interface ProductDetail {
   highlights: string[];
 }
 
+export interface WorkflowStep {
+  stepNumber: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface ComparisonRow {
+  feature: string;
+  detail: string;
+  seyyon: string;
+  others: string;
+}
+
+export interface ProductStat {
+  value: string;
+  unit: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-public-products',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  template: `
-    <div class="public-page-wrapper">
-      <section class="page-hero-section">
-        <div class="page-container text-center">
-          <span class="page-eyebrow">SEYYON CONNECT PLATFORM</span>
-          <h1 class="page-title">Enterprise customer engagement built for scale.</h1>
-          <p class="page-subtitle">
-            Explore the full suite of tools designed to streamline contacts, template approvals, campaign dispatches, and deep performance telemetry.
-          </p>
-        </div>
-      </section>
-
-      <section class="page-content-section">
-        <div class="page-container">
-          <div class="products-grid">
-            @for (prod of products; track prod.id) {
-              <div class="product-feature-card" [attr.data-id]="prod.id">
-                <div class="card-header-bar">
-                  <div class="prod-icon-box">
-                    <i class="bi {{ prod.icon }}"></i>
-                  </div>
-                  <span class="prod-badge">{{ prod.badge }}</span>
-                </div>
-                <h3>{{ prod.title }}</h3>
-                <p>{{ prod.description }}</p>
-                <ul class="highlights-list">
-                  @for (hl of prod.highlights; track hl) {
-                    <li>
-                      <i class="bi bi-check-circle-fill text-primary"></i>
-                      <span>{{ hl }}</span>
-                    </li>
-                  }
-                </ul>
-              </div>
-            }
-          </div>
-        </div>
-      </section>
-    </div>
-  `,
-  styles: [`
-    .public-page-wrapper {
-      padding-bottom: 5rem;
-    }
-    .page-hero-section {
-      padding: 4.5rem 1.5rem 3rem;
-      background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.06) 0%, #ffffff 70%);
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .page-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-    .page-eyebrow {
-      font-size: 0.8125rem;
-      font-weight: 800;
-      color: #2563eb;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 1rem;
-    }
-    .page-title {
-      font-size: 2.75rem;
-      font-weight: 800;
-      color: #0f1b3d;
-      letter-spacing: -0.025em;
-      line-height: 1.2;
-      max-width: 800px;
-      margin: 0 auto 1.25rem;
-    }
-    .page-subtitle {
-      font-size: 1.125rem;
-      color: #64748b;
-      max-width: 680px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-    .page-content-section {
-      padding: 4rem 0;
-    }
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-    }
-    @media (max-width: 991.98px) {
-      .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .page-title {
-        font-size: 2.125rem;
-      }
-    }
-    @media (max-width: 575.98px) {
-      .products-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    .product-feature-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 1.15rem;
-      padding: 2rem;
-      box-shadow: 0 4px 12px rgba(15, 27, 61, 0.03);
-      transition: all 0.25s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    .product-feature-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 32px -8px rgba(15, 27, 61, 0.08);
-      border-color: #cbd5e1;
-    }
-    .card-header-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-    }
-    .prod-icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 0.75rem;
-      background: #eff6ff;
-      color: #2563eb;
-      display: grid;
-      place-items: center;
-      font-size: 1.35rem;
-    }
-    .prod-badge {
-      font-size: 0.6875rem;
-      font-weight: 700;
-      color: #0f1b3d;
-      background: #f1f5f9;
-      padding: 0.25rem 0.6rem;
-      border-radius: 9999px;
-    }
-    .product-feature-card h3 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #0f1b3d;
-      margin-bottom: 0.75rem;
-    }
-    .product-feature-card p {
-      font-size: 0.875rem;
-      color: #64748b;
-      line-height: 1.6;
-      margin-bottom: 1.25rem;
-      flex: 1 0 auto;
-    }
-    .highlights-list {
-      list-style: none;
-      padding: 1rem 0 0;
-      margin: 0;
-      border-top: 1px solid #f1f5f9;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .highlights-list li {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: #172033;
-    }
-  `],
+  templateUrl: './products.component.html',
+  styleUrls: ['./products.component.scss'],
 })
 export class ProductsComponent implements OnInit {
   private readonly seo = inject(SeoService);
 
+  activeCategory: string = 'all';
+
+  readonly categories: ProductCategoryTab[] = [
+    { id: 'all', label: 'All Modules', icon: 'bi-grid-fill' },
+    { id: 'campaigns', label: 'Campaign Studio', icon: 'bi-megaphone-fill' },
+    { id: 'templates', label: 'Templates & Media', icon: 'bi-whatsapp' },
+    { id: 'crm', label: 'Audience & CRM', icon: 'bi-people-fill' },
+    { id: 'telemetry', label: 'Telemetry & Quotas', icon: 'bi-graph-up-arrow' },
+  ];
+
   readonly products: ProductDetail[] = [
     {
       id: 'customers',
+      number: '01',
+      category: 'crm',
       icon: 'bi-people-fill',
-      title: 'Customer Directory',
-      badge: 'Core Module',
-      description: 'Centralize and segment contact records with custom metadata, tags, and bulk upload validation.',
-      highlights: ['Custom Tagging & Filters', 'CSV/Excel Contact Ingestion', 'VIP Audience Segmentation'],
+      title: 'Customer Directory & CRM',
+      badge: 'Audience Core',
+      description:
+        'Centralize contact lists with custom tag segmentation, duplicate prevention, and seamless CSV/Excel imports.',
+      highlights: [
+        'Custom Audience Tagging & Multi-Criteria Filtering',
+        'High-Speed CSV / Excel Bulk Contact Ingestion',
+        'VIP & High-Priority Audience Categorization',
+        'Automatic Opt-In & Unsubscribe Safeguards',
+      ],
     },
     {
       id: 'campaigns',
+      number: '02',
+      category: 'campaigns',
       icon: 'bi-megaphone-fill',
-      title: 'Campaign Studio',
-      badge: 'High Speed',
-      description: 'Schedule broadcast dispatches with live progress bars, pause/resume controls, and queue diagnostics.',
-      highlights: ['Queue-based Dispatch Engine', 'Dynamic Variable Injection', 'Schedule or Instant Send'],
+      title: 'Automated Campaign Studio',
+      badge: 'High Throughput',
+      description:
+        'Schedule and dispatch high-volume broadcasts with asynchronous queue management and live progress tracking.',
+      highlights: [
+        'Queue-based Zero-Lag Asynchronous Dispatch Engine',
+        'Dynamic Column-to-Variable Parameter Mapping',
+        'Instant Schedule Execution or Time-Delayed Launch',
+        'Emergency Queue Pause, Resume & Cancel Controls',
+      ],
     },
     {
       id: 'templates',
+      number: '03',
+      category: 'templates',
       icon: 'bi-whatsapp',
-      title: 'WhatsApp Templates',
+      title: 'WhatsApp Template Studio',
       badge: 'Meta Certified',
-      description: 'Design and sync rich-text message templates with image headers, custom CTA buttons, and variable slots.',
-      highlights: ['Direct Meta Cloud Sync', 'Header Media Support', 'Quick Reply Buttons'],
+      description:
+        'Design rich-text message templates with multimedia headers, quick reply actions, and instant Meta sync.',
+      highlights: [
+        'Direct Meta Cloud API Verification & Live Polling',
+        'Image, Video & Document Header Support',
+        'Interactive CTA & Custom Quick-Reply Buttons',
+        'Multi-Language Template Localization Support',
+      ],
     },
     {
       id: 'media',
+      number: '04',
+      category: 'templates',
       icon: 'bi-images',
       title: 'Media Asset Center',
-      badge: 'Storage',
-      description: 'Organize media attachments, flyers, PDFs, and banners with instant preview and quota enforcement.',
-      highlights: ['Instant Asset Preview', 'Secure Cloud Storage', 'Multi-Format Support'],
+      badge: 'Cloud Storage',
+      description:
+        'Securely store, organize, and attach promotional flyers, product catalogs, and PDFs to your campaigns.',
+      highlights: [
+        'Instant Media Preview & Meta Hash Verification',
+        'Encrypted Cloud Storage with Rapid Asset CDN',
+        'Multi-Format Ingestion (JPEG, PNG, MP4, PDF)',
+        'Tenant Quota Protection & Compression Utility',
+      ],
     },
     {
       id: 'reports',
+      number: '05',
+      category: 'telemetry',
       icon: 'bi-graph-up-arrow',
-      title: 'Analytics & Logs',
-      badge: 'Telemetry',
-      description: 'Inspect message statuses, delivery ratios, failed attempts with error explanations, and read timestamps.',
-      highlights: ['Delivery & Read Ratios', 'Error Diagnostic Insights', 'Downloadable Audit Logs'],
+      title: 'Real-Time Telemetry & Logs',
+      badge: 'Live Diagnostics',
+      description:
+        'Inspect message statuses, delivery ratios, failed attempts with official Meta error codes, and read receipts.',
+      highlights: [
+        'Delivery, Read & Failure Ratio Telemetry',
+        'Meta Error Diagnostics with Fix Suggestions',
+        'Live Broadcast Activity Feed & Timestamps',
+        'Exportable Campaign Audit Logs & Reports',
+      ],
     },
     {
       id: 'subscriptions',
+      number: '06',
+      category: 'telemetry',
       icon: 'bi-shield-check',
-      title: 'Usage & Quotas',
+      title: 'Usage, Quotas & Subscriptions',
       badge: 'Transparent',
-      description: 'Monitor daily and monthly message credit counters with automatic tier tracking and transparent renewal.',
-      highlights: ['Real-Time Credit Meters', 'Tier Limit Safeguards', 'Transparent Billing Logs'],
+      description:
+        'Monitor daily and monthly message credit counters with automatic tier tracking and transparent renewal alerts.',
+      highlights: [
+        'Real-Time Credit Meters & Quota Utilization',
+        'Multi-Tier Safeguards & Threshold Warnings',
+        'Transparent Billing Invoices & Renewal Tracking',
+        'Multi-Tenant Company Admin Quota Allocations',
+      ],
     },
+  ];
+
+  get filteredProducts(): ProductDetail[] {
+    if (this.activeCategory === 'all') {
+      return this.products;
+    }
+    return this.products.filter((p) => p.category === this.activeCategory);
+  }
+
+  readonly workflowSteps: WorkflowStep[] = [
+    {
+      stepNumber: '01',
+      title: 'Connect WhatsApp Account',
+      description: 'Link your Meta Business Account and verified phone number with one-click Cloud API credentials.',
+      icon: 'bi-whatsapp',
+    },
+    {
+      stepNumber: '02',
+      title: 'Import & Segment Contacts',
+      description: 'Upload your audience lists via CSV/Excel, assign custom tags, and set up dynamic filtering groups.',
+      icon: 'bi-person-plus-fill',
+    },
+    {
+      stepNumber: '03',
+      title: 'Design Verified Templates',
+      description: 'Create interactive templates with images, variables, and CTA buttons, verified instantly by Meta.',
+      icon: 'bi-layout-text-window-reverse',
+    },
+    {
+      stepNumber: '04',
+      title: 'Broadcast & Measure Telemetry',
+      description: 'Launch your campaign to thousands of recipients and observe real-time delivery and read metrics.',
+      icon: 'bi-broadcast-pin',
+    },
+  ];
+
+  readonly comparisonRows: ComparisonRow[] = [
+    {
+      feature: 'Delivery Speed & Infrastructure',
+      detail: 'Direct Meta Cloud API vs. third-party aggregators',
+      seyyon: 'Direct Cloud API (10x faster, zero middleware lag)',
+      others: 'Legacy SMS / Aggregator queues with delay',
+    },
+    {
+      feature: 'Rich Media & Interactive CTAs',
+      detail: 'Images, PDFs, Video headers, and Quick-Replies',
+      seyyon: 'Supported natively with dynamic variables',
+      others: 'Plain text only or broken shortened links',
+    },
+    {
+      feature: 'Message Read Receipts',
+      detail: 'Real-time verified delivery and read timestamps',
+      seyyon: '100% accurate live read telemetry',
+      others: 'Unreliable delivery receipts, zero read data',
+    },
+    {
+      feature: 'Account Ban Safeguards',
+      detail: 'Meta policy enforcement and opt-in protection',
+      seyyon: 'Official Cloud API with zero risk of bans',
+      others: 'High risk of number bans via unofficial tools',
+    },
+    {
+      feature: 'Contact Segmentation & CRM',
+      detail: 'Tag-based audience management and bulk imports',
+      seyyon: 'Comprehensive multi-tenant customer CRM',
+      others: 'Isolated spreadsheets and manual copy-pasting',
+    },
+  ];
+
+  readonly productStats: ProductStat[] = [
+    { value: '10', unit: 'x', label: 'Faster Broadcast Speed' },
+    { value: '99.99', unit: '%', label: 'Delivery SLA Rate' },
+    { value: '<100', unit: 'ms', label: 'Cloud API Latency' },
+    { value: '0', unit: '%', label: 'Aggregator Markup' },
   ];
 
   ngOnInit(): void {
     this.seo.updateSeo({
-      title: 'Products & Solutions | Seyyon Connect',
-      description: 'Explore Seyyon Connect capabilities including WhatsApp broadcast campaigns, Meta template management, customer directory, and telemetry analytics.',
+      title: 'Products & Solutions | Seyyon Connect - Intelligent WhatsApp Platform',
+      description:
+        'Explore the full suite of Seyyon Connect enterprise tools: WhatsApp Template Studio, High-Throughput Campaign Automation, Customer CRM, and Live Telemetry.',
+      keywords:
+        'WhatsApp Products, Meta Cloud API, Campaign Studio, Template Builder, Customer Directory, Telemetry Analytics, Broadcast Automation',
+      ogTitle: 'Products & Solutions | Seyyon Connect',
+      ogDescription:
+        'Explore enterprise customer engagement tools built on official Meta Cloud API infrastructure.',
     });
+  }
+
+  setCategory(category: string): void {
+    this.activeCategory = category;
+  }
+
+  scrollToSection(elementId: string): void {
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }

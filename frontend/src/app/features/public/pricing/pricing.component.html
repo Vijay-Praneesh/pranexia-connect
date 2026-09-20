@@ -1,0 +1,487 @@
+<div class="public-pricing-page">
+  <!-- ======================================================================= -->
+  <!-- 1. PRICING HERO & BILLING TOGGLE SECTION                                -->
+  <!-- ======================================================================= -->
+  <section class="pricing-hero-section" aria-labelledby="pricing-hero-heading">
+    <div class="pricing-hero-container">
+      <span class="hero-eyebrow">SIMPLE, TRANSPARENT PRICING</span>
+      <h1 id="pricing-hero-heading" class="hero-title">
+        Plans That Grow <span class="highlight-orange">With Your Business</span>
+      </h1>
+      <p class="hero-subtitle">
+        Choose the Seyyon Connect plan that fits your customer engagement needs. Manage customers, campaigns,
+        WhatsApp communication, and performance from one unified platform.
+      </p>
+
+      <!-- Monthly / Yearly Billing Toggle -->
+      <div class="billing-toggle-wrapper" role="group" aria-label="Billing interval selection">
+        <div class="billing-toggle-box">
+          <button
+            type="button"
+            class="toggle-btn"
+            [class.active]="billingInterval === 'monthly'"
+            (click)="setBillingInterval('monthly')"
+            [attr.aria-pressed]="billingInterval === 'monthly'"
+          >
+            Monthly Billing
+          </button>
+
+          <button
+            type="button"
+            class="toggle-btn"
+            [class.active]="billingInterval === 'yearly'"
+            (click)="setBillingInterval('yearly')"
+            [attr.aria-pressed]="billingInterval === 'yearly'"
+          >
+            <span>Yearly Billing</span>
+            <span class="save-badge">Save ~17% (2 Mo Free)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 2. PRICING CARDS GRID (4 TIERS)                                         -->
+  <!-- ======================================================================= -->
+  <section class="pricing-cards-section" id="pricing-cards-section" aria-label="Pricing plans">
+    <div class="pricing-cards-container">
+      <div class="pricing-grid">
+        @for (plan of plans; track plan.id) {
+        <div class="pricing-card" [class.popular]="plan.isPopular" tabindex="0">
+          <!-- Most Popular Badge -->
+          @if (plan.isPopular) {
+          <div class="popular-pill-badge">
+            <i class="bi bi-star-fill"></i>
+            <span>{{ plan.badge || 'MOST POPULAR' }}</span>
+          </div>
+          }
+
+          <!-- Plan Card Header -->
+          <div class="card-header-block">
+            <h3 class="plan-name">{{ plan.displayName }}</h3>
+            <p class="plan-tagline">{{ plan.tagline }}</p>
+
+            <!-- Price Display Box -->
+            <div class="plan-price-box">
+              @if (plan.pricing.isCustom) {
+              <div class="custom-price-wrapper">
+                <span class="custom-amount">Custom</span>
+                <span class="custom-sub">Tailored to your volume</span>
+              </div>
+              } @else {
+              <div class="standard-price-wrapper">
+                <div class="price-row">
+                  <span class="currency-symbol">₹</span>
+                  <span class="amount-number">
+                    {{ (billingInterval === 'monthly' ? plan.pricing.monthly.amount : plan.pricing.yearly.amount) | number }}
+                  </span>
+                  <span class="billing-period">
+                    /{{ billingInterval === 'monthly' ? 'month' : 'year' }}
+                  </span>
+                </div>
+                @if (billingInterval === 'yearly' && plan.pricing.yearly.equivalentMonthly) {
+                <span class="yearly-equivalent-note">
+                  Effective {{ plan.pricing.yearly.equivalentMonthly }}/mo
+                </span>
+                }
+              </div>
+              }
+            </div>
+
+            <!-- CTA Action Button -->
+            <div class="card-cta-box">
+              <a
+                [routerLink]="plan.cta.route"
+                class="btn-plan-cta"
+                [class.btn-primary-cta]="plan.isPopular || plan.cta.isPrimary"
+                [class.btn-secondary-cta]="!plan.isPopular && !plan.cta.isPrimary"
+                [attr.aria-label]="plan.cta.text + ' for ' + plan.displayName + ' plan'"
+              >
+                <span>{{ plan.cta.text }}</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Key Resource Limits Summary -->
+          <div class="plan-limits-summary">
+            <span class="limits-header-label">RESOURCE CAPACITY</span>
+            <div class="limits-grid">
+              <div class="limit-item">
+                <i class="bi bi-chat-dots-fill limit-icon"></i>
+                <div class="limit-info">
+                  <span class="limit-val">{{ plan.keyLimits.messages }}</span>
+                  <span class="limit-lbl">Messages / mo</span>
+                </div>
+              </div>
+
+              <div class="limit-item">
+                <i class="bi bi-people-fill limit-icon"></i>
+                <div class="limit-info">
+                  <span class="limit-val">{{ plan.keyLimits.contacts }}</span>
+                  <span class="limit-lbl">Saved Contacts</span>
+                </div>
+              </div>
+
+              <div class="limit-item">
+                <i class="bi bi-megaphone-fill limit-icon"></i>
+                <div class="limit-info">
+                  <span class="limit-val">{{ plan.keyLimits.campaigns }}</span>
+                  <span class="limit-lbl">Campaigns / mo</span>
+                </div>
+              </div>
+
+              <div class="limit-item">
+                <i class="bi bi-whatsapp limit-icon"></i>
+                <div class="limit-info">
+                  <span class="limit-val">{{ plan.keyLimits.templates }}</span>
+                  <span class="limit-lbl">Templates</span>
+                </div>
+              </div>
+
+              <div class="limit-item">
+                <i class="bi bi-hdd-fill limit-icon"></i>
+                <div class="limit-info">
+                  <span class="limit-val">{{ plan.keyLimits.storage }}</span>
+                  <span class="limit-lbl">Media Storage</span>
+                </div>
+              </div>
+
+              <div class="limit-item">
+                <i class="bi bi-person-badge-fill limit-icon"></i>
+                <div class="limit-info">
+                  <span class="limit-val">{{ plan.keyLimits.users }}</span>
+                  <span class="limit-lbl">Team Members</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Plan Features Checklist -->
+          <div class="plan-features-list-wrapper">
+            <span class="features-header-label">WHAT'S INCLUDED</span>
+            <ul class="plan-features-list">
+              @for (feature of plan.highlightFeatures; track feature) {
+              <li>
+                <i class="bi bi-check2-circle feature-check-icon" aria-hidden="true"></i>
+                <span>{{ feature }}</span>
+              </li>
+              }
+            </ul>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 3. DETAILED FEATURE COMPARISON TABLE                                    -->
+  <!-- ======================================================================= -->
+  <section class="comparison-section" aria-labelledby="compare-plans-heading">
+    <div class="comparison-container">
+      <div class="comparison-header">
+        <span class="section-eyebrow">DETAILED COMPARISON</span>
+        <h2 id="compare-plans-heading" class="section-title">
+          Compare <span class="highlight-orange">Plan Capabilities</span>
+        </h2>
+        <p class="section-desc">
+          Review a complete side-by-side breakdown of features, resource limits, and telemetry options across every Seyyon Connect tier.
+        </p>
+      </div>
+
+      <div class="table-responsive-wrapper">
+        <table class="comparison-table" role="table" aria-label="Detailed Plan Comparison">
+          <thead>
+            <tr>
+              <th scope="col" class="th-feature-col">Feature / Capability</th>
+              <th scope="col" class="th-plan-col">
+                <span class="th-plan-title">Starter</span>
+                <span class="th-plan-price">₹999/mo</span>
+              </th>
+              <th scope="col" class="th-plan-col th-popular-col">
+                <div class="th-popular-pill">Most Popular</div>
+                <span class="th-plan-title">Business</span>
+                <span class="th-plan-price">₹2,499/mo</span>
+              </th>
+              <th scope="col" class="th-plan-col">
+                <span class="th-plan-title">Professional</span>
+                <span class="th-plan-price">₹5,999/mo</span>
+              </th>
+              <th scope="col" class="th-plan-col">
+                <span class="th-plan-title">Enterprise</span>
+                <span class="th-plan-price">Custom</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of comparisonCategories; track cat.category) {
+            <!-- Category Header Row -->
+            <tr class="category-header-row">
+              <td colspan="5" class="category-header-cell">
+                <span class="category-header-title">{{ cat.category }}</span>
+              </td>
+            </tr>
+
+            <!-- Feature Rows -->
+            @for (row of cat.rows; track row.name) {
+            <tr class="feature-data-row">
+              <td class="td-feature-name">
+                <span class="feat-name-text">{{ row.name }}</span>
+                @if (row.description) {
+                <span class="feat-desc-sub">{{ row.description }}</span>
+                }
+              </td>
+
+              <!-- Starter Column -->
+              <td class="td-plan-val">
+                @if (isBoolean(row.starter)) {
+                  @if (isTrue(row.starter)) {
+                    <i class="bi bi-check-circle-fill icon-check" aria-label="Included"></i>
+                  } @else {
+                    <i class="bi bi-dash icon-dash" aria-label="Not included"></i>
+                  }
+                } @else {
+                  <span class="val-text">{{ row.starter }}</span>
+                }
+              </td>
+
+              <!-- Business Column (Popular Highlight) -->
+              <td class="td-plan-val td-popular-cell">
+                @if (isBoolean(row.business)) {
+                  @if (isTrue(row.business)) {
+                    <i class="bi bi-check-circle-fill icon-check" aria-label="Included"></i>
+                  } @else {
+                    <i class="bi bi-dash icon-dash" aria-label="Not included"></i>
+                  }
+                } @else {
+                  <span class="val-text highlight-bold">{{ row.business }}</span>
+                }
+              </td>
+
+              <!-- Professional Column -->
+              <td class="td-plan-val">
+                @if (isBoolean(row.professional)) {
+                  @if (isTrue(row.professional)) {
+                    <i class="bi bi-check-circle-fill icon-check" aria-label="Included"></i>
+                  } @else {
+                    <i class="bi bi-dash icon-dash" aria-label="Not included"></i>
+                  }
+                } @else {
+                  <span class="val-text">{{ row.professional }}</span>
+                }
+              </td>
+
+              <!-- Enterprise Column -->
+              <td class="td-plan-val">
+                @if (isBoolean(row.enterprise)) {
+                  @if (isTrue(row.enterprise)) {
+                    <i class="bi bi-check-circle-fill icon-check" aria-label="Included"></i>
+                  } @else {
+                    <i class="bi bi-dash icon-dash" aria-label="Not included"></i>
+                  }
+                } @else {
+                  <span class="val-text">{{ row.enterprise }}</span>
+                }
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 4. PRODUCT VALUE SECTION                                                -->
+  <!-- ======================================================================= -->
+  <section class="value-section" aria-labelledby="value-heading">
+    <div class="value-container">
+      <div class="value-header">
+        <span class="section-eyebrow">PLATFORM VALUE</span>
+        <h2 id="value-heading" class="section-title">
+          Everything You Need To Manage <span class="highlight-orange">Customer Engagement</span>
+        </h2>
+        <p class="section-desc">
+          Every Seyyon Connect plan is backed by our full suite of core modules designed for high-deliverability messaging.
+        </p>
+      </div>
+
+      <div class="value-grid">
+        @for (item of productValues; track item.title) {
+        <div class="value-card" tabindex="0">
+          <div class="value-icon-box">
+            <i class="bi {{ item.icon }}"></i>
+          </div>
+          <h3 class="value-title">{{ item.title }}</h3>
+          <p class="value-desc">{{ item.description }}</p>
+          <ul class="value-checklist">
+            @for (hl of item.highlights; track hl) {
+            <li>
+              <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+              <span>{{ hl }}</span>
+            </li>
+            }
+          </ul>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 5. WHICH PLAN IS RIGHT FOR YOU? (DECISION GUIDE)                        -->
+  <!-- ======================================================================= -->
+  <section class="guide-section" aria-labelledby="guide-heading">
+    <div class="guide-container">
+      <div class="guide-header">
+        <span class="section-eyebrow">DECISION GUIDE</span>
+        <h2 id="guide-heading" class="section-title">
+          Which Plan Fits <span class="highlight-orange">Your Business?</span>
+        </h2>
+        <p class="section-desc">
+          Simple guidance to help you pick the right capacity tier based on your current audience size and messaging frequency.
+        </p>
+      </div>
+
+      <div class="guide-grid">
+        @for (guide of decisionGuides; track guide.title) {
+        <div class="guide-card" tabindex="0">
+          <div class="guide-badge-row">
+            <span class="guide-plan-tag">{{ guide.planName }}</span>
+          </div>
+          <h3 class="guide-title">{{ guide.title }}</h3>
+          <span class="guide-subtitle">{{ guide.subtitle }}</span>
+          <p class="guide-desc">{{ guide.description }}</p>
+          <div class="guide-best-for">
+            <strong>Best For:</strong> {{ guide.bestFor }}
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 6. PRICING FAQ ACCORDION SECTION                                        -->
+  <!-- ======================================================================= -->
+  <section class="faq-section" aria-labelledby="faq-heading">
+    <div class="faq-container">
+      <div class="faq-header">
+        <span class="section-eyebrow">FREQUENTLY ASKED QUESTIONS</span>
+        <h2 id="faq-heading" class="section-title">
+          Got Questions? <span class="highlight-orange">We've Got Answers</span>
+        </h2>
+        <p class="section-desc">
+          Common questions about billing intervals, plan quotas, Meta Cloud API requirements, and subscription management.
+        </p>
+      </div>
+
+      <div class="faq-accordion-list">
+        @for (faq of faqs; track faq.id) {
+        <div class="faq-item-card" [class.open]="faq.isOpen">
+          <button
+            type="button"
+            class="faq-question-btn"
+            (click)="toggleFaq(faq.id)"
+            [attr.aria-expanded]="faq.isOpen"
+            [attr.aria-controls]="'faq-answer-' + faq.id"
+          >
+            <span class="faq-question-text">{{ faq.question }}</span>
+            <div class="faq-icon-circle">
+              <i class="bi" [class.bi-chevron-down]="!faq.isOpen" [class.bi-chevron-up]="faq.isOpen"></i>
+            </div>
+          </button>
+
+          @if (faq.isOpen) {
+          <div [id]="'faq-answer-' + faq.id" class="faq-answer-pane" role="region">
+            <p class="faq-answer-text">{{ faq.answer }}</p>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 7. ULTRA-FAST CTA SECTION (MATCHING HOME & ABOUT DARK GLOW THEME)       -->
+  <!-- ======================================================================= -->
+  <section class="cta-section" aria-labelledby="pricing-cta-heading">
+    <div class="cta-container">
+      <div class="cta-card-wrapper">
+        <div class="cta-glow-blob top-right" aria-hidden="true"></div>
+        <div class="cta-glow-blob bottom-left" aria-hidden="true"></div>
+
+        <div class="cta-main-grid">
+          <div class="cta-content-col">
+            <div class="cta-live-badge">
+              <span class="pulse-dot"></span>
+              <span>GET CONNECTED TODAY</span>
+            </div>
+
+            <h2 id="pricing-cta-heading" class="cta-title">
+              Ready To Connect With Your<br />
+              <span class="highlight-orange">Customers More Effectively?</span>
+            </h2>
+
+            <p class="cta-desc">
+              Bring customer management, campaigns, WhatsApp communication and insights together with Seyyon Connect.
+            </p>
+
+            <div class="cta-features-list">
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>Direct Meta Cloud API Integration</span>
+              </div>
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>Transparent Usage & Quota Safeguards</span>
+              </div>
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>24/7 Dedicated Priority Technical Support</span>
+              </div>
+            </div>
+
+            <div class="cta-actions-group">
+              <a routerLink="/login" class="btn-cta-primary" aria-label="Get Started with Seyyon Connect">
+                <span>Get Started Now</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </a>
+              <a routerLink="/contact" class="btn-cta-secondary" aria-label="Contact Platform Sales">
+                <span>Talk to Sales</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="cta-visual-col">
+            <div class="cta-visual-wrapper">
+              <img src="assets/public-website/home/cta-network-hub.jpg" alt="Seyyon Connect High Speed Platform Hub" class="cta-hub-img" />
+              <div class="floating-badge badge-top-left" aria-hidden="true">
+                <div class="badge-icon-box bg-orange">
+                  <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="badge-text-box">
+                  <span class="badge-val">No Hidden Fees</span>
+                  <span class="badge-lbl">Clear Transparent Pricing</span>
+                </div>
+              </div>
+              <div class="floating-badge badge-bottom-right" aria-hidden="true">
+                <div class="badge-icon-box bg-green">
+                  <i class="bi bi-patch-check-fill"></i>
+                </div>
+                <div class="badge-text-box">
+                  <span class="badge-val">Meta Native</span>
+                  <span class="badge-lbl">Official Cloud Gateway</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

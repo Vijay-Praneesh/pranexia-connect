@@ -3,137 +3,218 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../../core/services/seo.service';
 
+export interface KeyPillar {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface CoreValue {
+  number: string;
+  icon: string;
+  title: string;
+  description: string;
+  tagline: string;
+}
+
+export interface WhyChooseItem {
+  id: string;
+  icon: string;
+  badge: string;
+  title: string;
+  description: string;
+  bullets: string[];
+}
+
+export interface TeamMember {
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  email: string;
+}
+
+export interface ImpactStat {
+  value: string;
+  unit: string;
+  label: string;
+}
+
+export interface StorySpotlight {
+  quote: string;
+  author: string;
+  role: string;
+  image: string;
+  title: string;
+}
+
 @Component({
   selector: 'app-public-about',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  template: `
-    <div class="public-page-wrapper">
-      <section class="page-hero-section">
-        <div class="page-container text-center">
-          <span class="page-eyebrow">ABOUT SEYYON CONNECT</span>
-          <h1 class="page-title">Connecting businesses with customers through intelligent communication.</h1>
-          <p class="page-subtitle">
-            Seyyon Connect is built to empower organizations with high-deliverability WhatsApp broadcasts, unified customer data management, and actionable campaign insights.
-          </p>
-        </div>
-      </section>
-
-      <section class="page-content-section">
-        <div class="page-container">
-          <div class="about-grid">
-            <div class="about-card">
-              <div class="card-icon"><i class="bi bi-bullseye text-primary"></i></div>
-              <h3>Our Mission</h3>
-              <p>To eliminate communication friction by delivering seamless, scalable, and compliant WhatsApp engagement tools for modern businesses.</p>
-            </div>
-            <div class="about-card">
-              <div class="card-icon"><i class="bi bi-shield-check text-success"></i></div>
-              <h3>Meta Cloud API Native</h3>
-              <p>Built strictly on official Meta Cloud API infrastructure to guarantee maximum delivery rates, encryption, and enterprise compliance.</p>
-            </div>
-            <div class="about-card">
-              <div class="card-icon"><i class="bi bi-lightning-charge text-warning"></i></div>
-              <h3>Real-Time Performance</h3>
-              <p>Engineered for high-throughput messaging with zero-lag telemetry, real-time message read receipts, and live queue monitoring.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  `,
-  styles: [`
-    .public-page-wrapper {
-      padding-bottom: 5rem;
-    }
-    .page-hero-section {
-      padding: 4.5rem 1.5rem 3rem;
-      background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.06) 0%, #ffffff 70%);
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .page-container {
-      max-width: 1140px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-    .page-eyebrow {
-      font-size: 0.8125rem;
-      font-weight: 800;
-      color: #2563eb;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 1rem;
-    }
-    .page-title {
-      font-size: 2.75rem;
-      font-weight: 800;
-      color: #0f1b3d;
-      letter-spacing: -0.025em;
-      line-height: 1.2;
-      max-width: 800px;
-      margin: 0 auto 1.25rem;
-    }
-    .page-subtitle {
-      font-size: 1.125rem;
-      color: #64748b;
-      max-width: 680px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-    .page-content-section {
-      padding: 4rem 0;
-    }
-    .about-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-    }
-    @media (max-width: 991.98px) {
-      .about-grid {
-        grid-template-columns: 1fr;
-      }
-      .page-title {
-        font-size: 2.125rem;
-      }
-    }
-    .about-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 1rem;
-      padding: 2rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .about-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 24px -6px rgba(15, 27, 61, 0.08);
-      background: #ffffff;
-    }
-    .card-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-    .about-card h3 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #0f1b3d;
-      margin-bottom: 0.75rem;
-    }
-    .about-card p {
-      font-size: 0.9375rem;
-      color: #64748b;
-      line-height: 1.6;
-      margin: 0;
-    }
-  `],
+  templateUrl: './about.component.html',
+  styleUrls: ['./about.component.scss'],
 })
 export class AboutComponent implements OnInit {
   private readonly seo = inject(SeoService);
 
+  readonly spotlight: StorySpotlight = {
+    quote:
+      'We envisioned a platform where businesses could achieve direct, frictionless, and high-deliverability conversations with customers worldwide without managing complex telecom stacks.',
+    author: 'Seyyon Connect Team',
+    role: 'Product & Engineering Division',
+    image: 'assets/public-website/home/banner-1.jpg',
+    title: 'Seyyon Connect Architecture',
+  };
+
+  readonly keyPillars: KeyPillar[] = [
+    {
+      icon: 'bi-broadcast-pin',
+      title: 'Meta Cloud API Native',
+      description: 'Official direct integration ensuring 99.99% message delivery rates and enterprise security.',
+    },
+    {
+      icon: 'bi-lightning-charge-fill',
+      title: 'High-Throughput Queue',
+      description: 'Asynchronous broadcast engine designed to dispatch thousands of messages with zero lag.',
+    },
+    {
+      icon: 'bi-shield-check',
+      title: 'Enterprise Compliance',
+      description: 'Strict adherence to Meta messaging policies, opt-in safeguards, and data protection.',
+    },
+    {
+      icon: 'bi-cpu-fill',
+      title: 'Intelligent Telemetry',
+      description: 'Real-time message read receipts, delivery confirmation, and detailed error diagnostics.',
+    },
+  ];
+
+  readonly coreValues: CoreValue[] = [
+    {
+      number: '01',
+      icon: 'bi-shield-lock-fill',
+      title: 'Uncompromising Reliability',
+      description:
+        'We build high-availability cloud infrastructure so your mission-critical campaigns reach customers on time, every time.',
+      tagline: '99.99% Uptime SLA',
+    },
+    {
+      number: '02',
+      icon: 'bi-people-fill',
+      title: 'Customer-Centric Simplicity',
+      description:
+        'From intuitive template builders to rapid audience segmentation, every tool is engineered for effortless productivity.',
+      tagline: 'Effortless Workflows',
+    },
+    {
+      number: '03',
+      icon: 'bi-graph-up-arrow',
+      title: 'Transparent Telemetry',
+      description:
+        'Full visibility into message queues, sent counts, delivery receipts, and error insights with zero hidden metrics.',
+      tagline: 'Real-Time Insights',
+    },
+    {
+      number: '04',
+      icon: 'bi-lock-fill',
+      title: 'Enterprise Security',
+      description:
+        'Bank-grade data encryption, granular role-based permissions, and strict Meta policy enforcement for total peace of mind.',
+      tagline: 'End-to-End Protection',
+    },
+  ];
+
+  readonly whyChooseUs: WhyChooseItem[] = [
+    {
+      id: 'cloud-infrastructure',
+      icon: 'bi-cloud-check-fill',
+      badge: 'Architecture',
+      title: 'Direct Cloud Infrastructure',
+      description:
+        'Bypass traditional aggregators and SMS bottlenecks with official Meta Cloud API infrastructure.',
+      bullets: [
+        'Zero middleware latency',
+        'Official Meta verification support',
+        'High TPS throughput thresholds',
+      ],
+    },
+    {
+      id: 'campaign-engine',
+      icon: 'bi-megaphone-fill',
+      badge: 'Automation',
+      title: 'Automated Campaign Studio',
+      description:
+        'Design, personalize, and schedule bulk campaigns with variable placeholders and instant media previews.',
+      bullets: [
+        'Dynamic placeholder variables',
+        'Rich media & CTA buttons',
+        'Live dispatch progress bars',
+      ],
+    },
+    {
+      id: 'audience-management',
+      icon: 'bi-person-badge-fill',
+      badge: 'Intelligence',
+      title: 'Smart Contact Segmentation',
+      description:
+        'Organize customer lists with custom tags, bulk CSV imports, and targeted filtering for hyper-relevant dispatches.',
+      bullets: [
+        'Custom tagging & filtering',
+        'Automatic duplicate removal',
+        'VIP audience categorization',
+      ],
+    },
+  ];
+
+  readonly teamMembers: TeamMember[] = [
+    {
+      name: 'Praveen Kumar',
+      role: 'Head of Engineering & Cloud Architecture',
+      bio: 'Cloud systems architect specializing in distributed messaging queues, high-availability microservices, and telecom APIs.',
+      image: 'assets/public-website/blog/blog-1.jpg',
+      email: 'praveen@seyyonconnect.com',
+    },
+    {
+      name: 'Ananya Sharma',
+      role: 'Product Lead & Customer Experience',
+      bio: 'Leading product design with a deep focus on conversational UI, template optimization, and scalable enterprise workflows.',
+      image: 'assets/public-website/blog/blog-2.jpg',
+      email: 'ananya@seyyonconnect.com',
+    },
+    {
+      name: 'Karthik Raja',
+      role: 'Operations & Meta Ecosystem Specialist',
+      bio: 'Expert in Meta business verification, compliance guidelines, international WhatsApp routing, and client onboarding.',
+      image: 'assets/public-website/blog/blog-3.jpg',
+      email: 'karthik@seyyonconnect.com',
+    },
+  ];
+
+  readonly impactStats: ImpactStat[] = [
+    { value: '500', unit: 'K+', label: 'Campaigns Dispatched' },
+    { value: '8', unit: 'M+', label: 'Audiences Engaged' },
+    { value: '99.99', unit: '%', label: 'Delivery Reliability' },
+    { value: '24/7', unit: '', label: 'Engineering NOC' },
+  ];
+
   ngOnInit(): void {
     this.seo.updateSeo({
-      title: 'About Us | Seyyon Connect',
-      description: 'Learn about Seyyon Connect, our mission, and how we empower modern businesses with intelligent customer communication.',
+      title: 'About Us | Seyyon Connect - Intelligent Customer Engagement',
+      description:
+        'Learn about Seyyon Connect, our mission, values, engineering architecture, and leadership team delivering next-gen WhatsApp broadcast and customer communication tools.',
+      keywords:
+        'About Seyyon Connect, WhatsApp Cloud API, Enterprise Broadcast, Customer Engagement, Messaging Automation, Meta Partner',
+      ogTitle: 'About Us | Seyyon Connect',
+      ogDescription:
+        'Connecting businesses with audiences worldwide through high-speed Meta Cloud API messaging infrastructure.',
     });
+  }
+
+  scrollToSection(elementId: string): void {
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }

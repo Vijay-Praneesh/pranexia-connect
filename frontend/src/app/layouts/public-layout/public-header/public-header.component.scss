@@ -76,9 +76,7 @@ $surface: #fbf4ee;
   }
 
   .header-logo {
-    height: 42px;
-    width: auto;
-    max-width: 190px;
+    width: 250px;
     object-fit: contain;
     display: block;
   }
@@ -176,7 +174,7 @@ $surface: #fbf4ee;
   justify-content: flex-end;
   gap: 1rem;
 
-  .btn-action-login {
+  .btn-action-contact {
     font-size: 0.9375rem;
     font-weight: 600;
     color: $text-dark;
@@ -190,6 +188,11 @@ $surface: #fbf4ee;
 
     &:hover {
       color: var(--wdtPrimaryColor, #f96614);
+    }
+
+    &.active {
+      color: var(--wdtPrimaryColor, #f96614);
+      font-weight: 700;
     }
 
     &:focus-visible {
@@ -376,7 +379,7 @@ $surface: #fbf4ee;
     flex-direction: column;
     gap: 0.75rem;
 
-    .mobile-btn-login {
+    .mobile-btn-contact {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -391,7 +394,8 @@ $surface: #fbf4ee;
       border-radius: 8px;
       transition: all 0.2s ease;
 
-      &:hover {
+      &:hover,
+      &.active {
         color: var(--wdtPrimaryColor, #f96614);
         border-color: var(--wdtPrimaryColor, #f96614);
       }

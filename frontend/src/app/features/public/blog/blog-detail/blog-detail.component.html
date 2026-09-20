@@ -1,0 +1,262 @@
+<div class="public-blog-detail-page">
+  <!-- ======================================================================= -->
+  <!-- 1. ARTICLE LOADING OR NOT FOUND STATES                                  -->
+  <!-- ======================================================================= -->
+  @if (notFound) {
+  <div class="not-found-container">
+    <div class="not-found-card">
+      <div class="not-found-icon">
+        <i class="bi bi-file-earmark-x"></i>
+      </div>
+      <h1>Article Not Found</h1>
+      <p>We couldn't find the article you're looking for. It may have been moved or updated.</p>
+      <a routerLink="/blogs" class="btn-primary-orange">
+        <i class="bi bi-arrow-left"></i>
+        <span>Back to All Articles</span>
+      </a>
+    </div>
+  </div>
+  } @else if (blog) {
+  <!-- ======================================================================= -->
+  <!-- 2. ARTICLE HEADER & HERO SECTION                                        -->
+  <!-- ======================================================================= -->
+  <header class="article-header-section" role="banner">
+    <div class="article-header-container">
+      <!-- Breadcrumb -->
+      <nav class="article-breadcrumb" aria-label="Breadcrumb">
+        <a routerLink="/" class="crumb-link">Home</a>
+        <span class="crumb-sep">/</span>
+        <a routerLink="/blogs" class="crumb-link">Blogs</a>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-current">{{ blog.category }}</span>
+      </nav>
+
+      <!-- Category Eyebrow -->
+      <div class="article-category-badge">
+        <span>{{ blog.category }}</span>
+      </div>
+
+      <!-- Main H1 Title -->
+      <h1 class="article-title">{{ blog.title }}</h1>
+
+      <!-- Excerpt -->
+      <p class="article-excerpt">{{ blog.excerpt }}</p>
+
+      <!-- Meta Bar: Author, Date, Read Time & Share -->
+      <div class="article-meta-bar">
+        <div class="author-meta-box">
+          <div class="author-avatar">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <div class="author-text">
+            <span class="author-name">{{ blog.author.name }}</span>
+            <span class="author-role">{{ blog.author.role }}</span>
+          </div>
+        </div>
+
+        <div class="meta-divider-vertical" aria-hidden="true"></div>
+
+        <div class="date-time-box">
+          <span class="meta-item">
+            <i class="bi bi-calendar3"></i>
+            {{ blog.publishedDate | date: 'longDate' }}
+          </span>
+          <span class="meta-dot">•</span>
+          <span class="meta-item">
+            <i class="bi bi-clock"></i>
+            {{ blog.readTime }}
+          </span>
+        </div>
+
+        <div class="share-actions-box">
+          <button type="button" class="btn-share-copy" (click)="copyShareLink()" aria-label="Copy link to article">
+            <i class="bi bi-link-45deg"></i>
+            <span>Share</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hero Featured Image -->
+      <div class="article-hero-media">
+        <img [src]="blog.image" [alt]="blog.title" class="hero-img" />
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================================= -->
+  <!-- 3. MAIN ARTICLE BODY + STICKY SIDEBAR TWO-COLUMN LAYOUT                 -->
+  <!-- ======================================================================= -->
+  <main class="article-body-section">
+    <div class="article-layout-container">
+      <!-- LEFT COLUMN: MAIN EDITORIAL CONTENT -->
+      <article class="article-main-col">
+        <!-- Content Blocks Renderer -->
+        <div class="article-content-flow">
+          @for (block of blog.content; track $index) {
+            @if (block.type === 'paragraph') {
+              <p class="block-paragraph">{{ block.text }}</p>
+            } @else if (block.type === 'heading') {
+              @if (block.level === 2) {
+                <h2 class="block-heading-2">{{ block.text }}</h2>
+              } @else if (block.level === 3) {
+                <h3 class="block-heading-3">{{ block.text }}</h3>
+              } @else {
+                <h4 class="block-heading-4">{{ block.text }}</h4>
+              }
+            } @else if (block.type === 'list') {
+              <ul class="block-list">
+                @for (item of block.items; track item) {
+                  <li>
+                    <i class="bi bi-check2-circle list-check-icon" aria-hidden="true"></i>
+                    <span>{{ item }}</span>
+                  </li>
+                }
+              </ul>
+            } @else if (block.type === 'image') {
+              <figure class="block-image-figure">
+                <img [src]="block.src" [alt]="block.alt" class="block-content-img" loading="lazy" />
+                @if (block.caption) {
+                  <figcaption class="block-caption">{{ block.caption }}</figcaption>
+                }
+              </figure>
+            } @else if (block.type === 'quote') {
+              <blockquote class="block-quote">
+                <i class="bi bi-quote quote-icon" aria-hidden="true"></i>
+                <p class="quote-text">{{ block.text }}</p>
+                @if (block.author) {
+                  <cite class="quote-author">— {{ block.author }}</cite>
+                }
+              </blockquote>
+            } @else if (block.type === 'highlight') {
+              <div class="block-highlight">
+                <div class="highlight-bar" aria-hidden="true"></div>
+                <div class="highlight-body">
+                  <i class="bi bi-lightbulb-fill highlight-icon" aria-hidden="true"></i>
+                  <p class="highlight-text">{{ block.text }}</p>
+                </div>
+              </div>
+            } @else if (block.type === 'link') {
+              <div class="block-link-box">
+                <a [href]="block.url" [target]="block.external ? '_blank' : '_self'" class="block-link">
+                  <span>{{ block.text }}</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Tags Section -->
+        @if (blog.tags && blog.tags.length > 0) {
+        <div class="article-tags-wrapper">
+          <span class="tags-label"><i class="bi bi-tags-fill"></i> Tags:</span>
+          <div class="tags-pills-list">
+            @for (tag of blog.tags; track tag) {
+            <span class="tag-pill">#{{ tag }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Previous / Next Article Navigation -->
+        @if (adjacentBlogs.previous || adjacentBlogs.next) {
+        <nav class="article-adjacent-nav" aria-label="Adjacent Articles">
+          <div class="adjacent-grid">
+            @if (adjacentBlogs.previous) {
+            <a [routerLink]="['/blogs', adjacentBlogs.previous.slug]" class="adjacent-card prev-card">
+              <span class="adjacent-dir-label">
+                <i class="bi bi-arrow-left"></i> Previous Article
+              </span>
+              <span class="adjacent-title">{{ adjacentBlogs.previous.title }}</span>
+            </a>
+            } @else {
+            <div class="adjacent-placeholder"></div>
+            }
+
+            @if (adjacentBlogs.next) {
+            <a [routerLink]="['/blogs', adjacentBlogs.next.slug]" class="adjacent-card next-card">
+              <span class="adjacent-dir-label">
+                Next Article <i class="bi bi-arrow-right"></i>
+              </span>
+              <span class="adjacent-title">{{ adjacentBlogs.next.title }}</span>
+            </a>
+            }
+          </div>
+        </nav>
+        }
+
+        <!-- Article Bottom CTA Card -->
+        <div class="article-cta-box">
+          <div class="article-cta-glow" aria-hidden="true"></div>
+          <div class="article-cta-body">
+            <span class="cta-eyebrow">SEYYON CONNECT PLATFORM</span>
+            <h3>Ready to improve the way you connect with your customers?</h3>
+            <p>Explore our high-deliverability Meta Cloud API WhatsApp messaging, campaign automation, and customer CRM.</p>
+            <div class="cta-btns-row">
+              <a routerLink="/pricing" class="btn-primary-orange">
+                <span>Get Started Now</span>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+              <a routerLink="/contact" class="btn-outline-white">
+                <span>Talk to Sales</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- RIGHT COLUMN: DESKTOP STICKY RELATED ARTICLES SIDEBAR -->
+      <aside class="article-sidebar-col" aria-label="Sidebar">
+        <div class="sticky-sidebar-wrapper">
+          <div class="sidebar-card">
+            <div class="sidebar-header">
+              <div class="header-indicator" aria-hidden="true"></div>
+              <h2 class="sidebar-title">Related Articles</h2>
+            </div>
+
+            <div class="related-list">
+              @for (rel of relatedBlogs; track rel.id) {
+              <article class="related-item-card">
+                <a [routerLink]="['/blogs', rel.slug]" class="related-thumb-link" tabindex="-1" aria-hidden="true">
+                  <img [src]="rel.image" [alt]="rel.title" class="related-thumb-img" loading="lazy" />
+                </a>
+
+                <div class="related-item-content">
+                  <span class="related-category">{{ rel.category }}</span>
+                  <h3 class="related-title">
+                    <a [routerLink]="['/blogs', rel.slug]" class="related-title-link">
+                      {{ rel.title }}
+                    </a>
+                  </h3>
+                  <div class="related-meta">
+                    <span>{{ rel.readTime }}</span>
+                    <span>•</span>
+                    <a [routerLink]="['/blogs', rel.slug]" class="related-read-link">
+                      <span>Read</span>
+                      <i class="bi bi-arrow-right"></i>
+                    </a>
+                  </div>
+                </div>
+              </article>
+              }
+            </div>
+          </div>
+
+          <!-- Quick Consultation Card in Sidebar -->
+          <div class="sidebar-consult-card">
+            <div class="consult-icon">
+              <i class="bi bi-chat-quote-fill"></i>
+            </div>
+            <h4>Have Questions?</h4>
+            <p>Speak with our WhatsApp messaging architects about your broadcast setup.</p>
+            <a routerLink="/contact" class="btn-consult-link">
+              <span>Consult Our Specialists</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  }
+</div>

@@ -29,12 +29,12 @@
       </ul>
     </nav>
 
-    <!-- RIGHT: ACTION BUTTONS (LOGIN + GET STARTED + MOBILE TOGGLE) -->
+    <!-- RIGHT: ACTION BUTTONS (CONTACT US + GET STARTED + MOBILE TOGGLE) -->
     <div class="header-right-actions">
-      <a routerLink="/login" class="btn-action-login">
-        Login
+      <a routerLink="/contact" routerLinkActive="active" class="btn-action-contact">
+        Contact Us
       </a>
-      <a routerLink="/login" class="btn-action-primary">
+      <a [routerLink]="['/pricing']" fragment="pricing-cards-section" class="btn-action-primary">
         <span>Get Started</span>
       </a>
 
@@ -77,14 +77,16 @@
         <!-- Mobile Actions -->
         <div class="mobile-actions-stack">
           <a
-            routerLink="/login"
-            class="mobile-btn-login"
+            routerLink="/contact"
+            routerLinkActive="active"
+            class="mobile-btn-contact"
             (click)="closeMobileMenu()"
           >
-            Login
+            Contact Us
           </a>
           <a
-            routerLink="/login"
+            [routerLink]="['/pricing']"
+            fragment="pricing-cards-section"
             class="mobile-btn-primary"
             (click)="closeMobileMenu()"
           >

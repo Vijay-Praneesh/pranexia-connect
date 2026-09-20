@@ -1,0 +1,50 @@
+<article class="blog-card" tabindex="0" [attr.aria-label]="blog.title">
+  <!-- Card Image Link -->
+  <a [routerLink]="['/blogs', blog.slug]" class="blog-card-media" tabindex="-1" aria-hidden="true">
+    <img
+      [src]="blog.image"
+      [alt]="blog.title"
+      class="card-img"
+      loading="lazy"
+    />
+    <div class="card-category-pill">
+      <span>{{ blog.category }}</span>
+    </div>
+  </a>
+
+  <!-- Card Body -->
+  <div class="blog-card-body">
+    <!-- Meta: Date & Read Time -->
+    <div class="card-meta-bar">
+      <span class="meta-date">
+        <i class="bi bi-calendar3"></i>
+        {{ blog.publishedDate | date: 'mediumDate' }}
+      </span>
+      <span class="meta-dot" aria-hidden="true">•</span>
+      <span class="meta-time">
+        <i class="bi bi-clock"></i>
+        {{ blog.readTime }}
+      </span>
+    </div>
+
+    <!-- Title -->
+    <h3 class="card-title">
+      <a [routerLink]="['/blogs', blog.slug]" class="card-title-link">
+        {{ blog.title }}
+      </a>
+    </h3>
+
+    <!-- Excerpt -->
+    <p class="card-excerpt">
+      {{ blog.excerpt }}
+    </p>
+
+    <!-- Footer Action -->
+    <div class="card-footer">
+      <a [routerLink]="['/blogs', blog.slug]" class="card-read-more" [attr.aria-label]="'Read article: ' + blog.title">
+        <span class="read-text">Read Article</span>
+        <i class="bi bi-arrow-right card-arrow" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+</article>

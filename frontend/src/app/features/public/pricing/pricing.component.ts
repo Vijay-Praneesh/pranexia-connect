@@ -1,308 +1,543 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { SeoService } from '../../../core/services/seo.service';
-
-interface PricingTier {
-  id: string;
-  name: string;
-  badge?: string;
-  price: string;
-  period: string;
-  description: string;
-  features: string[];
-  ctaText: string;
-  isPopular?: boolean;
-}
+import {
+  PricingPlan,
+  BillingIntervalType,
+  ComparisonCategory,
+  FaqItem,
+  ProductValueItem,
+  DecisionGuideItem,
+} from './pricing.model';
 
 @Component({
   selector: 'app-public-pricing',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  template: `
-    <div class="public-page-wrapper">
-      <section class="page-hero-section">
-        <div class="page-container text-center">
-          <span class="page-eyebrow">TRANSPARENT PRICING</span>
-          <h1 class="page-title">Flexible plans designed to scale with your business.</h1>
-          <p class="page-subtitle">
-            Choose the right tier for your messaging volume. All plans include official Meta Cloud API connectivity and standard security.
-          </p>
-        </div>
-      </section>
-
-      <section class="page-content-section">
-        <div class="page-container">
-          <div class="pricing-grid">
-            @for (tier of tiers; track tier.id) {
-              <div class="pricing-card" [class.popular]="tier.isPopular">
-                @if (tier.badge) {
-                  <div class="tier-popular-badge">{{ tier.badge }}</div>
-                }
-                <div class="tier-header">
-                  <h3 class="tier-name">{{ tier.name }}</h3>
-                  <p class="tier-desc">{{ tier.description }}</p>
-                  <div class="tier-price-box">
-                    <span class="currency">₹</span>
-                    <span class="amount">{{ tier.price }}</span>
-                    <span class="period">/{{ tier.period }}</span>
-                  </div>
-                </div>
-
-                <ul class="tier-features-list">
-                  @for (feat of tier.features; track feat) {
-                    <li>
-                      <i class="bi bi-check2-circle text-primary"></i>
-                      <span>{{ feat }}</span>
-                    </li>
-                  }
-                </ul>
-
-                <a routerLink="/login" class="btn" [class.btn-primary]="tier.isPopular" [class.btn-outline-primary]="!tier.isPopular">
-                  <span>{{ tier.ctaText }}</span>
-                  <i class="bi bi-arrow-right ms-2"></i>
-                </a>
-              </div>
-            }
-          </div>
-        </div>
-      </section>
-    </div>
-  `,
-  styles: [`
-    .public-page-wrapper {
-      padding-bottom: 5rem;
-    }
-    .page-hero-section {
-      padding: 4.5rem 1.5rem 3rem;
-      background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.06) 0%, #ffffff 70%);
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .page-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-    .page-eyebrow {
-      font-size: 0.8125rem;
-      font-weight: 800;
-      color: #2563eb;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 1rem;
-    }
-    .page-title {
-      font-size: 2.75rem;
-      font-weight: 800;
-      color: #0f1b3d;
-      letter-spacing: -0.025em;
-      line-height: 1.2;
-      max-width: 800px;
-      margin: 0 auto 1.25rem;
-    }
-    .page-subtitle {
-      font-size: 1.125rem;
-      color: #64748b;
-      max-width: 680px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-    .page-content-section {
-      padding: 4rem 0;
-    }
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-      align-items: stretch;
-    }
-    @media (max-width: 991.98px) {
-      .pricing-grid {
-        grid-template-columns: 1fr;
-        max-width: 500px;
-        margin: 0 auto;
-      }
-      .page-title {
-        font-size: 2.125rem;
-      }
-    }
-    .pricing-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 1.25rem;
-      padding: 2.25rem 2rem;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transition: all 0.25s ease;
-    }
-    .pricing-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 36px -8px rgba(15, 27, 61, 0.1);
-    }
-    .pricing-card.popular {
-      border: 2px solid #2563eb;
-      box-shadow: 0 12px 30px -6px rgba(37, 99, 235, 0.18);
-    }
-    .tier-popular-badge {
-      position: absolute;
-      top: -14px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #2563eb;
-      color: #ffffff;
-      font-size: 0.75rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      padding: 0.35rem 0.85rem;
-      border-radius: 9999px;
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-    }
-    .tier-name {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: #0f1b3d;
-      margin-bottom: 0.35rem;
-    }
-    .tier-desc {
-      font-size: 0.875rem;
-      color: #64748b;
-      margin-bottom: 1.5rem;
-      min-height: 40px;
-    }
-    .tier-price-box {
-      display: flex;
-      align-items: baseline;
-      gap: 0.25rem;
-      margin-bottom: 1.75rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .currency {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #0f1b3d;
-    }
-    .amount {
-      font-size: 3rem;
-      font-weight: 800;
-      color: #0f1b3d;
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
-    .period {
-      font-size: 0.9375rem;
-      color: #64748b;
-      font-weight: 600;
-    }
-    .tier-features-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      flex: 1 0 auto;
-    }
-    .tier-features-list li {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #172033;
-    }
-    .btn {
-      width: 100%;
-      padding: 0.75rem 1.25rem;
-      font-weight: 700;
-      border-radius: 0.625rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .btn-primary {
-      background: #2563eb;
-      color: #ffffff;
-      border: 1px solid #2563eb;
-    }
-    .btn-primary:hover {
-      background: #1d4ed8;
-      border-color: #1d4ed8;
-    }
-    .btn-outline-primary {
-      background: transparent;
-      color: #2563eb;
-      border: 1px solid #2563eb;
-    }
-    .btn-outline-primary:hover {
-      background: #eff6ff;
-    }
-  `],
+  templateUrl: './pricing.component.html',
+  styleUrls: ['./pricing.component.scss'],
 })
-export class PricingComponent implements OnInit {
+export class PricingComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly seo = inject(SeoService);
+  private readonly route = inject(ActivatedRoute);
+  private fragmentSub?: Subscription;
 
-  readonly tiers: PricingTier[] = [
+  billingInterval: BillingIntervalType = 'monthly';
+
+  readonly plans: PricingPlan[] = [
     {
-      id: 'starter',
-      name: 'Starter Plan',
-      price: '1,499',
-      period: 'month',
-      description: 'Ideal for small businesses launching WhatsApp campaigns.',
-      features: [
-        'Up to 2,500 messages/mo',
-        'Customer Directory (1,000 records)',
-        'Standard Template Management',
-        'Media Storage up to 500 MB',
-        'Email Support',
+      id: 'STARTER',
+      name: 'STARTER',
+      displayName: 'Starter',
+      tagline: 'Essential WhatsApp messaging for small businesses and startups.',
+      pricing: {
+        monthly: {
+          amount: 999,
+          formatted: '₹999/mo',
+          billingText: 'Billed monthly',
+        },
+        yearly: {
+          amount: 9990,
+          formatted: '₹9,990/yr',
+          equivalentMonthly: '₹832.50',
+          billingText: 'Billed annually',
+        },
+      },
+      keyLimits: {
+        messages: '5,000',
+        contacts: '1,000',
+        campaigns: '20',
+        templates: '10',
+        storage: '1 GB',
+        users: '2',
+      },
+      highlightFeatures: [
+        'Official Meta Cloud API Direct Gateway',
+        'Bulk CSV & Excel Contact Ingestion',
+        'Dynamic Parameter Variables ({{1}}, {{2}})',
+        'Standard Campaign Delivery Analytics',
+        '50 Monthly Media Uploads',
+        'Standard Email & In-App Support',
       ],
-      ctaText: 'Get Started',
+      cta: {
+        text: 'Get Started',
+        route: '/login',
+        isPrimary: false,
+      },
     },
     {
-      id: 'growth',
-      name: 'Growth Plan',
-      badge: 'Most Popular',
-      price: '3,999',
-      period: 'month',
-      description: 'Designed for scaling companies with regular broadcast schedules.',
-      features: [
-        'Up to 15,000 messages/mo',
-        'Customer Directory (10,000 records)',
-        'Unlimited Template Syncing',
-        'Priority Queue Processing',
-        'Media Storage up to 2 GB',
-        'Detailed Read Receipts Telemetry',
-      ],
-      ctaText: 'Start Free Trial',
+      id: 'BUSINESS',
+      name: 'BUSINESS',
+      displayName: 'Business',
+      tagline: 'Growing businesses scaling campaigns and customer engagement.',
       isPopular: true,
+      badge: 'MOST POPULAR',
+      pricing: {
+        monthly: {
+          amount: 2499,
+          formatted: '₹2,499/mo',
+          billingText: 'Billed monthly',
+        },
+        yearly: {
+          amount: 24990,
+          formatted: '₹24,990/yr',
+          equivalentMonthly: '₹2,082.50',
+          billingText: 'Billed annually',
+        },
+      },
+      keyLimits: {
+        messages: '25,000',
+        contacts: '10,000',
+        campaigns: '100',
+        templates: '50',
+        storage: '5 GB',
+        users: '10',
+      },
+      highlightFeatures: [
+        'Everything in Starter included',
+        'Priority Message Queue Processing',
+        'Audience Tag Filtering & VIP Segments',
+        'Rich Media Headers (Images, PDFs, Video)',
+        'Interactive CTA & Quick Reply Buttons',
+        'Real-Time Read Receipts & Telemetry',
+        '250 Monthly Media Uploads',
+      ],
+      cta: {
+        text: 'Get Started',
+        route: '/login',
+        isPrimary: true,
+      },
     },
     {
-      id: 'enterprise',
-      name: 'Enterprise Plan',
-      price: '8,999',
-      period: 'month',
-      description: 'Dedicated infrastructure for high-volume enterprise communications.',
-      features: [
-        'Custom Monthly Message Allocations',
-        'Unlimited Customer Records',
-        'Dedicated Cloud Throughput',
-        'Custom Webhooks & Integrations',
-        'Dedicated Account Manager',
-        '99.9% Uptime SLA',
+      id: 'PROFESSIONAL',
+      name: 'PROFESSIONAL',
+      displayName: 'Professional',
+      tagline: 'High-volume marketing and enterprise-grade multi-agent operations.',
+      pricing: {
+        monthly: {
+          amount: 5999,
+          formatted: '₹5,999/mo',
+          billingText: 'Billed monthly',
+        },
+        yearly: {
+          amount: 59990,
+          formatted: '₹59,990/yr',
+          equivalentMonthly: '₹4,999.16',
+          billingText: 'Billed annually',
+        },
+      },
+      keyLimits: {
+        messages: '100,000',
+        contacts: '50,000',
+        campaigns: '500',
+        templates: '200',
+        storage: '20 GB',
+        users: '25',
+      },
+      highlightFeatures: [
+        'Everything in Business included',
+        '2 Active WhatsApp Business Connections',
+        'High-Throughput Asynchronous Queue Engine',
+        'Meta Error Code Diagnostics & Fix Prompts',
+        'Exportable Campaign CSV Audit Logs',
+        '1,000 Monthly Media Uploads',
+        'Priority Phone & Technical Support',
       ],
-      ctaText: 'Contact Sales',
+      cta: {
+        text: 'Get Started',
+        route: '/login',
+        isPrimary: false,
+      },
+    },
+    {
+      id: 'ENTERPRISE',
+      name: 'ENTERPRISE',
+      displayName: 'Enterprise',
+      tagline: 'Custom limits, dedicated infrastructure, and unlimited scale.',
+      pricing: {
+        monthly: {
+          amount: 0,
+          formatted: 'Custom',
+          billingText: 'Custom agreement',
+        },
+        yearly: {
+          amount: 0,
+          formatted: 'Custom',
+          billingText: 'Custom agreement',
+        },
+        isCustom: true,
+      },
+      keyLimits: {
+        messages: 'Custom / High',
+        contacts: 'Unlimited',
+        campaigns: 'Unlimited',
+        templates: 'Unlimited',
+        storage: 'Dedicated',
+        users: 'Unlimited',
+      },
+      highlightFeatures: [
+        'Custom Monthly Message Allocations',
+        'Multi-WABA Dedicated Architecture',
+        'Custom Webhooks & Internal Integrations',
+        '99.99% Uptime Service Level Agreement (SLA)',
+        'Dedicated Cloud Telemetry & NOC Monitoring',
+        'Dedicated Enterprise Account Architect',
+      ],
+      cta: {
+        text: 'Contact Sales',
+        route: '/contact',
+        isPrimary: false,
+      },
+    },
+  ];
+
+  readonly comparisonCategories: ComparisonCategory[] = [
+    {
+      category: 'Resource Quotas & Monthly Limits',
+      rows: [
+        {
+          name: 'Monthly WhatsApp Messages',
+          description: 'Billable messages dispatched to recipient devices',
+          starter: '5,000 / mo',
+          business: '25,000 / mo',
+          professional: '100,000 / mo',
+          enterprise: 'Custom Volume',
+        },
+        {
+          name: 'Saved Customer Contacts',
+          description: 'Total active contact records in CRM directory',
+          starter: '1,000',
+          business: '10,000',
+          professional: '50,000',
+          enterprise: 'Unlimited',
+        },
+        {
+          name: 'Monthly Broadcast Campaigns',
+          description: 'Scheduled or instant campaign dispatches',
+          starter: '20 / mo',
+          business: '100 / mo',
+          professional: '500 / mo',
+          enterprise: 'Unlimited',
+        },
+        {
+          name: 'WhatsApp Message Templates',
+          description: 'Meta-approved templates stored in library',
+          starter: '10',
+          business: '50',
+          professional: '200',
+          enterprise: 'Unlimited',
+        },
+        {
+          name: 'Media File Storage',
+          description: 'Flyers, PDFs, catalogs, and video attachments',
+          starter: '1 GB',
+          business: '5 GB',
+          professional: '20 GB',
+          enterprise: 'Dedicated Storage',
+        },
+        {
+          name: 'Monthly Media Uploads',
+          description: 'New media asset ingestion per billing period',
+          starter: '50 / mo',
+          business: '250 / mo',
+          professional: '1,000 / mo',
+          enterprise: 'Unlimited',
+        },
+        {
+          name: 'Team Member Accounts',
+          description: 'User seats with role-based access control',
+          starter: '2 users',
+          business: '10 users',
+          professional: '25 users',
+          enterprise: 'Unlimited',
+        },
+        {
+          name: 'WhatsApp Business Connections',
+          description: 'Simultaneous WABA phone numbers connected',
+          starter: '1 Number',
+          business: '1 Number',
+          professional: '2 Numbers',
+          enterprise: 'Multi-WABA',
+        },
+      ],
+    },
+    {
+      category: 'Messaging & Campaign Capabilities',
+      rows: [
+        {
+          name: 'Official Meta Cloud API Direct Gateway',
+          description: 'Zero middleware latency and verified delivery',
+          starter: true,
+          business: true,
+          professional: true,
+          enterprise: true,
+        },
+        {
+          name: 'Dynamic Variable Placeholders',
+          description: 'Parameter mapping (e.g. {{1}} Customer Name)',
+          starter: true,
+          business: true,
+          professional: true,
+          enterprise: true,
+        },
+        {
+          name: 'Audience Tag Filtering & Segmentation',
+          description: 'Filter recipients by custom contact tags',
+          starter: false,
+          business: true,
+          professional: true,
+          enterprise: true,
+        },
+        {
+          name: 'Rich Media Headers (PDF / Image / Video)',
+          description: 'Attach multimedia headers to certified templates',
+          starter: false,
+          business: true,
+          professional: true,
+          enterprise: true,
+        },
+        {
+          name: 'Interactive CTA & Quick Reply Buttons',
+          description: 'One-tap website links and phone dialer buttons',
+          starter: false,
+          business: true,
+          professional: true,
+          enterprise: true,
+        },
+        {
+          name: 'High-Throughput Asynchronous Queue',
+          description: 'High TPS dispatching with pause/resume controls',
+          starter: false,
+          business: false,
+          professional: true,
+          enterprise: true,
+        },
+      ],
+    },
+    {
+      category: 'Analytics, Telemetry & Support',
+      rows: [
+        {
+          name: 'Real-Time Delivery & Read Receipts',
+          description: 'Accurate sent, delivered, and read timestamps',
+          starter: 'Basic Counts',
+          business: 'Full Telemetry',
+          professional: 'Full Telemetry',
+          enterprise: 'Full Telemetry + Webhooks',
+        },
+        {
+          name: 'Official Meta Error Code Diagnostics',
+          description: 'Detailed failure explanations and fix prompts',
+          starter: false,
+          business: true,
+          professional: true,
+          enterprise: true,
+        },
+        {
+          name: 'Exportable CSV Audit Logs',
+          description: 'Downloadable campaign dispatch records',
+          starter: false,
+          business: false,
+          professional: true,
+          enterprise: true,
+        },
+        {
+          name: 'Customer Support SLA',
+          description: 'Technical support response channels',
+          starter: 'Standard Email',
+          business: 'Priority In-App',
+          professional: 'Priority Phone & Chat',
+          enterprise: 'Dedicated 24/7 NOC + SLA',
+        },
+      ],
+    },
+  ];
+
+  readonly productValues: ProductValueItem[] = [
+    {
+      icon: 'bi-people-fill',
+      title: 'Customer Management',
+      description: 'Keep customer information organized and accessible.',
+      highlights: [
+        'Centralized contact database',
+        'Custom tagging and categorization',
+        'Bulk CSV & Excel file ingestion',
+      ],
+    },
+    {
+      icon: 'bi-megaphone-fill',
+      title: 'Campaign Management',
+      description: 'Create and manage customer communication campaigns from one platform.',
+      highlights: [
+        'Asynchronous queue-based dispatches',
+        'Instant or scheduled execution',
+        'Live progress bar monitoring',
+      ],
+    },
+    {
+      icon: 'bi-whatsapp',
+      title: 'WhatsApp Templates',
+      description: 'Organize reusable WhatsApp message templates for your communication workflows.',
+      highlights: [
+        'Meta Cloud API approval synchronization',
+        'Header media attachment support',
+        'Interactive CTA & Quick Reply buttons',
+      ],
+    },
+    {
+      icon: 'bi-graph-up-arrow',
+      title: 'Reports & Analytics',
+      description: 'Understand campaign activity and performance through meaningful reports.',
+      highlights: [
+        'Delivery and read receipt ratios',
+        'Official Meta failure diagnostics',
+        'Transparent credit & quota meters',
+      ],
+    },
+  ];
+
+  readonly decisionGuides: DecisionGuideItem[] = [
+    {
+      title: 'Startups & Boutique Stores',
+      subtitle: 'Starter Plan (₹999/mo)',
+      planName: 'Starter',
+      description:
+        'Ideal for businesses launching their first WhatsApp communication channel. Send up to 5,000 messages per month, organize 1,000 customer contacts, and manage 10 approved message templates.',
+      bestFor: 'Small businesses with up to 1,000 active contacts.',
+    },
+    {
+      title: 'Growing Brands & Multi-Agent Teams',
+      subtitle: 'Business Plan (₹2,499/mo)',
+      planName: 'Business',
+      description:
+        'Designed for scaling companies with regular broadcast schedules. Includes 25,000 monthly messages, 10,000 contacts, audience tag filtering, rich media headers, and real-time read telemetry.',
+      bestFor: 'Growing marketing teams and customer support desks.',
+    },
+    {
+      title: 'High-Volume Operations & Enterprises',
+      subtitle: 'Professional & Enterprise Plans',
+      planName: 'Professional / Enterprise',
+      description:
+        'Engineered for high-volume broadcast operations requiring 100,000+ messages per month, 50,000+ contacts, multi-number WhatsApp Business connections, and priority engineering support.',
+      bestFor: 'High-throughput commercial retailers and enterprise SaaS.',
+    },
+  ];
+
+  readonly faqs: FaqItem[] = [
+    {
+      id: 'included',
+      question: '1. What is included in a Seyyon Connect plan?',
+      answer:
+        'Every plan includes direct connection to the official Meta Cloud API, customer directory storage, campaign broadcast scheduling, template management, media storage, and real-time delivery telemetry based on your tier limits.',
+      isOpen: true,
+    },
+    {
+      id: 'change-plan',
+      question: '2. Can I change my plan later?',
+      answer:
+        'Yes. You can upgrade or downgrade your plan at any time from your Account Settings. Upgrades take effect immediately with prorated billing, while downgrades take effect at the end of the current billing cycle.',
+      isOpen: false,
+    },
+    {
+      id: 'upgrade-downgrade',
+      question: '3. Can I upgrade or downgrade my plan?',
+      answer:
+        'Yes. Our platform provides a clear upgrade preview that displays your new limits, price adjustment, and effective date before you confirm any plan change.',
+      isOpen: false,
+    },
+    {
+      id: 'billing-work',
+      question: '4. How does billing work?',
+      answer:
+        'Seyyon Connect offers transparent monthly and annual billing. Annual subscriptions receive an automatic discount equal to approximately 2 months free (~17% off). We accept all major cards, UPI, and bank transfers.',
+      isOpen: false,
+    },
+    {
+      id: 'reach-limit',
+      question: '5. What happens if I reach my plan limit?',
+      answer:
+        'Our system provides advance warning thresholds at 80% and 90% usage. If your message or contact limit is reached, campaigns will pause to prevent overages until you upgrade or your monthly cycle resets.',
+      isOpen: false,
+    },
+    {
+      id: 'whatsapp-setup',
+      question: '6. Is WhatsApp setup included?',
+      answer:
+        'Yes. We provide complete onboarding guidance to connect your verified Meta Business Account, register your business phone number, and generate your Cloud API credentials.',
+      isOpen: false,
+    },
+    {
+      id: 'cancel-sub',
+      question: '7. Can I cancel my subscription?',
+      answer:
+        'Yes, you can cancel your subscription at any time from the Subscription management page in your dashboard. Your access will remain active until the end of your current paid billing period.',
+      isOpen: false,
+    },
+    {
+      id: 'manage-sub',
+      question: '8. Where can I manage my subscription?',
+      answer:
+        'Authenticated company administrators can manage active plans, view past payment invoices, check live quota usage, and update billing methods in the Subscription section of the app.',
+      isOpen: false,
     },
   ];
 
   ngOnInit(): void {
     this.seo.updateSeo({
-      title: 'Pricing Plans | Seyyon Connect',
-      description: 'Transparent pricing for Seyyon Connect WhatsApp marketing, broadcast campaigns, and customer engagement platform.',
+      title: 'Seyyon Connect Pricing | Plans & Transparent Pricing',
+      description:
+        'Choose the Seyyon Connect plan that fits your customer engagement needs. Transparent pricing for WhatsApp broadcast campaigns, customer CRM, and Meta Cloud API messaging.',
+      keywords:
+        'Seyyon Connect Pricing, WhatsApp Marketing Plans, Meta Cloud API Pricing, Campaign Automation Pricing, SaaS Messaging Plans',
+      ogTitle: 'Seyyon Connect Pricing | Plans that Grow with Your Business',
+      ogDescription:
+        'Choose the Seyyon Connect plan that fits your customer engagement needs. Transparent pricing with no hidden fees.',
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.fragmentSub = this.route.fragment.subscribe((fragment) => {
+      if (fragment === 'pricing-cards-section' || fragment === 'pricing-cards') {
+        setTimeout(() => {
+          const el =
+            document.getElementById('pricing-cards-section') ||
+            document.querySelector('section.pricing-cards-section');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 120);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.fragmentSub?.unsubscribe();
+  }
+
+  setBillingInterval(interval: BillingIntervalType): void {
+    this.billingInterval = interval;
+  }
+
+  isBoolean(val: string | boolean): boolean {
+    return typeof val === 'boolean';
+  }
+
+  isTrue(val: string | boolean): boolean {
+    return val === true;
+  }
+
+  toggleFaq(faqId: string): void {
+    const faq = this.faqs.find((f) => f.id === faqId);
+    if (faq) {
+      faq.isOpen = !faq.isOpen;
+    }
   }
 }

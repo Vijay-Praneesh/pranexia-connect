@@ -1,0 +1,232 @@
+<div class="public-blogs-page">
+  <!-- ======================================================================= -->
+  <!-- 1. BLOG HERO HEADER SECTION                                             -->
+  <!-- ======================================================================= -->
+  <section class="blog-hero-section" aria-labelledby="blog-page-heading">
+    <div class="blog-hero-container">
+      <span class="hero-eyebrow">SEYYON CONNECT KNOWLEDGE HUB</span>
+      <h1 id="blog-page-heading" class="hero-title">
+        Insights <span class="highlight-orange">& Ideas</span>
+      </h1>
+      <p class="hero-subtitle">
+        Practical insights into customer engagement, WhatsApp communication, campaigns, analytics, and smarter business communication.
+      </p>
+
+      <!-- Search Bar -->
+      <div class="blog-search-wrapper">
+        <div class="search-input-box">
+          <i class="bi bi-search search-icon" aria-hidden="true"></i>
+          <input
+            type="text"
+            class="search-input"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Search by topic, keyword, or tag..."
+            aria-label="Search blog articles"
+          />
+          @if (searchQuery) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="searchQuery = ''; onSearchChange()"
+            aria-label="Clear search"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+          }
+        </div>
+      </div>
+
+      <!-- Dynamic Category Tabs -->
+      <nav class="category-tabs-nav" aria-label="Blog categories">
+        <div class="category-tabs-list" role="tablist">
+          @for (cat of categories; track cat.id) {
+          <button
+            type="button"
+            class="category-tab"
+            [class.active]="selectedCategory === cat.id"
+            (click)="onCategorySelect(cat.id)"
+            role="tab"
+            [attr.aria-selected]="selectedCategory === cat.id"
+          >
+            <span>{{ cat.label }}</span>
+            <span class="cat-count">({{ cat.count }})</span>
+          </button>
+          }
+        </div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 2. MAIN BLOG CONTENT SECTION                                            -->
+  <!-- ======================================================================= -->
+  <section class="blog-feed-section" aria-label="Blog posts list">
+    <div class="feed-container">
+      <!-- FEATURED ARTICLE (Shown when on 'all' and no active search) -->
+      @if (featuredBlog && selectedCategory === 'all' && !searchQuery) {
+      <div class="featured-block-wrapper">
+        <span class="feed-section-eyebrow">FEATURED ARTICLE</span>
+        <article class="featured-article-card" tabindex="0">
+          <div class="featured-content-col">
+            <span class="featured-category-tag">{{ featuredBlog.category }}</span>
+
+            <h2 class="featured-title">
+              <a [routerLink]="['/blogs', featuredBlog.slug]" class="featured-title-link">
+                {{ featuredBlog.title }}
+              </a>
+            </h2>
+
+            <p class="featured-excerpt">{{ featuredBlog.excerpt }}</p>
+
+            <div class="featured-meta-row">
+              <span class="meta-author">
+                <i class="bi bi-person-circle"></i>
+                {{ featuredBlog.author.name }}
+              </span>
+              <span class="meta-dot">•</span>
+              <span class="meta-date">{{ featuredBlog.publishedDate | date: 'mediumDate' }}</span>
+              <span class="meta-dot">•</span>
+              <span class="meta-time">{{ featuredBlog.readTime }}</span>
+            </div>
+
+            <div class="featured-action">
+              <a [routerLink]="['/blogs', featuredBlog.slug]" class="btn-primary-orange" [attr.aria-label]="'Read featured article: ' + featuredBlog.title">
+                <span>Read Article</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Featured Image -->
+          <a [routerLink]="['/blogs', featuredBlog.slug]" class="featured-media-col" tabindex="-1" aria-hidden="true">
+            <img [src]="featuredBlog.image" [alt]="featuredBlog.title" class="featured-img" />
+            <div class="featured-pill-badge">
+              <i class="bi bi-star-fill"></i>
+              <span>Featured Post</span>
+            </div>
+          </a>
+        </article>
+      </div>
+      }
+
+      <!-- LATEST ARTICLES GRID -->
+      <div class="latest-articles-wrapper">
+        <div class="feed-section-header">
+          <h2 class="feed-section-title">
+            @if (searchQuery || selectedCategory !== 'all') {
+              <span>Search Results ({{ filteredBlogs.length }})</span>
+            } @else {
+              <span>Latest <span class="highlight-orange">Articles</span></span>
+            }
+          </h2>
+          @if (searchQuery || selectedCategory !== 'all') {
+          <button type="button" class="btn-reset-filters" (click)="clearFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            <span>Reset Filters</span>
+          </button>
+          }
+        </div>
+
+        @if (nonFeaturedFilteredBlogs.length > 0) {
+        <div class="articles-grid">
+          @for (blog of nonFeaturedFilteredBlogs; track blog.id) {
+          <app-blog-card [blog]="blog"></app-blog-card>
+          }
+        </div>
+        } @else if (filteredBlogs.length === 0) {
+        <!-- Empty State -->
+        <div class="empty-state-card">
+          <div class="empty-icon-box">
+            <i class="bi bi-journal-x"></i>
+          </div>
+          <h3>No Articles Found</h3>
+          <p>We couldn't find any articles matching "{{ searchQuery }}". Try adjusting your search query or selecting a different category.</p>
+          <button type="button" class="btn-primary-orange" (click)="clearFilters()">
+            View All Articles
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 3. ULTRA-FAST CTA SECTION (MATCHING HOME & ABOUT DARK GLOW THEME)       -->
+  <!-- ======================================================================= -->
+  <section class="cta-section" aria-labelledby="blog-cta-heading">
+    <div class="cta-container">
+      <div class="cta-card-wrapper">
+        <div class="cta-glow-blob top-right" aria-hidden="true"></div>
+        <div class="cta-glow-blob bottom-left" aria-hidden="true"></div>
+
+        <div class="cta-main-grid">
+          <div class="cta-content-col">
+            <div class="cta-live-badge">
+              <span class="pulse-dot"></span>
+              <span>STAY INFORMED & CONNECTED</span>
+            </div>
+
+            <h2 id="blog-cta-heading" class="cta-title">
+              Ready To Upgrade Your<br />
+              <span class="highlight-orange">Customer Engagement?</span>
+            </h2>
+
+            <p class="cta-desc">
+              Experience the power of Meta Cloud API verified WhatsApp campaigns, customer CRM management, and real-time delivery telemetry.
+            </p>
+
+            <div class="cta-features-list">
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>Direct Meta Cloud API Integration</span>
+              </div>
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>High-Speed Asynchronous Campaign Engine</span>
+              </div>
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>24/7 Dedicated Priority Technical Support</span>
+              </div>
+            </div>
+
+            <div class="cta-actions-group">
+              <a routerLink="/pricing" class="btn-cta-primary" aria-label="Get Started with Seyyon Connect">
+                <span>Get Started Now</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </a>
+              <a routerLink="/contact" class="btn-cta-secondary" aria-label="Contact Platform Sales">
+                <span>Talk to Sales</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="cta-visual-col">
+            <div class="cta-visual-wrapper">
+              <img src="assets/public-website/home/cta-network-hub.jpg" alt="Seyyon Connect Knowledge & Communication Hub" class="cta-hub-img" />
+              <div class="floating-badge badge-top-left" aria-hidden="true">
+                <div class="badge-icon-box bg-orange">
+                  <i class="bi bi-journal-bookmark-fill"></i>
+                </div>
+                <div class="badge-text-box">
+                  <span class="badge-val">Expert Insights</span>
+                  <span class="badge-lbl">Proven Best Practices</span>
+                </div>
+              </div>
+              <div class="floating-badge badge-bottom-right" aria-hidden="true">
+                <div class="badge-icon-box bg-green">
+                  <i class="bi bi-patch-check-fill"></i>
+                </div>
+                <div class="badge-text-box">
+                  <span class="badge-val">Meta Certified</span>
+                  <span class="badge-lbl">Official Cloud API</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

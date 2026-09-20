@@ -1,28 +1,78 @@
 <footer class="public-footer" role="contentinfo">
-  <!-- Ambient Backlight Glow -->
-  <div class="footer-ambient-glow" aria-hidden="true"></div>
+  <!-- Multi-layered Ambient Glows -->
+  <div class="footer-ambient-glow glow-top-center" aria-hidden="true"></div>
+  <div class="footer-ambient-glow glow-bottom-left" aria-hidden="true"></div>
+  <div class="footer-ambient-glow glow-top-right" aria-hidden="true"></div>
 
   <div class="footer-container">
-    <!-- Top Footer Columns Grid -->
-    <div class="footer-top-grid">
-      <!-- 1. Brand & Tagline Col -->
-      <div class="footer-brand-col">
+    <!-- TOP: SLEEK NEWSLETTER / ENGAGEMENT BANNER -->
+    <div class="footer-newsletter-banner">
+      <div class="newsletter-glow" aria-hidden="true"></div>
+      <div class="newsletter-content-grid">
+        <div class="newsletter-text-col">
+          <div class="newsletter-badge">
+            <span class="live-dot"></span>
+            <span>WHATSAPP INTELLIGENCE</span>
+          </div>
+          <h3 class="newsletter-title">Stay Ahead With Enterprise Marketing Insights</h3>
+          <p class="newsletter-desc">
+            Get platform feature releases, Meta Cloud API updates, and proven campaign deliverability playbooks.
+          </p>
+        </div>
+
+        <div class="newsletter-form-col">
+          @if (newsletterSubmitted) {
+          <div class="newsletter-success-box" role="status">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Thank you for subscribing! You're now on our priority list.</span>
+          </div>
+          } @else {
+          <form (ngSubmit)="onNewsletterSubmit()" class="newsletter-form-wrapper" novalidate>
+            <div class="newsletter-input-group">
+              <i class="bi bi-envelope newsletter-icon" aria-hidden="true"></i>
+              <input
+                type="email"
+                [(ngModel)]="newsletterEmail"
+                name="newsletterEmail"
+                class="newsletter-input"
+                placeholder="Enter your work email..."
+                required
+                aria-label="Email address for newsletter subscription"
+              />
+              <button type="submit" class="btn-newsletter-submit" aria-label="Subscribe to newsletter">
+                <span>Subscribe</span>
+                <i class="bi bi-arrow-right"></i>
+              </button>
+            </div>
+            <span class="newsletter-micro-note">No spam. Unsubscribe anytime with one click.</span>
+          </form>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN 4-COLUMN FOOTER GRID -->
+    <div class="footer-main-grid">
+      <!-- 1. BRAND & MISSION COLUMN -->
+      <div class="footer-col footer-brand-col">
         <a routerLink="/" class="footer-brand-link" aria-label="Seyyon Connect Home">
           <img
-            src="assets/seyyon-logo.png"
+            src="assets/seyyon-logo-white.png"
             alt="Seyyon Connect"
-            class="footer-logo"
+            class="footer-logo-white"
           />
         </a>
+
         <p class="footer-tagline">
           Connect. Engage. <span class="highlight-orange">Grow.</span>
         </p>
+
         <p class="footer-desc">
-          The unified customer engagement and WhatsApp campaign command center engineered for modern growing businesses worldwide.
+          The unified customer engagement and WhatsApp broadcast command center engineered for modern fast-growing businesses.
         </p>
 
-        <!-- Social Media Icons Row -->
-        <div class="footer-social-row">
+        <!-- Social Media Glow Icons Row -->
+        <div class="footer-social-row" aria-label="Social media channels">
           <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Twitter / X">
             <i class="bi bi-twitter-x"></i>
           </a>
@@ -40,84 +90,144 @@
           </a>
         </div>
 
-        <!-- Security / Meta Partner Badge -->
+        <!-- Meta Partner & Security Pill -->
         <div class="footer-security-pill">
-          <i class="bi bi-shield-check text-primary"></i>
+          <span class="status-pulse-green"></span>
           <span>Official Meta Cloud API Standards</span>
         </div>
       </div>
 
-      <!-- 2. Links Column: Platform -->
-      <div class="footer-links-col">
-        <span class="footer-col-title">Platform</span>
+      <!-- 2. PRODUCTS & CAPABILITIES COLUMN -->
+      <div class="footer-col footer-links-col">
+        <span class="footer-col-title">Platform & Products</span>
         <ul class="footer-links-list">
-          <li><a routerLink="/products">Customer Directory</a></li>
-          <li><a routerLink="/products">Campaign Studio</a></li>
-          <li><a routerLink="/products">WhatsApp Templates</a></li>
-          <li><a routerLink="/products">Media Library</a></li>
-          <li><a routerLink="/products">Analytics & Reports</a></li>
-          <li><a routerLink="/products">Automated Workflows</a></li>
+          <li>
+            <a routerLink="/products">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>Customer Directory</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/products">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>Campaign Broadcast Studio</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/products">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>WhatsApp Message Templates</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/products">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>Media Asset Storage</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/products">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>Delivery Telemetry & Reports</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/products">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>High-TPS Asynchronous Queue</span>
+            </a>
+          </li>
         </ul>
       </div>
 
-      <!-- 3. Links Column: Company -->
-      <div class="footer-links-col">
-        <span class="footer-col-title">Company</span>
+      <!-- 3. COMPANY & RESOURCES COLUMN -->
+      <div class="footer-col footer-links-col">
+        <span class="footer-col-title">Company & Resources</span>
         <ul class="footer-links-list">
-          <li><a routerLink="/about">About Us</a></li>
-          <li><a routerLink="/pricing">Pricing Plans</a></li>
-          <li><a routerLink="/contact">Contact Support</a></li>
-          <li><a routerLink="/login">Client Portal</a></li>
-          <li><a routerLink="/about">Trust & Security</a></li>
-          <li><a routerLink="/about">Customer Stories</a></li>
+          <li>
+            <a routerLink="/about">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>About Seyyon Connect</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/pricing">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>Pricing Plans & Quotas</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/blogs">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>Guides, Insights & Blogs</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/contact">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>Contact Us</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/about">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span>Platform Trust & Security</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/pricing']" fragment="pricing-cards-section">
+              <i class="bi bi-chevron-right link-bullet"></i>
+              <span class="text-highlight-orange">Get Started Free</span>
+            </a>
+          </li>
         </ul>
       </div>
 
-      <!-- 4. Contact & Support Column -->
-      <div class="footer-links-col footer-contact-col">
-        <span class="footer-col-title">Contact & Support</span>
+      <!-- 4. DIRECT CHANNELS & SERVICE STATUS COLUMN -->
+      <div class="footer-col footer-contact-col">
+        <span class="footer-col-title">Direct Support & Ops</span>
         <ul class="footer-contact-list">
           <li>
             <div class="contact-icon-box">
-              <i class="bi bi-envelope-fill text-primary"></i>
+              <i class="bi bi-envelope-at-fill"></i>
             </div>
             <div class="contact-info">
-              <span class="contact-label">Email Us</span>
-              <a href="mailto:support@seyyon.com" class="contact-value">support&#64;seyyon.com</a>
+              <span class="contact-label">Direct Inbox</span>
+              <a routerLink="/contact" class="contact-value">support&#64;seyyon.com</a>
             </div>
           </li>
           <li>
             <div class="contact-icon-box">
-              <i class="bi bi-telephone-fill text-primary"></i>
+              <i class="bi bi-shield-check"></i>
             </div>
             <div class="contact-info">
-              <span class="contact-label">Phone Support</span>
-              <span class="contact-value">+1 (800) 555-SEYYON</span>
+              <span class="contact-label">Infrastructure SLA</span>
+              <span class="contact-value">99.99% Uptime SLA</span>
             </div>
           </li>
           <li>
             <div class="contact-icon-box">
-              <i class="bi bi-clock-history text-primary"></i>
+              <i class="bi bi-clock-history"></i>
             </div>
             <div class="contact-info">
-              <span class="contact-label">Availability</span>
+              <span class="contact-label">Technical NOC</span>
               <span class="contact-value">24/7 Dedicated Monitoring</span>
             </div>
           </li>
           <li>
             <div class="contact-icon-box">
-              <i class="bi bi-geo-alt-fill text-primary"></i>
+              <i class="bi bi-diagram-3-fill"></i>
             </div>
             <div class="contact-info">
-              <span class="contact-label">Global NOC</span>
-              <span class="contact-value">100+ Network Hubs</span>
+              <span class="contact-label">Meta Cloud Gateway</span>
+              <span class="contact-value">Official WABA Direct Connect</span>
             </div>
           </li>
         </ul>
       </div>
     </div>
 
-    <!-- Bottom Copyright & Legal Strip -->
+    <!-- BOTTOM STRIP: COPYRIGHT, LEGAL LINKS & BACK TO TOP -->
     <div class="footer-bottom-strip">
       <div class="footer-copyright">
         © {{ currentYear }} <span class="brand-text">Seyyon Connect</span>. All rights reserved.
@@ -128,13 +238,13 @@
         <span class="dot-separator">•</span>
         <a routerLink="/about">Terms of Service</a>
         <span class="dot-separator">•</span>
-        <a routerLink="/about">Security Overview</a>
+        <a routerLink="/about">Security Standards</a>
         <span class="dot-separator">•</span>
-        <a routerLink="/about">Cookie Policy</a>
+        <a routerLink="/about">Cookie Preferences</a>
       </div>
 
-      <!-- Back To Top Button -->
-      <button type="button" class="btn-back-to-top" (click)="scrollToTop()" aria-label="Back to top">
+      <!-- Back To Top Smooth Pill Button -->
+      <button type="button" class="btn-back-to-top" (click)="scrollToTop()" aria-label="Scroll back to top">
         <span>Back to Top</span>
         <i class="bi bi-arrow-up"></i>
       </button>

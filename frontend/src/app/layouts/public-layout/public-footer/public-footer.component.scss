@@ -1,39 +1,73 @@
 // =============================================================================
-// SEYYON CONNECT — PUBLIC WEBSITE FOOTER STYLES (COOL LIGHT-BLACK THEME)
-// Brand Colors: Light-Black #0D121F, Accent Orange #F96614, Text White #FFFFFF
+// SEYYON CONNECT — PUBLIC WEBSITE FOOTER (SUPER COOL LIGHT-BLACK UI THEME)
+// Palette: Light Black #0C1017, Card #131926, Brand Orange #F96614, Text White #FFFFFF
 // =============================================================================
 
-$footer-bg: #0d121f;
-$footer-card: #131a2b;
+$footer-bg: #0c1017;
+$footer-card: #131926;
+$footer-card-hover: #172033;
 $primary: #f96614;
 $primary-hover: #f68749;
+$secondary: #f68749;
 $text-white: #ffffff;
 $text-light: #e2e8f0;
 $text-muted: #94a3b8;
 $border-color: rgba(255, 255, 255, 0.08);
+$border-hover: rgba(249, 102, 20, 0.35);
+
+:host {
+  display: block;
+  width: 100%;
+}
 
 .public-footer {
   background-color: $footer-bg;
-  border-top: 1px solid $border-color;
-  padding: 5rem 1.5rem 2.25rem;
+  background-image: radial-gradient(circle at 50% 0%, rgba(249, 102, 20, 0.06) 0%, transparent 60%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4.5rem 1.5rem 2.25rem;
   color: $text-white;
   position: relative;
   overflow: hidden;
 
   @media (max-width: 991.98px) {
-    padding: 4rem 1.25rem 2rem;
+    padding: 3.5rem 1.25rem 2rem;
   }
 }
 
+// -----------------------------------------------------------------------------
+// MULTI-LAYERED AMBIENT GLOWS
+// -----------------------------------------------------------------------------
 .footer-ambient-glow {
   position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 900px;
-  height: 280px;
-  background: radial-gradient(ellipse at top, rgba(249, 102, 20, 0.12) 0%, rgba(249, 102, 20, 0) 70%);
+  border-radius: 50%;
   pointer-events: none;
+  filter: blur(90px);
+  z-index: 1;
+
+  &.glow-top-center {
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 240px;
+    background: radial-gradient(ellipse, rgba(249, 102, 20, 0.14) 0%, rgba(249, 102, 20, 0) 70%);
+  }
+
+  &.glow-bottom-left {
+    bottom: -80px;
+    left: -80px;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0) 70%);
+  }
+
+  &.glow-top-right {
+    top: 60px;
+    right: -60px;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(249, 102, 20, 0.09) 0%, rgba(249, 102, 20, 0) 70%);
+  }
 }
 
 .footer-container {
@@ -44,16 +78,216 @@ $border-color: rgba(255, 255, 255, 0.08);
 }
 
 // -----------------------------------------------------------------------------
-// TOP 4-COLUMN FOOTER GRID
+// TOP NEWSLETTER / ENGAGEMENT GLASS BANNER
 // -----------------------------------------------------------------------------
-.footer-top-grid {
+.footer-newsletter-banner {
+  position: relative;
+  background: linear-gradient(135deg, rgba(19, 25, 38, 0.95) 0%, rgba(15, 20, 31, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2.75rem 3rem;
+  margin-bottom: 4.5rem;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+
+  @media (max-width: 991.98px) {
+    padding: 2.25rem 1.75rem;
+    border-radius: 18px;
+    margin-bottom: 3.5rem;
+  }
+
+  .newsletter-glow {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(249, 102, 20, 0.22) 0%, rgba(249, 102, 20, 0) 70%);
+    pointer-events: none;
+    filter: blur(50px);
+  }
+
+  .newsletter-content-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 3rem;
+    align-items: center;
+
+    @media (max-width: 991.98px) {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+  }
+
+  .newsletter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(249, 102, 20, 0.12);
+    border: 1px solid rgba(249, 102, 20, 0.3);
+    padding: 0.35rem 0.85rem;
+    border-radius: 100px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.725rem;
+    font-weight: 700;
+    color: #ff914d;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 0.85rem;
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ff7728;
+      box-shadow: 0 0 6px #ff7728;
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+  }
+
+  .newsletter-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: $text-white;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+
+    @media (max-width: 575.98px) {
+      font-size: 1.4rem;
+    }
+  }
+
+  .newsletter-desc {
+    font-size: 0.95rem;
+    color: $text-muted;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .newsletter-form-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .newsletter-input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: rgba(12, 16, 23, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      padding: 0.35rem 0.35rem 0.35rem 2.85rem;
+      transition: all 0.25s ease;
+
+      &:focus-within {
+        border-color: $primary;
+        box-shadow: 0 0 0 4px rgba(249, 102, 20, 0.15);
+
+        .newsletter-icon {
+          color: $primary;
+        }
+      }
+
+      .newsletter-icon {
+        position: absolute;
+        left: 1rem;
+        color: #64748b;
+        font-size: 1.1rem;
+        transition: color 0.2s ease;
+      }
+
+      .newsletter-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.95rem;
+        padding: 0.5rem 0.75rem;
+
+        &::placeholder {
+          color: #64748b;
+          font-weight: 400;
+        }
+      }
+
+      .btn-newsletter-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: $primary;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        padding: 0.65rem 1.35rem;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        white-space: nowrap;
+
+        i {
+          font-size: 0.85rem;
+          transition: transform 0.2s ease;
+        }
+
+        &:hover {
+          background: $primary-hover;
+          box-shadow: 0 4px 14px rgba(249, 102, 20, 0.4);
+
+          i {
+            transform: translateX(3px);
+          }
+        }
+      }
+    }
+
+    .newsletter-micro-note {
+      font-size: 0.75rem;
+      color: #64748b;
+      padding-left: 0.5rem;
+    }
+  }
+
+  .newsletter-success-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    color: #6ee7b7;
+    font-size: 0.92rem;
+    font-weight: 600;
+
+    i {
+      font-size: 1.25rem;
+      color: #10b981;
+      flex-shrink: 0;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// MAIN 4-COLUMN FOOTER GRID
+// -----------------------------------------------------------------------------
+.footer-main-grid {
   display: grid;
-  grid-template-columns: 1.75fr 1fr 1fr 1.35fr;
+  grid-template-columns: 1.65fr 1fr 1fr 1.35fr;
   gap: 3.5rem;
   margin-bottom: 4rem;
 
   @media (max-width: 1199.98px) {
-    grid-template-columns: 1.5fr 1fr 1fr 1.25fr;
+    grid-template-columns: 1.45fr 1fr 1fr 1.25fr;
     gap: 2.5rem;
   }
 
@@ -68,7 +302,7 @@ $border-color: rgba(255, 255, 255, 0.08);
   }
 }
 
-// 1. BRAND COLUMN
+// 1. BRAND & MISSION COLUMN
 .footer-brand-col {
   display: flex;
   flex-direction: column;
@@ -76,20 +310,26 @@ $border-color: rgba(255, 255, 255, 0.08);
 
   .footer-brand-link {
     display: inline-block;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.35rem;
     text-decoration: none;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.02);
+    }
   }
 
-  .footer-logo {
-    height: 38px;
-    width: auto;
+  .footer-logo-white {
+    width: 250px;
+    max-width: 100%;
+    height: auto;
     object-fit: contain;
-    filter: brightness(1.1);
+    display: block;
   }
 
   .footer-tagline {
     font-family: 'Outfit', sans-serif;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: $text-white;
     margin-bottom: 0.75rem;
@@ -101,30 +341,30 @@ $border-color: rgba(255, 255, 255, 0.08);
   }
 
   .footer-desc {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     color: $text-muted;
     line-height: 1.65;
-    margin-bottom: 1.5rem;
-    max-width: 380px;
+    margin-bottom: 1.75rem;
+    max-width: 360px;
   }
 
   .footer-social-row {
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
 
     .social-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      color: $text-white;
+      color: $text-light;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.95rem;
+      font-size: 1rem;
       text-decoration: none;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -133,7 +373,7 @@ $border-color: rgba(255, 255, 255, 0.08);
         border-color: $primary;
         color: #ffffff;
         transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(249, 102, 20, 0.35);
+        box-shadow: 0 6px 18px rgba(249, 102, 20, 0.4);
       }
     }
   }
@@ -142,7 +382,7 @@ $border-color: rgba(255, 255, 255, 0.08);
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    font-size: 0.75rem;
+    font-size: 0.775rem;
     font-weight: 600;
     color: $text-light;
     background: rgba(255, 255, 255, 0.04);
@@ -150,9 +390,13 @@ $border-color: rgba(255, 255, 255, 0.08);
     padding: 0.45rem 0.95rem;
     border-radius: 100px;
 
-    .text-primary {
-      color: $primary !important;
-      font-size: 0.95rem;
+    .status-pulse-green {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+      animation: pulseDot 2s infinite ease-in-out;
     }
   }
 }
@@ -162,21 +406,21 @@ $border-color: rgba(255, 255, 255, 0.08);
   .footer-col-title {
     display: block;
     font-family: 'Outfit', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.925rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.2px;
     color: $text-white;
     margin-bottom: 1.5rem;
     position: relative;
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.6rem;
 
     &::after {
       content: '';
       position: absolute;
       bottom: 0;
       left: 0;
-      width: 24px;
+      width: 28px;
       height: 2px;
       background: $primary;
       border-radius: 2px;
@@ -189,49 +433,91 @@ $border-color: rgba(255, 255, 255, 0.08);
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.9rem;
 
     li {
       a {
-        font-size: 0.9rem;
+        font-size: 0.92rem;
         color: #cbd5e1;
         text-decoration: none;
-        transition: all 0.2s ease;
+        transition: all 0.22s ease;
         display: inline-flex;
         align-items: center;
+        gap: 0.5rem;
+
+        .link-bullet {
+          font-size: 0.7rem;
+          color: $primary;
+          opacity: 0;
+          transform: translateX(-4px);
+          transition: all 0.22s ease;
+        }
+
+        .text-highlight-orange {
+          color: #ff914d;
+          font-weight: 700;
+        }
 
         &:hover {
           color: $primary;
+          transform: translateX(4px);
+
+          .link-bullet {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
       }
     }
   }
 }
 
-// 4. CONTACT & SUPPORT COLUMN
+// 4. DIRECT SUPPORT & OPS COLUMN
 .footer-contact-col {
+  .footer-col-title {
+    display: block;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.925rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: $text-white;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.6rem;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 28px;
+      height: 2px;
+      background: $primary;
+      border-radius: 2px;
+    }
+  }
+
   .footer-contact-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 1.1rem;
+    gap: 1.15rem;
 
     li {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.95rem;
 
       &:hover {
         .contact-icon-box {
           background: $primary;
           border-color: $primary;
+          color: #ffffff;
           transform: scale(1.05);
-
-          .text-primary {
-            color: #ffffff !important;
-          }
+          box-shadow: 0 4px 14px rgba(249, 102, 20, 0.35);
         }
 
         .contact-value {
@@ -241,22 +527,18 @@ $border-color: rgba(255, 255, 255, 0.08);
     }
 
     .contact-icon-box {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
       background: rgba(249, 102, 20, 0.12);
       border: 1px solid rgba(249, 102, 20, 0.25);
+      color: $primary;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      font-size: 1.05rem;
       flex-shrink: 0;
       transition: all 0.25s ease;
-
-      .text-primary {
-        color: $primary !important;
-        transition: color 0.25s ease;
-      }
     }
 
     .contact-info {
@@ -273,7 +555,7 @@ $border-color: rgba(255, 255, 255, 0.08);
       }
 
       .contact-value {
-        font-size: 0.875rem;
+        font-size: 0.9rem;
         color: $text-light;
         text-decoration: none;
         font-weight: 600;
@@ -288,14 +570,14 @@ $border-color: rgba(255, 255, 255, 0.08);
 // BOTTOM STRIP: COPYRIGHT, LEGAL LINKS & BACK TO TOP
 // -----------------------------------------------------------------------------
 .footer-bottom-strip {
-  border-top: 1px solid $border-color;
-  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 2.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1.25rem;
-  font-size: 0.85rem;
+  gap: 1.5rem;
+  font-size: 0.875rem;
   color: $text-muted;
 
   .footer-copyright {
@@ -310,7 +592,7 @@ $border-color: rgba(255, 255, 255, 0.08);
   .footer-legal-links {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.95rem;
     flex-wrap: wrap;
 
     a {
@@ -333,25 +615,52 @@ $border-color: rgba(255, 255, 255, 0.08);
   .btn-back-to-top {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.55rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: $text-white;
     font-family: 'Outfit', sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.825rem;
     font-weight: 700;
-    padding: 0.45rem 1rem;
+    padding: 0.5rem 1.15rem;
     border-radius: 100px;
     cursor: pointer;
     transition: all 0.25s ease;
     outline: none;
+
+    i {
+      font-size: 0.85rem;
+      transition: transform 0.25s ease;
+    }
 
     &:hover {
       background: $primary;
       border-color: $primary;
       color: #ffffff;
       transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(249, 102, 20, 0.35);
+      box-shadow: 0 4px 16px rgba(249, 102, 20, 0.4);
+
+      i {
+        transform: translateY(-2px);
+      }
     }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// KEYFRAMES
+// -----------------------------------------------------------------------------
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
   }
 }
