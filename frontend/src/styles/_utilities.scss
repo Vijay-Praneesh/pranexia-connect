@@ -24,7 +24,7 @@
 }
 
 // -----------------------------------------------------------------------------
-// Universal Table Typography & Spacing (No-Wrap across all project tables)
+// Universal Table Typography, Spacing & Header Theme (Owner Dashboard Gradient)
 // -----------------------------------------------------------------------------
 table,
 .table,
@@ -33,7 +33,13 @@ table,
 .studio-table,
 .comparison-table,
 .history-table,
-.recipient-table {
+.recipient-table,
+.recent-campaigns-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  vertical-align: middle;
+
   th,
   td {
     white-space: nowrap !important;
@@ -45,6 +51,71 @@ table,
   td.text-wrap,
   .text-wrap {
     white-space: normal !important;
+  }
+
+  thead {
+    background: linear-gradient(90deg, #2563eb 0%, #3730a3 100%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+
+    tr {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    th {
+      background: transparent !important;
+      font-size: 0.75rem !important;
+      font-weight: 700 !important;
+      color: #ffffff !important;
+      letter-spacing: 0.05em !important;
+      text-transform: uppercase !important;
+      padding: 0.875rem 1.25rem;
+      white-space: nowrap !important;
+      border: none !important;
+
+      // Ensure all buttons, sort triggers, text, labels, icons in header are white
+      button,
+      .btn-table-sort,
+      .sort-button,
+      span,
+      strong,
+      div,
+      i,
+      small {
+        color: #ffffff !important;
+      }
+
+      .btn-table-sort,
+      .sort-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+
+        &:hover {
+          opacity: 0.85;
+        }
+
+        i {
+          font-size: 0.75rem;
+          color: rgba(255, 255, 255, 0.85) !important;
+        }
+      }
+
+      input[type="checkbox"] {
+        border-color: rgba(255, 255, 255, 0.7);
+        accent-color: #2563eb;
+      }
+    }
   }
 }
 
@@ -232,6 +303,73 @@ table,
 
 .shadow-2xl {
   box-shadow: 0 25px 50px -12px rgba(15, 27, 61, 0.25) !important;
+}
+
+// -----------------------------------------------------------------------------
+// Universal Fractional / Decimal Spacing Utilities
+// -----------------------------------------------------------------------------
+// All-around Padding
+.p-0\.5, .p-0-5, [class*="p-0.5"], [class~="p-0.5"] { padding: 0.1875rem !important; }
+.p-1\.5, .p-1-5, [class*="p-1.5"], [class~="p-1.5"] { padding: 0.45rem !important; }
+.p-2\.5, .p-2-5, [class*="p-2.5"], [class~="p-2.5"] { padding: 0.75rem !important; }
+.p-3\.5, .p-3-5, [class*="p-3.5"], [class~="p-3.5"] { padding: 1.25rem !important; }
+.p-4\.5, .p-4-5, [class*="p-4.5"], [class~="p-4.5"] { padding: 1.65rem !important; }
+
+// Horizontal Padding (px)
+.px-0\.5, .px-0-5, [class*="px-0.5"], [class~="px-0.5"] { padding-left: 0.25rem !important; padding-right: 0.25rem !important; }
+.px-1\.5, .px-1-5, [class*="px-1.5"], [class~="px-1.5"] { padding-left: 0.45rem !important; padding-right: 0.45rem !important; }
+.px-2\.5, .px-2-5, [class*="px-2.5"], [class~="px-2.5"] { padding-left: 0.85rem !important; padding-right: 0.85rem !important; }
+.px-3\.5, .px-3-5, [class*="px-3.5"], [class~="px-3.5"] { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+.px-4\.5, .px-4-5, [class*="px-4.5"], [class~="px-4.5"] { padding-left: 1.65rem !important; padding-right: 1.65rem !important; }
+
+// Vertical Padding (py)
+.py-0\.5, .py-0-5, [class*="py-0.5"], [class~="py-0.5"] { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+.py-1\.5, .py-1-5, [class*="py-1.5"], [class~="py-1.5"] { padding-top: 0.45rem !important; padding-bottom: 0.45rem !important; }
+.py-2\.5, .py-2-5, [class*="py-2.5"], [class~="py-2.5"] { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+.py-3\.5, .py-3-5, [class*="py-3.5"], [class~="py-3.5"] { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+
+// Directional Padding
+.pt-1\.5, .pt-1-5, [class*="pt-1.5"] { padding-top: 0.45rem !important; }
+.pb-1\.5, .pb-1-5, [class*="pb-1.5"] { padding-bottom: 0.45rem !important; }
+.pt-2\.5, .pt-2-5, [class*="pt-2.5"] { padding-top: 0.75rem !important; }
+.pb-2\.5, .pb-2-5, [class*="pb-2.5"] { padding-bottom: 0.75rem !important; }
+.pt-3\.5, .pt-3-5, [class*="pt-3.5"] { padding-top: 1.25rem !important; }
+.pb-3\.5, .pb-3-5, [class*="pb-3.5"] { padding-bottom: 1.25rem !important; }
+.ps-2\.5, .ps-2-5, [class*="ps-2.5"] { padding-left: 0.75rem !important; }
+.pe-2\.5, .pe-2-5, [class*="pe-2.5"] { padding-right: 0.75rem !important; }
+.ps-3\.5, .ps-3-5, [class*="ps-3.5"] { padding-left: 1.25rem !important; }
+.pe-3\.5, .pe-3-5, [class*="pe-3.5"] { padding-right: 1.25rem !important; }
+
+// Flex Gaps
+.gap-0\.5, .gap-0-5, [class*="gap-0.5"] { gap: 0.1875rem !important; }
+.gap-1\.5, .gap-1-5, [class*="gap-1.5"] { gap: 0.45rem !important; }
+.gap-2\.5, .gap-2-5, [class*="gap-2.5"] { gap: 0.75rem !important; }
+.gap-3\.5, .gap-3-5, [class*="gap-3.5"] { gap: 1.25rem !important; }
+
+// Margins
+.m-1\.5, .m-1-5 { margin: 0.45rem !important; }
+.m-2\.5, .m-2-5 { margin: 0.75rem !important; }
+.m-3\.5, .m-3-5 { margin: 1.25rem !important; }
+.mb-1\.5, .mb-1-5 { margin-bottom: 0.45rem !important; }
+.mb-2\.5, .mb-2-5 { margin-bottom: 0.75rem !important; }
+.mb-3\.5, .mb-3-5 { margin-bottom: 1.25rem !important; }
+.mt-1\.5, .mt-1-5 { margin-top: 0.45rem !important; }
+.mt-2\.5, .mt-2-5 { margin-top: 0.75rem !important; }
+.mt-3\.5, .mt-3-5 { margin-top: 1.25rem !important; }
+
+// Specific Box Helpers for Perfect Breathing Room
+.customer-selection-wrapper {
+  padding: 1.25rem 1.35rem !important;
+  border-radius: 0.75rem !important;
+}
+
+.modal-hero-rate-box {
+  padding: 1.25rem 1.5rem !important;
+  border-radius: 1rem !important;
+}
+
+.cycle-remaining-pill {
+  padding: 0.35rem 0.85rem !important;
 }
 
 @keyframes backdropFadeIn {

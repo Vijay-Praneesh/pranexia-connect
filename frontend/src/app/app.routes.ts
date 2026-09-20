@@ -3,6 +3,58 @@ import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
+  // ===========================================================================
+  // 1. PUBLIC MARKETING WEBSITE (SEYYON CONNECT)
+  // ===========================================================================
+  {
+    path: '',
+    loadComponent: () =>
+      import('./layouts/public-layout/public-layout.component').then(
+        (c) => c.PublicLayoutComponent,
+      ),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/public/home/home.component').then(
+            (c) => c.HomeComponent,
+          ),
+      },
+      {
+        path: 'about',
+        loadComponent: () =>
+          import('./features/public/about/about.component').then(
+            (c) => c.AboutComponent,
+          ),
+      },
+      {
+        path: 'products',
+        loadComponent: () =>
+          import('./features/public/products/products.component').then(
+            (c) => c.ProductsComponent,
+          ),
+      },
+      {
+        path: 'pricing',
+        loadComponent: () =>
+          import('./features/public/pricing/pricing.component').then(
+            (c) => c.PricingComponent,
+          ),
+      },
+      {
+        path: 'contact',
+        loadComponent: () =>
+          import('./features/public/contact/contact.component').then(
+            (c) => c.ContactComponent,
+          ),
+      },
+    ],
+  },
+
+  // ===========================================================================
+  // 2. AUTHENTICATION (LOGIN)
+  // ===========================================================================
   {
     path: '',
     loadComponent: () =>
@@ -19,6 +71,10 @@ export const routes: Routes = [
       },
     ],
   },
+
+  // ===========================================================================
+  // 3. AUTHENTICATED SAAS APPLICATION & DASHBOARD
+  // ===========================================================================
   {
     path: '',
     loadComponent: () =>
@@ -123,6 +179,7 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '', pathMatch: 'full', redirectTo: 'login' },
-  { path: '**', redirectTo: 'login' },
+
+  // Fallback Route
+  { path: '**', redirectTo: '' },
 ];

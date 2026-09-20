@@ -103,8 +103,13 @@ class PlanService {
       }
 
       case METRIC_KEYS.MONTHLY_MEDIA_UPLOADS: {
+        const stats = await usageRepository.getActiveMediaStats(companyId);
         const summary = await usageService.getCompanyUsageSummary(companyId, periodStr);
-        return summary.saas.media.uploadedCount || 0;
+        const recordedCount = summary.saas?.media?.uploadedCount;
+        if (typeof stats?.activeFileCount === "number" && typeof recordedCount === "number") {
+          return Math.min(recordedCount, stats.activeFileCount);
+        }
+        return (typeof recordedCount === "number" ? recordedCount : stats?.activeFileCount) || 0;
       }
 
       case METRIC_KEYS.CUSTOMERS: {

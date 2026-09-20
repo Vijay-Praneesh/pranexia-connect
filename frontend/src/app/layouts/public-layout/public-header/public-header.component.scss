@@ -1,0 +1,447 @@
+// =============================================================================
+// SEYYON CONNECT — PUBLIC WEBSITE HEADER STYLES
+// Brand Orange Palette: Primary #F96614, Secondary #F68749
+// =============================================================================
+
+:host {
+  --wdtPrimaryColor: #f96614;
+  --wdtPrimaryColorRgb: 249, 102, 20;
+  --wdtSecondaryColor: #f68749;
+
+  display: block;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 1040;
+}
+
+$primary: #f96614;
+$secondary: #f68749;
+$text-dark: #1a1a1a;
+$text-muted: #666666;
+$border: #eaeaea;
+$surface: #fbf4ee;
+
+.public-header {
+  height: 76px;
+  background-color: $surface;
+  background-image: url('/assets/public-website/home/banner-bg.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  border-bottom: 1px solid transparent;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  width: 100%;
+
+  &.scrolled {
+    background-color: #ffffff;
+    background-image: none;
+    border-bottom-color: $border;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// -----------------------------------------------------------------------------
+// 1. BRAND LOGO (LEFT)
+// -----------------------------------------------------------------------------
+.header-left {
+  display: flex;
+  align-items: center;
+  flex: 1 0 0;
+  justify-content: flex-start;
+
+  .brand-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+      opacity: 0.92;
+      transform: scale(1.01);
+    }
+  }
+
+  .header-logo {
+    height: 42px;
+    width: auto;
+    max-width: 190px;
+    object-fit: contain;
+    display: block;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 2. CENTER NAVIGATION (DESKTOP)
+// -----------------------------------------------------------------------------
+.header-center-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+
+  @media (max-width: 991.98px) {
+    display: none;
+  }
+
+  .nav-list {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-item {
+    position: relative;
+  }
+
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: $text-dark;
+    text-decoration: none;
+    padding: 5px 0px 1px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    line-height: 1.5;
+    transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: 'Outfit', sans-serif;
+
+    // Left-to-Right Hover & Active Underline Animation
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background-color: var(--wdtPrimaryColor, #f96614);
+      border-radius: 1px;
+      transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &:hover {
+      color: var(--wdtPrimaryColor, #f96614);
+
+      &::after {
+        width: 100%;
+      }
+    }
+
+    &.active {
+      color: var(--wdtPrimaryColor, #f96614);
+      font-weight: bold;
+
+      &::after {
+        width: 100%;
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--wdtPrimaryColor, #f96614);
+      outline-offset: 4px;
+      border-radius: 2px;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 3. RIGHT ACTIONS (DESKTOP)
+// -----------------------------------------------------------------------------
+.header-right-actions {
+  display: flex;
+  align-items: center;
+  flex: 1 0 0;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  .btn-action-login {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: $text-dark;
+    text-decoration: none;
+    padding: 0.55rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.22s ease;
+
+    &:hover {
+      color: var(--wdtPrimaryColor, #f96614);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--wdtPrimaryColor, #f96614);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 991.98px) {
+      display: none;
+    }
+  }
+
+  .btn-action-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: var(--wdtPrimaryColor, #f96614);
+    border: 1px solid var(--wdtPrimaryColor, #f96614);
+    text-decoration: none;
+    padding: 0.6rem 1.45rem;
+    border-radius: 9px;
+    height: 44px;
+    box-shadow: 0 2px 6px rgba(249, 102, 20, 0.2);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+
+    &:hover {
+      background-color: var(--wdtSecondaryColor, #f68749);
+      border-color: var(--wdtSecondaryColor, #f68749);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(249, 102, 20, 0.28);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(249, 102, 20, 0.2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--wdtPrimaryColor, #f96614);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 991.98px) {
+      display: none;
+    }
+  }
+
+  .mobile-toggle-btn {
+    display: none;
+    background: transparent;
+    border: 1px solid $border;
+    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    font-size: 1.35rem;
+    color: $text-dark;
+    cursor: pointer;
+    line-height: 1;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: var(--wdtPrimaryColor, #f96614);
+      border-color: var(--wdtPrimaryColor, #f96614);
+      background-color: rgba(249, 102, 20, 0.04);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--wdtPrimaryColor, #f96614);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 991.98px) {
+      display: inline-flex;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 4. MOBILE NAVIGATION DRAWER & OVERLAY
+// -----------------------------------------------------------------------------
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  top: 76px;
+  background-color: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1030;
+  animation: fadeIn 0.22s ease;
+}
+
+.mobile-menu-drawer {
+  position: fixed;
+  top: 76px;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid $border;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  z-index: 1035;
+  max-height: calc(100vh - 76px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .mobile-drawer-body {
+    padding: 1.25rem 1.5rem 2rem;
+  }
+
+  .mobile-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mobile-nav-item {
+    width: 100%;
+  }
+
+  .mobile-nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: $text-dark;
+    text-decoration: none;
+    padding: 0.75rem 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.2s ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0.5rem;
+      width: 0;
+      height: 2px;
+      background-color: var(--wdtPrimaryColor, #f96614);
+      border-radius: 1px;
+      transition: width 0.25s ease;
+    }
+
+    &:hover {
+      color: var(--wdtPrimaryColor, #f96614);
+
+      &::after {
+        width: 36px;
+      }
+    }
+
+    &.active {
+      color: var(--wdtPrimaryColor, #f96614);
+      font-weight: 600;
+
+      &::after {
+        width: 36px;
+      }
+    }
+  }
+
+  .mobile-divider {
+    height: 1px;
+    background-color: $border;
+    margin: 1.25rem 0;
+  }
+
+  .mobile-actions-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .mobile-btn-login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: $text-dark;
+      text-decoration: none;
+      background: transparent;
+      border: 1px solid $border;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: var(--wdtPrimaryColor, #f96614);
+        border-color: var(--wdtPrimaryColor, #f96614);
+      }
+    }
+
+    .mobile-btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 46px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: var(--wdtPrimaryColor, #f96614);
+      border: 1px solid var(--wdtPrimaryColor, #f96614);
+      border-radius: 9px;
+      text-decoration: none;
+      box-shadow: 0 2px 8px rgba(249, 102, 20, 0.25);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: var(--wdtSecondaryColor, #f68749);
+        border-color: var(--wdtSecondaryColor, #f68749);
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 5. KEYFRAMES
+// -----------------------------------------------------------------------------
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,143 @@
+<footer class="public-footer" role="contentinfo">
+  <!-- Ambient Backlight Glow -->
+  <div class="footer-ambient-glow" aria-hidden="true"></div>
+
+  <div class="footer-container">
+    <!-- Top Footer Columns Grid -->
+    <div class="footer-top-grid">
+      <!-- 1. Brand & Tagline Col -->
+      <div class="footer-brand-col">
+        <a routerLink="/" class="footer-brand-link" aria-label="Seyyon Connect Home">
+          <img
+            src="assets/seyyon-logo.png"
+            alt="Seyyon Connect"
+            class="footer-logo"
+          />
+        </a>
+        <p class="footer-tagline">
+          Connect. Engage. <span class="highlight-orange">Grow.</span>
+        </p>
+        <p class="footer-desc">
+          The unified customer engagement and WhatsApp campaign command center engineered for modern growing businesses worldwide.
+        </p>
+
+        <!-- Social Media Icons Row -->
+        <div class="footer-social-row">
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Twitter / X">
+            <i class="bi bi-twitter-x"></i>
+          </a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="LinkedIn">
+            <i class="bi bi-linkedin"></i>
+          </a>
+          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Facebook">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="YouTube">
+            <i class="bi bi-youtube"></i>
+          </a>
+        </div>
+
+        <!-- Security / Meta Partner Badge -->
+        <div class="footer-security-pill">
+          <i class="bi bi-shield-check text-primary"></i>
+          <span>Official Meta Cloud API Standards</span>
+        </div>
+      </div>
+
+      <!-- 2. Links Column: Platform -->
+      <div class="footer-links-col">
+        <span class="footer-col-title">Platform</span>
+        <ul class="footer-links-list">
+          <li><a routerLink="/products">Customer Directory</a></li>
+          <li><a routerLink="/products">Campaign Studio</a></li>
+          <li><a routerLink="/products">WhatsApp Templates</a></li>
+          <li><a routerLink="/products">Media Library</a></li>
+          <li><a routerLink="/products">Analytics & Reports</a></li>
+          <li><a routerLink="/products">Automated Workflows</a></li>
+        </ul>
+      </div>
+
+      <!-- 3. Links Column: Company -->
+      <div class="footer-links-col">
+        <span class="footer-col-title">Company</span>
+        <ul class="footer-links-list">
+          <li><a routerLink="/about">About Us</a></li>
+          <li><a routerLink="/pricing">Pricing Plans</a></li>
+          <li><a routerLink="/contact">Contact Support</a></li>
+          <li><a routerLink="/login">Client Portal</a></li>
+          <li><a routerLink="/about">Trust & Security</a></li>
+          <li><a routerLink="/about">Customer Stories</a></li>
+        </ul>
+      </div>
+
+      <!-- 4. Contact & Support Column -->
+      <div class="footer-links-col footer-contact-col">
+        <span class="footer-col-title">Contact & Support</span>
+        <ul class="footer-contact-list">
+          <li>
+            <div class="contact-icon-box">
+              <i class="bi bi-envelope-fill text-primary"></i>
+            </div>
+            <div class="contact-info">
+              <span class="contact-label">Email Us</span>
+              <a href="mailto:support@seyyon.com" class="contact-value">support&#64;seyyon.com</a>
+            </div>
+          </li>
+          <li>
+            <div class="contact-icon-box">
+              <i class="bi bi-telephone-fill text-primary"></i>
+            </div>
+            <div class="contact-info">
+              <span class="contact-label">Phone Support</span>
+              <span class="contact-value">+1 (800) 555-SEYYON</span>
+            </div>
+          </li>
+          <li>
+            <div class="contact-icon-box">
+              <i class="bi bi-clock-history text-primary"></i>
+            </div>
+            <div class="contact-info">
+              <span class="contact-label">Availability</span>
+              <span class="contact-value">24/7 Dedicated Monitoring</span>
+            </div>
+          </li>
+          <li>
+            <div class="contact-icon-box">
+              <i class="bi bi-geo-alt-fill text-primary"></i>
+            </div>
+            <div class="contact-info">
+              <span class="contact-label">Global NOC</span>
+              <span class="contact-value">100+ Network Hubs</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Copyright & Legal Strip -->
+    <div class="footer-bottom-strip">
+      <div class="footer-copyright">
+        © {{ currentYear }} <span class="brand-text">Seyyon Connect</span>. All rights reserved.
+      </div>
+
+      <div class="footer-legal-links">
+        <a routerLink="/about">Privacy Policy</a>
+        <span class="dot-separator">•</span>
+        <a routerLink="/about">Terms of Service</a>
+        <span class="dot-separator">•</span>
+        <a routerLink="/about">Security Overview</a>
+        <span class="dot-separator">•</span>
+        <a routerLink="/about">Cookie Policy</a>
+      </div>
+
+      <!-- Back To Top Button -->
+      <button type="button" class="btn-back-to-top" (click)="scrollToTop()" aria-label="Back to top">
+        <span>Back to Top</span>
+        <i class="bi bi-arrow-up"></i>
+      </button>
+    </div>
+  </div>
+</footer>

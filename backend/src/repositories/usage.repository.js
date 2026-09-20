@@ -92,6 +92,30 @@ class UsageRepository {
   }
 
   /**
+   * Safely decrement one or more usage metrics for a company period (clamped at 0).
+   */
+  async decrementUsageMetrics(companyId, periodStr, decrements, transaction = null) {
+    const usage = await this.findOrCreateUsage(companyId, periodStr, transaction);
+    const updates = {};
+    for (const [key, value] of Object.entries(decrements)) {
+      const currentVal = Number(usage[key] || 0);
+      updates[key] = Math.max(0, currentVal - Number(value || 0));
+    }
+    await usage.update(updates, { transaction });
+    return await usage.reload({ transaction });
+  }
+
+  /**
+   * Remove an idempotent event if needed (e.g. on entity deletion).
+   */
+  async removeIdempotentEvent(companyId, eventKey, transaction = null) {
+    return await UsageEvent.destroy({
+      where: { companyId, eventKey },
+      transaction,
+    });
+  }
+
+  /**
    * Find monthly usage by company and period.
    */
   async findByCompanyAndPeriod(companyId, periodStr) {

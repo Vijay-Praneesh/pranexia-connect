@@ -46,11 +46,17 @@ class MediaService {
   async delete(companyId, id) {
     const media = await mediaRepository.findByIdAndCompany(companyId, id);
     if (!media) throw new AppError("Media not found", 404);
+    const mediaSize = Number(media.size) || 0;
     const [marked] = await mediaRepository.markDeleted(companyId, id);
     if (!marked) throw new AppError("Media could not be deleted", 409);
     await storageService.delete(media.storageKey);
     const deleted = await mediaRepository.deleteByIdAndCompany(companyId, id);
     if (!deleted) throw new AppError("Media could not be deleted", 409);
+    try {
+      await usageService.recordMediaDeletion(companyId, { mediaId: id, size: mediaSize });
+    } catch {
+      // Non-blocking usage sync
+    }
   }
   async assertOwnedByCompany(companyId, mediaId) {
     const media = await mediaRepository.findByIdAndCompany(companyId, mediaId);

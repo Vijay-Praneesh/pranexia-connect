@@ -644,15 +644,15 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 comparison-table">
-          <thead class="bg-surface-subtle">
+          <thead>
             <tr>
               <th class="ps-4 py-3" style="min-width: 200px;">Plan Feature / Quota</th>
               @for (p of planOverview.availablePlans; track p.name) {
               <th class="text-center py-3" [class.current-plan-header]="p.name === planOverview.plan.name"
                 style="min-width: 150px;">
-                <div class="fw-bold fs-6 text-navy">{{ p.displayName }}</div>
+                <div class="fw-bold fs-6 text-white">{{ p.displayName }}</div>
                 @if (p.name === planOverview.plan.name) {
-                <span class="badge bg-primary text-white mt-1 px-3 py-1 rounded-pill small">Current Plan</span>
+                <span class="badge bg-white text-primary mt-1 px-3 py-1 rounded-pill small fw-bold">Current Plan</span>
                 }
               </th>
               }
@@ -797,7 +797,7 @@
       } @else {
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 history-table">
-          <thead class="bg-surface-subtle">
+          <thead>
             <tr>
               <th class="ps-4 py-3" style="min-width: 170px;">Billing Period</th>
               <th class="py-3" style="min-width: 140px;">Messages Sent</th>

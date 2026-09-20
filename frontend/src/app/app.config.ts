@@ -1,6 +1,10 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { APP_INITIALIZER, ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {
+  provideRouter,
+  withInMemoryScrolling,
+  withRouterConfig,
+} from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { routes } from './app.routes';
@@ -15,7 +19,16 @@ function initializeAuthentication(auth: AuthService): () => Promise<boolean> {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top',
+        anchorScrolling: 'enabled',
+      }),
+      withRouterConfig({
+        onSameUrlNavigation: 'reload',
+      }),
+    ),
     provideHttpClient(withInterceptors([authInterceptor])),
     { provide: API_BASE_URL, useValue: environment.apiBaseUrl },
     {

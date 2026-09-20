@@ -1,0 +1,544 @@
+<div class="public-home-page">
+  <!-- ======================================================================= -->
+  <!-- 1. HERO BANNER SECTION (EXACT REFERENCE DESIGN)                        -->
+  <!-- ======================================================================= -->
+  <section class="hero-section" aria-labelledby="hero-heading">
+    <div class="hero-container">
+      <!-- LEFT COLUMN: CONTENT, ACTIONS & EXPERT WIDGET -->
+      <div class="hero-content-col">
+        <!-- Eyebrow -->
+        <span class="hero-eyebrow">CONNECT WITH US</span>
+
+        <!-- Main H1 Headline -->
+        <h1 id="hero-heading" class="hero-title">
+          Internet Connects<br />
+          People <span class="highlight-orange">Worldwide</span>
+        </h1>
+
+        <!-- Subtitle / Description -->
+        <p class="hero-desc">
+          Empower your business with Seyyon Connect's high-speed customer communication platform. Design Meta-approved
+          templates, dispatch automated broadcast campaigns, and engage audiences worldwide with verified Cloud API
+          deliverability.
+        </p>
+
+        <!-- CTA Action Buttons -->
+        <div class="hero-actions">
+          <a routerLink="/about" class="btn-know-more" aria-label="Know More About Us">
+            Know More About Us
+          </a>
+        </div>
+
+        <!-- Bottom Row: Consult Our Experts + Scroll Down -->
+        <div class="hero-bottom-row">
+          <!-- Consult Experts Widget -->
+          <a routerLink="/contact" class="expert-widget" aria-label="Questions? Consult Our Experts">
+            <div class="expert-avatar-box">
+              <img src="assets/public-website/home/expert-avatar.jpg" alt="Support Expert" class="expert-avatar-img" />
+            </div>
+            <div class="expert-text-box">
+              <span class="expert-sub">Questions?</span>
+              <span class="expert-title">Consult Our Experts</span>
+            </div>
+          </a>
+
+          <!-- Scroll Down Indicator -->
+          <div class="scroll-down-widget" (click)="scrollToSection('what-we-do')" role="button" tabindex="0"
+            aria-label="Scroll down to features" (keydown.enter)="scrollToSection('what-we-do')">
+            <div class="scroll-arrow-box">
+              <i class="bi bi-arrow-down" aria-hidden="true"></i>
+            </div>
+            <span class="scroll-label">SCROLL DOWN</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: PHOTO COMPOSITION & USER METRIC BADGE -->
+      <div class="hero-visual-col" aria-hidden="false">
+        <div class="hero-composition-grid">
+          <!-- Top Row (Left Sub-column with Clients Badge & Work Card + Right Sub-column with Home Card) -->
+          <div class="composition-top-row">
+            <!-- Top Left: Clients Badge + Work Card -->
+            <div class="composition-top-left">
+              <!-- Floating Happy Users Badge -->
+              <div class="clients-badge-card" aria-label="8M+ Happy Users">
+                <img src="assets/public-website/home/clients.jpg" alt="8M+ Happy Users" class="clients-img" />
+              </div>
+
+              <!-- Card 2: Work Image -->
+              <div class="banner-card card-work">
+                <img src="assets/public-website/home/banner-2.jpg" alt="Seyyon Connect Work" class="card-photo" />
+              </div>
+            </div>
+
+            <!-- Top Right: Tall Home Image -->
+            <div class="banner-card card-home">
+              <img src="assets/public-website/home/banner-1.jpg" alt="Seyyon Connect Collaboration"
+                class="card-photo" />
+            </div>
+          </div>
+
+          <!-- Bottom Row: Wide Entertainment Image -->
+          <div class="banner-card card-entertainment">
+            <img src="assets/public-website/home/banner-3.jpg" alt="Seyyon Connect Engagement" class="card-photo" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 2. WHAT WE DO SECTION (2-COLUMN TESTIMONIAL & 2X2 FEATURE GRID)         -->
+  <!-- ======================================================================= -->
+  <section id="what-we-do" class="what-we-do-section" aria-labelledby="what-we-do-heading">
+    <!-- Subtle Background Network Watermark Graphic -->
+    <div class="section-bg-watermark" aria-hidden="true">
+      <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M200 40 L200 360 M120 360 L280 360 M140 280 L260 280 M160 200 L240 200 M180 120 L220 120"
+          stroke="#F96614" stroke-width="1.5" stroke-opacity="0.12" stroke-linecap="round" />
+        <path d="M120 360 L200 120 L280 360" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.12" />
+        <circle cx="200" cy="40" r="10" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.15" />
+        <circle cx="200" cy="40" r="30" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.08"
+          stroke-dasharray="4 4" />
+      </svg>
+    </div>
+
+    <div class="what-we-do-container">
+      <!-- LEFT COLUMN: TESTIMONIAL / HIGHLIGHT CARD WITH ORANGE OFFSET FRAME -->
+      <div class="what-we-do-left">
+        <div class="testimonial-frame-wrapper">
+          <!-- Orange Backdrop Accent Outline -->
+          <div class="orange-frame-accent" aria-hidden="true"></div>
+
+          <!-- Main Testimonial Card with Image & Dark Gradient -->
+          <div class="testimonial-card">
+            <img [src]="testimonial.image" [alt]="testimonial.author" class="testimonial-bg-img" />
+            <div class="testimonial-overlay" aria-hidden="true"></div>
+
+            <!-- Card Bottom Testimonial Content -->
+            <div class="testimonial-content">
+              <div class="testimonial-quote-icon">
+                <i class="bi bi-quote"></i>
+              </div>
+              <p class="testimonial-quote-text">
+                {{ testimonial.quote }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: HEADLINE, DESCRIPTION, 2X2 FEATURE GRID & CTA -->
+      <div class="what-we-do-right">
+        <!-- Eyebrow -->
+        <span class="section-eyebrow">WHAT WE DO</span>
+
+        <!-- Main Heading -->
+        <h2 id="what-we-do-heading" class="section-title">
+          Find Your Perfect <span class="highlight-orange">And Fastest</span><br />
+          Connection
+        </h2>
+
+        <!-- Paragraph Description -->
+        <p class="section-desc">
+          Transform high-volume broadcast messaging into personalized 1-on-1 conversations. Connect instantly with
+          verified Meta Cloud API delivery, customizable templates, and real-time delivery telemetry.
+        </p>
+
+        <!-- 2x2 Feature Highlights Grid -->
+        <div class="features-2x2-grid">
+          @for (feat of features; track feat.title) {
+          <div class="feature-item">
+            <div class="feature-icon-box">
+              <i class="bi {{ feat.icon }}" aria-hidden="true"></i>
+            </div>
+            <div class="feature-info">
+              <h3 class="feature-title">{{ feat.title }}</h3>
+              <p class="feature-desc">{{ feat.description }}</p>
+            </div>
+          </div>
+          }
+        </div>
+
+        <!-- Action Button -->
+        <div class="section-action">
+          <a routerLink="/about" class="btn-discover-more" aria-label="Discover More About Seyyon Connect">
+            Discover More
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 3. OUR SERVICES SECTION (EXPLORE THE SERVICE YOU'RE INTERESTED IN)      -->
+  <!-- ======================================================================= -->
+  <section class="services-section" aria-labelledby="services-heading">
+    <div class="services-container">
+      <!-- Section Header -->
+      <div class="services-header">
+        <span class="section-eyebrow">OUR SERVICES</span>
+        <h2 id="services-heading" class="services-title">
+          Explore The Service <span class="highlight-orange">You’re Interested In</span>
+        </h2>
+      </div>
+
+      <!-- Services 4-Card Grid -->
+      <div class="services-grid">
+        <!-- Card 1: Secure Connection -->
+        <div class="service-card" tabindex="0">
+          <!-- Background Network Graphic Overlay -->
+          <div class="card-bg-mesh" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="155" cy="45" r="3.5" fill="currentColor" />
+              <circle cx="185" cy="85" r="2.5" fill="currentColor" />
+              <circle cx="125" cy="115" r="2" fill="currentColor" />
+              <circle cx="170" cy="140" r="3" fill="currentColor" />
+              <line x1="155" y1="45" x2="185" y2="85" stroke="currentColor" stroke-width="0.8" />
+              <line x1="185" y1="85" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
+              <line x1="155" y1="45" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
+              <line x1="125" y1="115" x2="170" y2="140" stroke="currentColor" stroke-width="0.8" />
+            </svg>
+          </div>
+
+          <!-- Big Watermark Number -->
+          <div class="service-number" aria-hidden="true">01</div>
+
+          <!-- Icon: Transmission Antenna Tower -->
+          <div class="service-icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="service-icon-svg">
+              <path d="M32 16 L32 20 M26 52 L38 52 M22 52 L30 20 L34 20 L42 52 M25 40 L39 40 M28 30 L36 30"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="32" cy="16" r="3" fill="currentColor" />
+              <path d="M28 40 L36 30 M36 40 L28 30" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M23 10 C20 13 18 17 18 22 C18 27 20 31 23 34" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" />
+              <path d="M16 6 C12 11 9 16 9 22 C9 28 12 33 16 38" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" />
+              <path d="M41 10 C44 13 46 17 46 22 C46 27 44 31 41 34" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" />
+              <path d="M48 6 C52 11 55 16 55 22 C55 28 52 33 48 38" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <!-- Title -->
+          <h3 class="service-title">
+            <span class="title-bar" aria-hidden="true">|</span> Secure Connection
+          </h3>
+
+          <!-- Description -->
+          <p class="service-desc">
+            Donec enim diam vulputate ut aliquam id diam maecenas.
+          </p>
+
+          <!-- Read More Link -->
+          <a routerLink="/products" class="service-link" aria-label="Read more about Secure Connection">
+            <span class="link-text">Read More</span>
+            <i class="bi bi-arrow-right link-arrow" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        <!-- Card 2: HD DTH Connections -->
+        <div class="service-card" tabindex="0">
+          <div class="card-bg-mesh" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="155" cy="45" r="3.5" fill="currentColor" />
+              <circle cx="185" cy="85" r="2.5" fill="currentColor" />
+              <circle cx="125" cy="115" r="2" fill="currentColor" />
+              <circle cx="170" cy="140" r="3" fill="currentColor" />
+              <line x1="155" y1="45" x2="185" y2="85" stroke="currentColor" stroke-width="0.8" />
+              <line x1="185" y1="85" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
+            </svg>
+          </div>
+
+          <div class="service-number" aria-hidden="true">02</div>
+
+          <!-- Icon: Satellite Dish -->
+          <div class="service-icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="service-icon-svg">
+              <path d="M16 52 L32 52 M24 52 L24 45 L32 38" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M18 42 C14 36 14 26 23 20 C32 14 41 18 44 28 C46 34 43 40 37 44 C29 49 20 47 18 42 Z"
+                stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
+              <path d="M28 28 L46 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="47" cy="15" r="3" fill="currentColor" />
+              <path d="M47 8 C52 10 56 14 57 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M42 4 C50 6 58 13 60 22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <h3 class="service-title">
+            <span class="title-bar" aria-hidden="true">|</span> HD DTH Connections
+          </h3>
+
+          <p class="service-desc">
+            Bibendum enim facilisis gravida neque convallis auctor urna nunc.
+          </p>
+
+          <a routerLink="/products" class="service-link" aria-label="Read more about HD DTH Connections">
+            <span class="link-text">Read More</span>
+            <i class="bi bi-arrow-right link-arrow" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        <!-- Card 3: High Speed Wi-Fi -->
+        <div class="service-card" tabindex="0">
+          <div class="card-bg-mesh" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="155" cy="45" r="3.5" fill="currentColor" />
+              <circle cx="185" cy="85" r="2.5" fill="currentColor" />
+              <circle cx="125" cy="115" r="2" fill="currentColor" />
+              <circle cx="170" cy="140" r="3" fill="currentColor" />
+              <line x1="155" y1="45" x2="185" y2="85" stroke="currentColor" stroke-width="0.8" />
+              <line x1="185" y1="85" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
+            </svg>
+          </div>
+
+          <div class="service-number" aria-hidden="true">03</div>
+
+          <!-- Icon: High Speed Wi-Fi Mesh Node -->
+          <div class="service-icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="service-icon-svg">
+              <circle cx="32" cy="36" r="4" fill="currentColor" />
+              <path d="M32 40 L32 54 M26 54 L38 54" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M24 30 C28 26 36 26 40 30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M18 24 C25 18 39 18 46 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="32" cy="32" r="22" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" />
+              <circle cx="32" cy="10" r="3.5" stroke="currentColor" stroke-width="2.5" fill="none" />
+              <circle cx="12" cy="24" r="3.5" stroke="currentColor" stroke-width="2.5" fill="none" />
+              <circle cx="52" cy="24" r="3.5" stroke="currentColor" stroke-width="2.5" fill="none" />
+              <circle cx="16" cy="46" r="3.5" stroke="currentColor" stroke-width="2.5" fill="none" />
+              <circle cx="48" cy="46" r="3.5" stroke="currentColor" stroke-width="2.5" fill="none" />
+            </svg>
+          </div>
+
+          <h3 class="service-title">
+            <span class="title-bar" aria-hidden="true">|</span> High Speed Wi-Fi
+          </h3>
+
+          <p class="service-desc">
+            Pretium vulputate sapien nec sagittis aliquam malesuada.
+          </p>
+
+          <a routerLink="/products" class="service-link" aria-label="Read more about High Speed Wi-Fi">
+            <span class="link-text">Read More</span>
+            <i class="bi bi-arrow-right link-arrow" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        <!-- Card 4: Office Package -->
+        <div class="service-card" tabindex="0">
+          <div class="card-bg-mesh" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="155" cy="45" r="3.5" fill="currentColor" />
+              <circle cx="185" cy="85" r="2.5" fill="currentColor" />
+              <circle cx="125" cy="115" r="2" fill="currentColor" />
+              <circle cx="170" cy="140" r="3" fill="currentColor" />
+              <line x1="155" y1="45" x2="185" y2="85" stroke="currentColor" stroke-width="0.8" />
+              <line x1="185" y1="85" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
+            </svg>
+          </div>
+
+          <div class="service-number" aria-hidden="true">04</div>
+
+          <!-- Icon: Office Skyscraper Package -->
+          <div class="service-icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="service-icon-svg">
+              <path d="M12 52 L12 36 L24 36 L24 52" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
+              <line x1="16" y1="41" x2="16" y2="43" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="20" y1="41" x2="20" y2="43" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="16" y1="47" x2="16" y2="49" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="20" y1="47" x2="20" y2="49" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M24 52 L24 28 L44 20 L44 52" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
+              <line x1="8" y1="52" x2="48" y2="52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="30" y1="28" x2="30" y2="30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="38" y1="25" x2="38" y2="27" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="30" y1="35" x2="30" y2="37" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="38" y1="32" x2="38" y2="34" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="30" y1="42" x2="30" y2="44" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="38" y1="39" x2="38" y2="41" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="30" y1="48" x2="30" y2="50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="38" y1="46" x2="38" y2="48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M20 22 C26 17 38 17 44 22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M24 16 C29 12 37 12 42 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M28 10 C31 8 35 8 38 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <h3 class="service-title">
+            <span class="title-bar" aria-hidden="true">|</span> Office Package
+          </h3>
+
+          <p class="service-desc">
+            Nascetur ridiculus mus mauris vitae ultricies leo integer malesuada.
+          </p>
+
+          <a routerLink="/products" class="service-link" aria-label="Read more about Office Package">
+            <span class="link-text">Read More</span>
+            <i class="bi bi-arrow-right link-arrow" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 4. BLOG SECTION (RECENT UPDATION / CURRENTLY TRENDING IN OUR BLOG)      -->
+  <!-- ======================================================================= -->
+  <section class="blog-section" aria-labelledby="blog-heading">
+    <div class="blog-container">
+      <!-- Section Header -->
+      <div class="blog-header">
+        <span class="section-eyebrow">RECENT UPDATION</span>
+        <h2 id="blog-heading" class="blog-title">
+          Currently Trending <span class="highlight-orange">In Our Blog</span>
+        </h2>
+      </div>
+
+      <!-- Blog 3-Card Grid -->
+      <div class="blog-grid">
+        @for (item of blogs; track item.id) {
+        <article class="blog-card" tabindex="0">
+          <!-- Blog Card Image Wrapper with Smooth Hover Zoom -->
+          <div class="blog-img-box">
+            <img [src]="item.image" [alt]="item.title" class="blog-photo" />
+          </div>
+
+          <!-- Blog Card Body Content -->
+          <div class="blog-body">
+            <h3 class="blog-card-title">
+              <a [routerLink]="item.link" class="blog-title-link">
+                {{ item.title }}
+              </a>
+            </h3>
+
+            <p class="blog-card-desc">
+              {{ item.description }}
+            </p>
+
+            <a [routerLink]="item.link" class="blog-read-more" [attr.aria-label]="'Read more about ' + item.title">
+              <span class="read-more-text">Read More</span>
+              <i class="bi bi-arrow-right blog-arrow" aria-hidden="true"></i>
+            </a>
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 5. ULTRA-FAST CONNECTIVITY CTA & NETWORK HUB SECTION                    -->
+  <!-- ======================================================================= -->
+  <section class="cta-section" aria-labelledby="cta-heading">
+    <div class="cta-container">
+      <div class="cta-card-wrapper">
+        <!-- Ambient Glowing Background Radial Blobs -->
+        <div class="cta-glow-blob top-right" aria-hidden="true"></div>
+        <div class="cta-glow-blob bottom-left" aria-hidden="true"></div>
+
+        <!-- Main Top Row: Left Content + Right 3D Visual -->
+        <div class="cta-main-grid">
+          <!-- Left Column: Copy & Actions -->
+          <div class="cta-content-col">
+            <div class="cta-live-badge">
+              <span class="pulse-dot"></span>
+              <span>ULTRA-FAST BROADBAND & FIBER</span>
+            </div>
+
+            <h2 id="cta-heading" class="cta-title">
+              Ready For Ultra-Fast,<br />
+              <span class="highlight-orange">Uninterrupted</span> Connectivity?
+            </h2>
+
+            <p class="cta-desc">
+              Join over 8,000+ businesses and homes experiencing blazing 10Gbps fiber-optic speeds, 99.99% guaranteed
+              uptime, and 24/7 dedicated engineering support.
+            </p>
+
+            <!-- Feature Checkpoints -->
+            <div class="cta-features-list">
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>Free Installation & Dual-Band Router</span>
+              </div>
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>Zero Latency Meta Cloud API</span>
+              </div>
+              <div class="cta-feature-item">
+                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
+                <span>24/7 Dedicated NOC Support</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="cta-actions-group">
+              <a routerLink="/contact" class="btn-cta-primary" aria-label="Get Connected Now">
+                <span>Get Connected Now</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </a>
+              <a routerLink="/pricing" class="btn-cta-secondary" aria-label="Explore Plans and Pricing">
+                <span>Explore Plans</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Column: 3D Holographic Network Hub Graphic & Floating Metric Cards -->
+          <div class="cta-visual-col">
+            <div class="cta-visual-wrapper">
+              <img src="assets/public-website/home/cta-network-hub.jpg" alt="Seyyon Connect High Speed Network Hub"
+                class="cta-hub-img" />
+
+              <!-- Floating Live Metric Badge 1 -->
+              <div class="floating-badge badge-top-left" aria-hidden="true">
+                <div class="badge-icon-box bg-orange">
+                  <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="badge-text-box">
+                  <span class="badge-val">10 Gbps</span>
+                  <span class="badge-lbl">Ultra Backbone</span>
+                </div>
+              </div>
+
+              <!-- Floating Live Metric Badge 2 -->
+              <div class="floating-badge badge-bottom-right" aria-hidden="true">
+                <div class="badge-icon-box bg-green">
+                  <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="badge-text-box">
+                  <span class="badge-val">99.99%</span>
+                  <span class="badge-lbl">Uptime SLA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row: 4 Metric Highlights Strip -->
+        <div class="cta-metrics-strip">
+          <div class="metric-item">
+            <span class="metric-number">10<span class="metric-unit">Gbps</span></span>
+            <span class="metric-label">High-Throughput Backbone</span>
+          </div>
+          <div class="metric-divider" aria-hidden="true"></div>
+          <div class="metric-item">
+            <span class="metric-number">99.99<span class="metric-unit">%</span></span>
+            <span class="metric-label">Guaranteed SLA Uptime</span>
+          </div>
+          <div class="metric-divider" aria-hidden="true"></div>
+          <div class="metric-item">
+            <span class="metric-number">100<span class="metric-unit">+</span></span>
+            <span class="metric-label">Cities & Connected Hubs</span>
+          </div>
+          <div class="metric-divider" aria-hidden="true"></div>
+          <div class="metric-item">
+            <span class="metric-number">24/7</span>
+            <span class="metric-label">Live NOC Engineering</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

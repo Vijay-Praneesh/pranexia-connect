@@ -183,6 +183,42 @@ class UsageService {
   }
 
   /**
+   * Record media deletion and decrement media metrics.
+   */
+  async recordMediaDeletion(companyId, { mediaId, size }) {
+    if (!companyId || !mediaId) return null;
+
+    const currentPeriod = getCurrentPeriod();
+    const eventKey = `media_up:${mediaId}`;
+    const deletedBytes = Number(size) || 0;
+
+    try {
+      await usageRepository.removeIdempotentEvent(companyId, eventKey);
+
+      await usageRepository.decrementUsageMetrics(companyId, currentPeriod, {
+        mediaUploadedCount: 1,
+        mediaUploadedBytes: deletedBytes,
+      });
+
+      // Synchronize with live active media stats to ensure consistency
+      const stats = await usageRepository.getActiveMediaStats(companyId);
+      const usage = await usageRepository.findByCompanyAndPeriod(companyId, currentPeriod);
+      if (usage && usage.mediaUploadedCount > stats.activeFileCount) {
+        await usage.update({
+          mediaUploadedCount: stats.activeFileCount,
+          mediaUploadedBytes: stats.activeStorageBytes,
+        });
+      }
+
+      logger.info(`[Usage] Media deletion recorded for tenant ${companyId} (media: ${mediaId})`);
+      return { recorded: true };
+    } catch (error) {
+      logger.error(`[Usage] Failed to record media deletion: ${error.message}`);
+      return { recorded: false, error: error.message };
+    }
+  }
+
+  /**
    * Record template used in a campaign.
    */
   async recordTemplateUsed(companyId, { campaignId, templateId }) {
@@ -229,6 +265,21 @@ class UsageService {
       metaUsageRepository.findByCompanyAndPeriod(companyId, period),
     ]);
 
+    let mediaUploadedCount = usageRecord?.mediaUploadedCount || 0;
+    let mediaUploadedBytes = Number(usageRecord?.mediaUploadedBytes || 0);
+
+    // Auto-align media upload counts if persisted record is higher than actual active files
+    if (typeof mediaStats?.activeFileCount === "number" && mediaUploadedCount > mediaStats.activeFileCount) {
+      mediaUploadedCount = mediaStats.activeFileCount;
+      mediaUploadedBytes = mediaStats.activeStorageBytes;
+      if (usageRecord) {
+        void usageRecord.update({
+          mediaUploadedCount: mediaStats.activeFileCount,
+          mediaUploadedBytes: mediaStats.activeStorageBytes,
+        }).catch(() => {});
+      }
+    }
+
     const saasUsage = {
       messagesSent: usageRecord?.messagesSent || 0,
       messagesDelivered: usageRecord?.messagesDelivered || 0,
@@ -236,8 +287,8 @@ class UsageService {
       messagesFailed: usageRecord?.messagesFailed || 0,
       campaignsCreated: usageRecord?.campaignsCreated || 0,
       campaignsCompleted: usageRecord?.campaignsCompleted || 0,
-      mediaUploadedCount: usageRecord?.mediaUploadedCount || 0,
-      mediaUploadedBytes: Number(usageRecord?.mediaUploadedBytes || 0),
+      mediaUploadedCount,
+      mediaUploadedBytes,
       templatesUsed: usageRecord?.templatesUsed || 0,
     };
 
