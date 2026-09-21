@@ -384,105 +384,219 @@ $error-red: #ef4444;
   }
 }
 
-// Status Banner Post-Trigger
-.info-status-banner {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 16px;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 2rem;
+// -----------------------------------------------------------------------------
+// PROVIDER SELECTION STATE
+// -----------------------------------------------------------------------------
+.provider-selection-box {
   display: flex;
-  align-items: flex-start;
-  gap: 1.25rem;
+  flex-direction: column;
+  gap: 1.75rem;
   animation: fadeIn 0.3s ease;
+}
 
-  &.banner-error {
-    background: #fef2f2;
-    border-color: #fecaca;
+.provider-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
 
-    .banner-icon-box {
-      background: rgba(239, 68, 68, 0.12);
-      color: $error-red;
+.provider-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1.35rem 1.5rem;
+  background: $white;
+  border: 1.5px solid $border;
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 10px rgba(23, 32, 51, 0.02);
+
+  &:hover {
+    border-color: rgba(249, 102, 20, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(249, 102, 20, 0.08);
+
+    .provider-card-right {
+      color: $primary;
+      transform: translateX(3px);
     }
   }
 
-  .banner-icon-box {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 4px rgba(249, 102, 20, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .provider-card-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .provider-icon-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+
+    &.gmail-badge {
+      background: #fef2f2;
+      border-color: #fee2e2;
+    }
+
+    &.outlook-badge {
+      background: #eff6ff;
+      border-color: #dbeafe;
+    }
+  }
+
+  .provider-text-group {
+    display: flex;
+    flex-direction: column;
+
+    .provider-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin-bottom: 0.2rem;
+    }
+
+    .provider-desc {
+      font-size: 0.88rem;
+      color: $text-body;
+      line-height: 1.4;
+    }
+  }
+
+  .provider-card-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #94a3b8;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+.provider-footer-row {
+  display: flex;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f1f5f9;
+
+  .btn-back-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: $text-dark;
+    border-radius: 10px;
+    padding: 0.6rem 1.25rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    i {
+      font-size: 0.9rem;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+
+      i {
+        transform: translateX(-3px);
+      }
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(249, 102, 20, 0.15);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// CONFIRMATION STATE
+// -----------------------------------------------------------------------------
+.confirmation-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+  animation: fadeIn 0.3s ease;
+
+  .confirmation-icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
     background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
     color: #10b981;
     display: grid;
     place-items: center;
-    font-size: 1.35rem;
-    flex-shrink: 0;
+    font-size: 1.85rem;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);
   }
 
-  .banner-body {
-    flex: 1;
+  .confirmation-body {
+    width: 100%;
 
-    .banner-title {
+    .confirmation-heading {
       font-family: 'Outfit', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1.85rem;
+      font-weight: 800;
       color: $text-dark;
-      margin-bottom: 0.35rem;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
     }
 
-    .banner-text {
-      font-size: 0.92rem;
+    .confirmation-message {
+      font-size: 1.05rem;
       color: $text-body;
-      line-height: 1.5;
-      margin-bottom: 1rem;
-
-      .fallback-email-link {
-        color: $primary;
-        font-weight: 700;
-        text-decoration: underline;
-      }
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      max-width: 580px;
     }
 
-    .banner-actions {
+    .confirmation-action-group {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 0.85rem;
+      gap: 1rem;
 
-      .btn-banner-action {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        background: $primary;
-        color: $white;
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.88rem;
-        font-weight: 700;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
-        text-decoration: none;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: $primary-hover;
-          transform: translateY(-1px);
-        }
-      }
-
-      .btn-banner-secondary {
-        background: transparent;
-        border: 1px solid #cbd5e1;
-        color: $text-dark;
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.88rem;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: #f1f5f9;
-        }
+      .btn-prepare-another {
+        padding: 0 1.75rem;
       }
     }
   }

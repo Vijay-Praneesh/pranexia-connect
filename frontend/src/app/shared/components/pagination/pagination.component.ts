@@ -24,6 +24,29 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       </nav>
     }
   `,
+  styles: [`
+    .pagination {
+      gap: 0.35rem;
+    }
+    .page-link {
+      color: #111111;
+      border-radius: 6px;
+      border: 1px solid #eaeaea;
+      padding: 0.35rem 0.75rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      &:hover:not(:disabled) {
+        background-color: #fff4ee;
+        color: #f96614;
+        border-color: rgba(249, 102, 20, 0.3);
+      }
+    }
+    .page-item.disabled .page-link {
+      color: #94a3b8;
+      background-color: #f8fafc;
+      border-color: #eaeaea;
+    }
+  `],
 })
 export class PaginationComponent {
   @Input() page = 1;

@@ -1,12 +1,15 @@
 // Seyyon Connect — Premium Customers Module SCSS
 // Palette & Tokens
-$navy: #0f1b3d;
-$blue: #2563eb;
-$blue-dark: #1d4ed8;
-$blue-subtle: #eff6ff;
-$indigo: #4338ca;
-$indigo-subtle: #eef2ff;
-$gold: #f4b728;
+$primary: #f96614;
+$primary-hover: #f68749;
+$primary-subtle: #fff4ee;
+$navy: #111111;
+$blue: #f96614;
+$blue-dark: #e05307;
+$blue-subtle: #fff4ee;
+$indigo: #ea580c;
+$indigo-subtle: #ffedd5;
+$gold: #f96614;
 $emerald: #059669;
 $emerald-subtle: #ecfdf5;
 $rose: #e11d48;
@@ -16,11 +19,11 @@ $amber-subtle: #fffbeb;
 $sky: #0284c7;
 $sky-subtle: #f0f9ff;
 
-$text-navy: #0f1b3d;
-$text-main: #1e293b;
+$text-navy: #111111;
+$text-main: #111111;
 $text-muted: #64748b;
-$border-color: #e2e8f0;
-$border-subtle: #f1f5f9;
+$border-color: #eaeaea;
+$border-subtle: #f8fafc;
 $surface-white: #ffffff;
 $surface-subtle: #f8fafc;
 
@@ -30,6 +33,7 @@ $surface-subtle: #f8fafc;
   margin: 0 auto;
   min-height: 100%;
   box-sizing: border-box;
+  font-family: 'Outfit', Inter, system-ui, sans-serif;
 }
 
 // =========================================================================
@@ -54,14 +58,14 @@ $surface-subtle: #f8fafc;
       gap: 0.5rem;
       font-size: 0.75rem;
       font-weight: 700;
-      color: $blue;
+      color: $primary;
       letter-spacing: 0.08em;
       text-transform: uppercase;
 
       .eyebrow-accent-bar {
         width: 14px;
         height: 3px;
-        background: $gold;
+        background: linear-gradient(90deg, #f96614 0%, #f68749 100%);
         border-radius: 2px;
       }
     }
@@ -100,19 +104,19 @@ $surface-subtle: #f8fafc;
       height: 42px;
       padding: 0 1.25rem;
       font-size: 0.875rem;
-      font-weight: 600;
+      font-weight: 700;
       color: #ffffff;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      background: linear-gradient(135deg, #f96614 0%, #f68749 100%);
       border: 1px solid transparent;
       border-radius: 0.625rem;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 4px 14px rgba(249, 102, 20, 0.28);
       transition: all 0.2s ease;
 
       &:hover {
-        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        background: linear-gradient(135deg, #f68749 0%, #f96614 100%);
         transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        box-shadow: 0 6px 18px rgba(249, 102, 20, 0.38);
       }
     }
 
@@ -129,15 +133,16 @@ $surface-subtle: #f8fafc;
       border: 1px solid $border-color;
       border-radius: 0.625rem;
       cursor: pointer;
-      box-shadow: 0 1px 3px rgba(15, 27, 61, 0.04);
+      box-shadow: 0 1px 3px rgba(17, 17, 17, 0.04);
       transition: all 0.2s ease;
 
       &:hover:not(:disabled) {
-        background: $surface-subtle;
-        border-color: #cbd5e1;
-        color: $blue;
+        background: $primary-subtle;
+        border-color: rgba(249, 102, 20, 0.3);
+        color: $primary;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(15, 27, 61, 0.08);
+        box-shadow: 0 4px 12px rgba(249, 102, 20, 0.08);
+
       }
 
       &:disabled {

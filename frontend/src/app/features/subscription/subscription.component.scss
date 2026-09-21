@@ -3,24 +3,25 @@
 // Color Palette: Deep Navy #0F1B3D, Blue #2563EB, Indigo #4338CA, Gold #F4B728, Emerald #10B981
 // =============================================================================
 
-$navy: #0f1b3d;
-$navy-dark: #0a1229;
-$primary-blue: #2563eb;
-$primary-hover: #1d4ed8;
-$indigo: #4338ca;
-$indigo-accent: #6366f1;
-$gold: #f4b728;
+$navy: #111111;
+$navy-dark: #1a1a1a;
+$primary-blue: #f96614;
+$primary-hover: #f68749;
+$indigo: #f96614;
+$indigo-accent: #f68749;
+$gold: #f96614;
 $emerald: #10b981;
-$text-dark: #172033;
+$text-dark: #111111;
 $text-muted: #64748b;
-$border-light: #e2e8f0;
+$border-light: #eaeaea;
 $surface-subtle: #f8fafc;
-$surface-hover: #f1f5f9;
+$surface-hover: #fff4ee;
 
 .subscription-command-center {
   padding-top: 0.25rem;
   padding-bottom: 4rem;
   color: $text-dark;
+  font-family: 'Outfit', Inter, sans-serif;
 }
 
 // -----------------------------------------------------------------------------
@@ -59,32 +60,32 @@ $surface-hover: #f1f5f9;
 }
 
 .bg-indigo-subtle {
-  background-color: #eef2ff !important;
+  background-color: #fff4ee !important;
 }
 
 .shadow-2xs {
-  box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04) !important;
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.04) !important;
 }
 
 .shadow-xs {
-  box-shadow: 0 1px 3px rgba(15, 27, 61, 0.08) !important;
+  box-shadow: 0 1px 3px rgba(17, 17, 17, 0.08) !important;
 }
 
 .btn-gold {
-  background-color: $gold !important;
-  border-color: $gold !important;
-  color: #0f1b3d !important;
+  background: linear-gradient(135deg, #f96614 0%, #f68749 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
   font-weight: 700;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: darken($gold, 8%) !important;
-    border-color: darken($gold, 8%) !important;
-    color: #0a1229 !important;
+    background: linear-gradient(135deg, #f68749 0%, #f96614 100%) !important;
+    color: #ffffff !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(244, 183, 40, 0.35);
+    box-shadow: 0 4px 14px rgba(249, 102, 20, 0.35);
   }
 }
+
 
 .tracking-wider {
   letter-spacing: 0.06em !important;
@@ -353,33 +354,75 @@ $surface-hover: #f1f5f9;
 // Collapsible Full Comparison Matrix
 // -----------------------------------------------------------------------------
 .plan-comparison-card {
+  background: #ffffff;
   border: 1px solid $border-light !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 4px 20px rgba(17, 17, 17, 0.05) !important;
 
   .card-header {
-    padding: 1.5rem 1.75rem !important;
+    padding: 1.25rem 1.75rem !important;
+
+    .comparison-header-icon {
+      width: 42px;
+      height: 42px;
+      background-color: #fff4ee;
+      border: 1px solid rgba(249, 102, 20, 0.2);
+    }
   }
 
   .comparison-table {
+    thead {
+      background: linear-gradient(90deg, #ff9d67 0%, #f96614 100%) !important;
 
-    th,
-    td {
-      padding: 1.15rem 1.35rem;
-      border-color: $border-light;
+      th {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        padding: 1rem 1.25rem;
+        border: none !important;
+
+        &.current-plan-header {
+          background: rgba(255, 255, 255, 0.18) !important;
+          border-left: 2px solid rgba(255, 255, 255, 0.35) !important;
+          border-right: 2px solid rgba(255, 255, 255, 0.35) !important;
+        }
+      }
     }
 
-    .current-plan-header {
-      background-color: #eff6ff !important;
-      border-left: 2px solid $primary-blue;
-      border-right: 2px solid $primary-blue;
-      border-top: 3px solid $primary-blue;
+    tbody {
+      tr {
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background-color: #fbfbfb !important;
+        }
+      }
+
+      td {
+        padding: 1rem 1.25rem;
+        border-color: #f1f5f9;
+        font-size: 0.9375rem;
+
+        &.current-plan-col {
+          background-color: #fffbf8 !important;
+          border-left: 1px solid rgba(249, 102, 20, 0.2);
+          border-right: 1px solid rgba(249, 102, 20, 0.2);
+          font-weight: 700;
+          color: $navy;
+        }
+      }
     }
 
-    .current-plan-col {
-      background-color: #f8faff !important;
-      border-left: 2px solid $primary-blue;
-      border-right: 2px solid $primary-blue;
-      font-weight: 600;
-      color: $navy;
+    tfoot {
+      td {
+        padding: 1rem 1.25rem;
+        border-color: #e2e8f0;
+
+        &.current-plan-col {
+          background-color: #fffbf8 !important;
+          border-left: 1px solid rgba(249, 102, 20, 0.2);
+          border-right: 1px solid rgba(249, 102, 20, 0.2);
+        }
+      }
     }
   }
 }
@@ -490,19 +533,52 @@ $surface-hover: #f1f5f9;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 0.875rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 0.875rem !important;
+  min-height: 136px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px -2px rgba(15, 27, 61, 0.08) !important;
+    box-shadow: 0 6px 16px -2px rgba(17, 17, 17, 0.08) !important;
     border-color: #cbd5e1;
   }
-}
 
-.quota-mini-icon {
-  width: 32px;
-  height: 32px;
-  font-size: 0.9rem;
+  .quota-mini-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+    margin-inline: auto;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quota-card-label {
+    font-size: 0.8125rem;
+    color: #64748b;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    margin-bottom: 0.35rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .quota-card-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #111111;
+    line-height: 1.2;
+    text-align: center;
+  }
 }
 
 .interval-modal-btn {

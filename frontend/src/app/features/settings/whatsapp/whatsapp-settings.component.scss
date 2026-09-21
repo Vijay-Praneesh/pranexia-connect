@@ -1,28 +1,30 @@
 // =============================================================================
 // Seyyon Connect — WhatsApp Business Settings & Cloud API Command Hub
-// Color Palette: Deep Navy #0F1B3D, WhatsApp Emerald #25D366, Forest #075E54, Blue #2563EB, Gold #F4B728
+// Color Palette: Seyyon Orange #f96614, WhatsApp Emerald #25d366, Forest #075e54
 // =============================================================================
 
-$navy: #0f1b3d;
-$navy-dark: #0a1229;
-$navy-light: #1e293b;
+$navy: #111111;
+$navy-dark: #1a1a1a;
+$navy-light: #111111;
 $emerald: #10b981;
 $emerald-whatsapp: #25d366;
 $emerald-dark: #075e54;
 $emerald-subtle: #ecfdf5;
 $emerald-border: #a7f3d0;
-$primary-blue: #2563eb;
-$gold: #f4b728;
-$text-dark: #172033;
+$primary: #f96614;
+$gold: #f96614;
+$text-dark: #111111;
 $text-muted: #64748b;
-$border-light: #e2e8f0;
+$border-light: #eaeaea;
 $surface-subtle: #f8fafc;
 $surface-card: #ffffff;
 
 .whatsapp-settings-container {
   padding-bottom: 2.5rem;
   color: $text-dark;
+  font-family: 'Outfit', Inter, sans-serif;
 }
+
 
 // -----------------------------------------------------------------------------
 // Global Badges & Utility Colors
@@ -249,14 +251,14 @@ $surface-card: #ffffff;
     }
 
     &:hover {
-      border-color: $primary-blue;
+      border-color: $primary;
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(15, 27, 61, 0.08);
 
       i.bi-chevron-right,
       i.bi-box-arrow-up-right {
         transform: translateX(2px);
-        color: $primary-blue !important;
+        color: $primary !important;
       }
     }
 

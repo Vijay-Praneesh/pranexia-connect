@@ -5,15 +5,14 @@
     <!-- ========================================== -->
     <aside class="welcome-panel" aria-label="Product introduction">
       <!-- Top Brand Logo -->
-
       <!-- Main Welcome Message -->
       <div class="welcome-body">
-        <h1 class="welcome-heading">WELCOME BACK!</h1>
+        <span class="welcome-eyebrow">ENTERPRISE CLOUD API</span>
+        <h1 class="welcome-heading">Connect Worldwide.</h1>
         <p class="welcome-tagline">
-          Connect with your customers.<br />
-          Build meaningful conversations.
+          Engage customers with high-speed automated campaigns and Meta-verified delivery.
         </p>
-        <div class="gold-accent-line" aria-hidden="true"></div>
+        <div class="brand-accent-line" aria-hidden="true"></div>
 
         <!-- Three Feature Highlights -->
         <div class="feature-list" role="list">
@@ -23,19 +22,19 @@
               <i class="bi bi-chat-square-text-fill"></i>
             </div>
             <div class="feature-text">
-              <h2 class="feature-title">Engage Customers</h2>
-              <p class="feature-desc">Start conversations that matter</p>
+              <h2 class="feature-title">Meta-Approved Templates</h2>
+              <p class="feature-desc">Interactive headers, buttons & media</p>
             </div>
           </div>
 
           <!-- Feature 2 -->
           <div class="feature-item" role="listitem">
             <div class="feature-icon-wrapper" aria-hidden="true">
-              <i class="bi bi-graph-up-arrow"></i>
+              <i class="bi bi-lightning-charge-fill"></i>
             </div>
             <div class="feature-text">
-              <h2 class="feature-title">Drive Growth</h2>
-              <p class="feature-desc">Grow your business with insights</p>
+              <h2 class="feature-title">High-Speed Broadcasts</h2>
+              <p class="feature-desc">Automated, targeted campaign delivery</p>
             </div>
           </div>
 
@@ -45,8 +44,8 @@
               <i class="bi bi-shield-check"></i>
             </div>
             <div class="feature-text">
-              <h2 class="feature-title">Secure & Reliable</h2>
-              <p class="feature-desc">Enterprise-grade security you can trust</p>
+              <h2 class="feature-title">Enterprise Security</h2>
+              <p class="feature-desc">Verified WhatsApp Cloud API integration</p>
             </div>
           </div>
         </div>
@@ -100,7 +99,7 @@
       <!-- Traditional Email + Password Form -->
       <form [formGroup]="form" (ngSubmit)="submit()" class="login-form" novalidate>
         <!-- Email Field -->
-        <div class="form-group mb-3">
+        <div class="form-group mb-2">
           <label class="input-label" for="email">Email address</label>
           <div class="input-container" [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid">
             <i class="bi bi-envelope input-icon" aria-hidden="true"></i>
@@ -115,7 +114,7 @@
         </div>
 
         <!-- Password Field -->
-        <div class="form-group mb-4">
+        <div class="form-group mb-3">
           <div class="d-flex justify-content-between align-items-center mb-1">
             <label class="input-label mb-0" for="password">Password</label>
           </div>
@@ -135,7 +134,7 @@
         </div>
 
         <!-- Sign In Submit Button -->
-        <button class="btn btn-primary-gradient w-100 mb-3" type="submit" [disabled]="submitting || googleSubmitting">
+        <button class="btn btn-primary-gradient w-100 mb-2" type="submit" [disabled]="submitting || googleSubmitting">
           @if (submitting) {
           <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
           <span>Signing in…</span>
@@ -145,7 +144,7 @@
         </button>
 
         <!-- Divider -->
-        <div class="auth-divider my-3">
+        <div class="auth-divider my-2">
           <span>OR</span>
         </div>
 

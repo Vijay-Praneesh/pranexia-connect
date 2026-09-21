@@ -131,19 +131,57 @@ table,
 }
 
 // -----------------------------------------------------------------------------
-// Universal Button Hover Contrast Safeguards
-// Prevents text/icon from becoming invisible when hovering outline / white buttons
+// Universal Button Hover Contrast Safeguards & Seyyon Connect Brand Buttons
 // -----------------------------------------------------------------------------
 .btn {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  font-family: 'Outfit', Inter, sans-serif;
+
+  &.btn-primary {
+    background-color: #f96614 !important;
+    border-color: #f96614 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(249, 102, 20, 0.24);
+
+    &:hover:not(:disabled),
+    &:focus:not(:disabled),
+    &:active:not(:disabled) {
+      background-color: #f68749 !important;
+      border-color: #f68749 !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 18px rgba(249, 102, 20, 0.35);
+    }
+  }
+
+  &.btn-primary-gradient {
+    background: linear-gradient(135deg, #f96614 0%, #f68749 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(249, 102, 20, 0.28);
+    font-weight: 600;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #f68749 0%, #f96614 100%) !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 20px rgba(249, 102, 20, 0.38);
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(249, 102, 20, 0.24);
+    }
+  }
 
   &.btn-outline-primary {
+    border-color: #f96614 !important;
+    color: #f96614 !important;
 
     &:hover:not(:disabled),
     &:active:not(:disabled),
     &.active {
-      background-color: var(--bs-primary, #4f46e5) !important;
-      border-color: var(--bs-primary, #4f46e5) !important;
+      background-color: #f96614 !important;
+      border-color: #f96614 !important;
       color: #ffffff !important;
 
       i,
@@ -180,13 +218,13 @@ table,
     &.active {
       background-color: #f1f5f9 !important;
       border-color: #cbd5e1 !important;
-      color: #0f1b3d !important;
+      color: #111111 !important;
 
       i,
       span,
       strong,
       small {
-        color: #0f1b3d !important;
+        color: #111111 !important;
       }
     }
   }
@@ -232,8 +270,8 @@ table,
     &:hover:not(:disabled),
     &:active:not(:disabled),
     &.active {
-      background-color: #0f1b3d !important;
-      border-color: #0f1b3d !important;
+      background-color: #111111 !important;
+      border-color: #111111 !important;
       color: #ffffff !important;
 
       i,
@@ -271,7 +309,7 @@ table,
   position: fixed;
   inset: 0;
   z-index: 1055;
-  background-color: rgba(15, 27, 61, 0.65) !important;
+  background-color: rgba(17, 17, 17, 0.65) !important;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -285,8 +323,8 @@ table,
   border-radius: 1.25rem !important;
   border: 1px solid rgba(226, 232, 240, 0.9) !important;
   box-shadow:
-    0 25px 60px -12px rgba(15, 27, 61, 0.28),
-    0 4px 12px rgba(15, 27, 61, 0.08) !important;
+    0 25px 60px -12px rgba(17, 17, 17, 0.28),
+    0 4px 12px rgba(17, 17, 17, 0.08) !important;
   background-color: #ffffff !important;
   animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -295,7 +333,7 @@ table,
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 2px 8px rgba(249, 102, 20, 0.18);
 }
 
 .btn-close-circle {
@@ -314,7 +352,7 @@ table,
 
   &:hover:not(:disabled) {
     background-color: #f1f5f9;
-    color: #0f1b3d;
+    color: #111111;
     border-color: #cbd5e1;
     transform: rotate(90deg) scale(1.05);
   }
@@ -591,6 +629,142 @@ table,
 
 .cycle-remaining-pill {
   padding: 0.35rem 0.85rem !important;
+}
+
+// Form controls focus ring with Seyyon Orange
+.form-control,
+.form-select {
+  border-color: #e2e8f0;
+  font-family: 'Outfit', Inter, sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: #f96614 !important;
+    box-shadow: 0 0 0 3px rgba(249, 102, 20, 0.15) !important;
+  }
+}
+
+// Universal Orange Background & White Text for All Select Options & Dropdowns
+select,
+.form-select {
+  cursor: pointer;
+  accent-color: #f96614 !important;
+  color-scheme: light;
+
+  option {
+    background-color: #ffffff;
+    color: #111111;
+    padding: 0.65rem 1rem;
+    font-family: 'Outfit', Inter, sans-serif;
+    font-size: 0.9375rem;
+
+    &:checked,
+    &:hover,
+    &:focus,
+    &:active,
+    &[selected] {
+      background-color: #f96614 !important;
+      background: #f96614 !important;
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+      box-shadow: 0 0 10px 100px #f96614 inset !important;
+    }
+  }
+
+  &:focus option:checked {
+    background-color: #f96614 !important;
+    background: #f96614 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    box-shadow: 0 0 10px 100px #f96614 inset !important;
+  }
+}
+
+select option:checked,
+select option:hover,
+select option:focus,
+select option:active {
+  background-color: #f96614 !important;
+  background: #f96614 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 10px 100px #f96614 inset !important;
+}
+
+// Bootstrap Dropdown Menus & Items
+.dropdown-menu {
+  border-radius: 0.875rem !important;
+  border: 1px solid #eaeaea !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  padding: 0.5rem !important;
+  background-color: #ffffff !important;
+  overflow: hidden;
+
+  .dropdown-item {
+    border-radius: 0.5rem !important;
+    padding: 0.55rem 0.95rem !important;
+    font-weight: 500;
+    color: #111111;
+    font-family: 'Outfit', Inter, sans-serif;
+    transition: all 0.15s ease;
+
+    &:hover,
+    &:focus,
+    &.active,
+    &:active {
+      background: linear-gradient(135deg, #f96614 0%, #f68749 100%) !important;
+      background-color: #f96614 !important;
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+
+      i,
+      span,
+      strong,
+      small,
+      div {
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+      }
+    }
+  }
+}
+
+.form-check-input {
+  &:checked {
+    background-color: #f96614 !important;
+    border-color: #f96614 !important;
+  }
+
+  &:focus {
+    border-color: #f96614 !important;
+    box-shadow: 0 0 0 3px rgba(249, 102, 20, 0.15) !important;
+  }
+}
+
+// Brand Cards
+.saas-card,
+.dashboard-card {
+  background: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 8px 30px rgba(249, 102, 20, 0.06);
+  }
+}
+
+.text-orange {
+  color: #f96614 !important;
+}
+
+.bg-orange-subtle {
+  background-color: #fbf4ee !important;
+}
+
+.border-orange-subtle {
+  border-color: rgba(249, 102, 20, 0.25) !important;
 }
 
 @keyframes backdropFadeIn {

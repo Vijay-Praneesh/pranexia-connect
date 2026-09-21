@@ -22,9 +22,21 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
       <!-- FIXED LEFT SIDEBAR (100% STATIONARY) -->
       <aside
         class="app-sidebar"
+        [class.collapsed]="sidebarCollapsed"
         [class.mobile-open]="mobileNavOpen"
         aria-label="Application Sidebar"
       >
+        <!-- SIDEBAR COLLAPSE TOGGLE (PINNED TO RIGHT BORDER) -->
+        <button
+          class="btn-sidebar-collapse d-none d-xl-flex"
+          type="button"
+          (click)="toggleSidebarCollapse()"
+          [attr.aria-label]="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+          [attr.title]="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+        >
+          <i class="bi" [class.bi-chevron-left]="!sidebarCollapsed" [class.bi-chevron-right]="sidebarCollapsed" aria-hidden="true"></i>
+        </button>
+
         <!-- SIDEBAR HEADER / BRAND -->
         <div class="sidebar-header">
           <a
@@ -36,6 +48,11 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
               src="assets/seyyon-logo.png"
               alt="Seyyon Connect"
               class="sidebar-logo"
+            />
+            <img
+              src="assets/seyyon-favicon.png"
+              alt="Seyyon Connect"
+              class="sidebar-favicon"
             />
           </a>
         </div>
@@ -58,6 +75,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
                     [routerLink]="item.path"
                     routerLinkActive="active"
                     [routerLinkActiveOptions]="{ exact: true }"
+                    [title]="item.label"
                     (click)="closeMobileNav()"
                   >
                     <span class="nav-item-icon-wrapper" aria-hidden="true">
@@ -173,19 +191,17 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
   styles: [
     `
       // Variables
-      $navy: #0f1b3d;
-      $blue: #2563eb;
-      $blue-hover: #1d4ed8;
-      $indigo: #4338ca;
-      $gold: #d97706;
-      $gold-bg: #fffbeb;
-      $gold-border: rgba(245, 158, 11, 0.35);
-      $green: #10b981;
+      $primary: #f96614;
+      $primary-hover: #f68749;
+      $primary-light: #ff9d67;
+      $primary-peach: #fff4ee;
+      $primary-gradient: linear-gradient(90deg, #f96614 0%, #f68749 100%);
+      $navy: #111111;
       $surface: #ffffff;
-      $page-bg: #f5f5f5;
-      $border: #eeeeee;
+      $page-bg: #f8fafc;
+      $border: #eaeaea;
       $border-strong: #e2e8f0;
-      $text-dark: #172033;
+      $text-dark: #111111;
       $text-muted: #64748b;
 
       .app-shell-container {
@@ -197,6 +213,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
         background-color: $page-bg;
         position: relative;
         box-sizing: border-box;
+        font-family: 'Outfit', Inter, system-ui, sans-serif;
       }
 
       // -----------------------------------------------------------------------
@@ -214,10 +231,117 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
         display: flex;
         flex-direction: column;
         z-index: 100;
+        position: relative;
         border-right: 1px solid $border-strong;
-        box-shadow: 2px 0 8px rgba(15, 27, 61, 0.02);
-        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        overflow: hidden;
+        box-shadow: 2px 0 12px rgba(17, 17, 17, 0.03);
+        transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.22s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: visible;
+
+        // COLLAPSE TOGGLE PINNED TO RIGHT BORDER
+        .btn-sidebar-collapse {
+          position: absolute;
+          top: 68px;
+          right: -13px;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background-color: #ffffff;
+          border: 1px solid $border-strong;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+          color: #64748b;
+          z-index: 120;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+          i {
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          &:hover {
+            background-color: $primary;
+            border-color: $primary;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(249, 102, 20, 0.35);
+            transform: scale(1.08);
+          }
+        }
+
+        &.collapsed {
+          width: 72px;
+          min-width: 72px;
+          max-width: 72px;
+
+          .sidebar-header {
+            padding: 0 0.5rem;
+            justify-content: center;
+
+            .sidebar-brand-link {
+              justify-content: center;
+              width: auto;
+
+              .sidebar-logo {
+                display: none !important;
+              }
+
+              .sidebar-favicon {
+                display: block !important;
+                width: 36px;
+                height: 36px;
+                max-width: 36px;
+                max-height: 36px;
+                object-fit: contain;
+              }
+            }
+          }
+
+          .sidebar-scrollable-content {
+            padding: 1.25rem 0.5rem;
+
+            .nav-section-label {
+              display: none;
+            }
+
+            .sidebar-nav {
+              align-items: center;
+
+              .sidebar-nav-item {
+                justify-content: center;
+                padding: 0.75rem 0;
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+
+                .nav-item-icon-wrapper {
+                  font-size: 1.25rem;
+                  margin: 0;
+                }
+
+                .nav-item-text {
+                  display: none;
+                }
+              }
+            }
+          }
+
+          .sidebar-footer {
+            padding: 0.85rem 0.5rem;
+
+            .sidebar-user-card {
+              justify-content: center;
+
+              .user-info {
+                display: none;
+              }
+            }
+          }
+        }
 
         .sidebar-header {
           height: 64px;
@@ -227,19 +351,30 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
           border-bottom: 1px solid $border;
           display: flex;
           align-items: center;
+          justify-content: center;
           flex-shrink: 0;
 
           .sidebar-brand-link {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             text-decoration: none;
             width: 100%;
 
             .sidebar-logo {
-              height: 39px;
               width: 100%;
               max-width: 215px;
-              object-fit: cover;
+              object-fit: contain;
+              display: block;
+            }
+
+            .sidebar-favicon {
+              width: 36px;
+              height: 36px;
+              max-width: 36px;
+              max-height: 36px;
+              object-fit: contain;
+              display: none;
             }
           }
         }
@@ -265,8 +400,8 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
           .nav-section-label {
             font-size: 0.75rem;
             font-weight: 700;
-            color: $blue;
-            letter-spacing: 0.06em;
+            color: $primary;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             padding: 0.25rem 0.5rem 0.65rem;
           }
@@ -275,7 +410,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
         .sidebar-nav {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 0.4rem;
           padding: 0;
 
           .sidebar-nav-item {
@@ -290,7 +425,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
             font-size: 0.9375rem;
             font-weight: 600;
             border: 1px solid transparent;
-            transition: all 0.15s ease-in-out;
+            transition: all 0.18s ease-in-out;
             position: relative;
             white-space: nowrap;
 
@@ -299,7 +434,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
               display: grid;
               place-items: center;
               color: #64748b;
-              transition: color 0.15s ease;
+              transition: color 0.18s ease;
             }
 
             .nav-item-text {
@@ -307,20 +442,20 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
             }
 
             &:hover {
-              color: $blue;
-              background-color: #eff6ff;
-              border-color: #dbeafe;
+              color: $primary;
+              background-color: $primary-peach;
+              border-color: rgba(249, 102, 20, 0.2);
 
               .nav-item-icon-wrapper {
-                color: $blue;
+                color: $primary;
               }
             }
 
             &.active {
               color: #ffffff;
-              background: linear-gradient(90deg, #2563eb 0%, #3730a3 100%);
+              background: $primary-gradient;
               border-color: transparent;
-              box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+              box-shadow: 0 4px 14px rgba(249, 102, 20, 0.28);
 
               .nav-item-icon-wrapper {
                 color: #ffffff;
@@ -328,7 +463,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
             }
 
             &:focus-visible {
-              outline: 2px solid $blue;
+              outline: 2px solid $primary;
               outline-offset: 2px;
             }
           }
@@ -439,7 +574,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
         position: sticky;
         top: 0;
         z-index: 90;
-        box-shadow: 0 1px 3px rgba(15, 27, 61, 0.02);
+        box-shadow: 0 1px 3px rgba(17, 17, 17, 0.02);
         box-sizing: border-box;
         flex-shrink: 0;
 
@@ -464,8 +599,9 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
             flex-shrink: 0;
 
             &:hover {
-              background-color: #f8fafc;
-              color: $blue;
+              background-color: $primary-peach;
+              color: $primary;
+              border-color: rgba(249, 102, 20, 0.3);
             }
           }
 
@@ -527,20 +663,25 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
             width: 38px;
             height: 38px;
             border-radius: 8px;
-            background-color: $surface;
-            border: 1px solid $border-strong;
-            color: $text-muted;
+            background: linear-gradient(135deg, #f96614 0%, #f68749 100%) !important;
+            border: none !important;
+            color: #ffffff !important;
             display: grid;
             place-items: center;
             text-decoration: none;
             font-size: 1.05rem;
+            box-shadow: 0 2px 8px rgba(249, 102, 20, 0.25);
             transition: all 0.15s ease;
             flex-shrink: 0;
 
+            i {
+              color: #ffffff !important;
+            }
+
             &:hover {
-              color: $blue;
-              background-color: #eff6ff;
-              border-color: rgba(37, 99, 235, 0.3);
+              background: linear-gradient(135deg, #f68749 0%, #f96614 100%) !important;
+              box-shadow: 0 4px 14px rgba(249, 102, 20, 0.4);
+              transform: translateY(-1px);
             }
           }
 
@@ -559,8 +700,9 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
             white-space: nowrap;
 
             &:hover {
-              color: $navy;
-              background-color: #f8fafc;
+              color: $primary;
+              background-color: $primary-peach;
+              border-color: rgba(249, 102, 20, 0.3);
             }
           }
 
@@ -596,7 +738,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
         flex: 1 0 auto;
         min-width: 0;
         width: 100%;
-        background-color: #fff;
+        background-color: $page-bg;
         padding: 1.75rem 2rem 3rem;
         box-sizing: border-box;
       }
@@ -607,7 +749,7 @@ import { AuthorizationFeedbackService } from '../../core/services/authorization-
       .mobile-backdrop {
         position: fixed;
         inset: 0;
-        background-color: rgba(15, 27, 61, 0.5);
+        background-color: rgba(17, 17, 17, 0.45);
         backdrop-filter: blur(2px);
         z-index: 99;
         animation: fadeIn 0.2s ease-out;
@@ -669,9 +811,14 @@ export class AppLayoutComponent {
   readonly auth = inject(AuthService);
   readonly feedback = inject(AuthorizationFeedbackService);
   mobileNavOpen = false;
+  sidebarCollapsed = false;
 
   canShow(roles: readonly string[], role: string): boolean {
     return roles.includes(role);
+  }
+
+  toggleSidebarCollapse(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
   toggleMobileNav(): void {

@@ -328,16 +328,22 @@
   <!-- ========================================================================= -->
   @if (showPlanComparison && planOverview) {
   <div class="card border-0 shadow-sm rounded-4 mb-5 plan-comparison-card overflow-hidden">
-    <div class="card-header bg-navy text-white d-flex align-items-center justify-content-between p-4">
-      <div>
-        <h5 class="card-title mb-1 fw-bold d-flex align-items-center gap-2 text-white">
-          <i class="bi bi-grid-3x3-gap text-gold"></i>
-          <span>Comprehensive Feature &amp; Limit Matrix</span>
-        </h5>
-        <small class="text-white-50">Compare authoritative quotas across all Seyyon Connect tiers</small>
+    <!-- Clean Modern White Header with Orange Icon -->
+    <div class="card-header bg-white border-bottom p-4 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-3">
+        <div class="comparison-header-icon rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
+          <i class="bi bi-grid-3x3-gap fs-4 text-primary"></i>
+        </div>
+        <div>
+          <h5 class="card-title mb-0.5 fw-extrabold text-navy">
+            Comprehensive Feature &amp; Limit Matrix
+          </h5>
+          <small class="text-muted">Compare authoritative quotas across all Seyyon Connect tiers</small>
+        </div>
       </div>
-      <button class="btn btn-sm btn-outline-light rounded-pill px-3" type="button" (click)="togglePlanComparison()">
-        <i class="bi bi-x-lg me-1"></i>Close
+      <button class="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-2xs" type="button" (click)="togglePlanComparison()">
+        <i class="bi bi-x-lg"></i>
+        <span>Close</span>
       </button>
     </div>
 
@@ -346,13 +352,18 @@
         <table class="table table-hover align-middle mb-0 comparison-table">
           <thead>
             <tr>
-              <th class="ps-4 py-3" style="min-width: 220px;">Feature / Allowance</th>
+              <th class="ps-4 py-3.5" style="min-width: 220px;">Feature / Allowance</th>
               @for (p of planOverview.availablePlans; track p.name) {
-              <th class="text-center py-3" [class.current-plan-header]="p.name === subscription?.plan"
+              <th class="text-center py-3.5" [class.current-plan-header]="p.name === subscription?.plan"
                 style="min-width: 150px;">
                 <div class="fw-bold fs-6 text-white">{{ p.displayName }}</div>
                 @if (p.name === subscription?.plan) {
-                <span class="badge bg-white text-primary mt-1 px-3 py-1 rounded-pill small fw-bold">Current Plan</span>
+                <div class="mt-1">
+                  <span class="badge bg-white text-primary px-2.5 py-1 rounded-pill small fw-bold shadow-sm d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Current Plan</span>
+                  </span>
+                </div>
                 }
               </th>
               }
@@ -360,7 +371,7 @@
           </thead>
           <tbody>
             <tr>
-              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-chat-dots me-2 text-primary"></i>Monthly
+              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-whatsapp me-2 text-success"></i>Monthly
                 Messages</td>
               @for (p of planOverview.availablePlans; track p.name) {
               <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
@@ -369,7 +380,7 @@
               }
             </tr>
             <tr>
-              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-megaphone me-2 text-info"></i>Monthly
+              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-megaphone-fill me-2 text-primary"></i>Monthly
                 Campaigns</td>
               @for (p of planOverview.availablePlans; track p.name) {
               <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
@@ -378,7 +389,7 @@
               }
             </tr>
             <tr>
-              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-people me-2 text-success"></i>Contacts /
+              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-people-fill me-2 text-primary"></i>Contacts /
                 Customers</td>
               @for (p of planOverview.availablePlans; track p.name) {
               <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
@@ -388,7 +399,7 @@
             </tr>
             <tr>
               <td class="ps-4 py-3 fw-semibold text-navy"><i
-                  class="bi bi-file-earmark-text me-2 text-primary"></i>Templates</td>
+                  class="bi bi-file-earmark-text-fill me-2 text-primary"></i>Approved Templates</td>
               @for (p of planOverview.availablePlans; track p.name) {
               <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
                 {{ p.limits['TEMPLATES'] !== null ? (p.limits['TEMPLATES'] | number) : 'Unlimited' }}
@@ -396,7 +407,7 @@
               }
             </tr>
             <tr>
-              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-hdd-network me-2 text-warning"></i>Media
+              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-database-fill me-2 text-warning"></i>Media
                 Storage</td>
               @for (p of planOverview.availablePlans; track p.name) {
               <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
@@ -406,7 +417,7 @@
               }
             </tr>
             <tr>
-              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-cloud-arrow-up me-2 text-info"></i>Monthly
+              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-cloud-arrow-up-fill me-2 text-primary"></i>Monthly
                 Media Uploads</td>
               @for (p of planOverview.availablePlans; track p.name) {
               <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
@@ -416,7 +427,7 @@
               }
             </tr>
             <tr>
-              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-person-badge me-2 text-secondary"></i>Team
+              <td class="ps-4 py-3 fw-semibold text-navy"><i class="bi bi-person-badge-fill me-2 text-secondary"></i>Team
                 Members</td>
               @for (p of planOverview.availablePlans; track p.name) {
               <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
@@ -434,21 +445,21 @@
               }
             </tr>
           </tbody>
-          <tfoot class="bg-light">
+          <tfoot class="bg-surface-subtle border-top">
             <tr>
-              <td class="ps-4 py-3 fw-bold text-navy">Plan Action</td>
+              <td class="ps-4 py-3.5 fw-bold text-navy">Plan Action</td>
               @for (p of planOverview.availablePlans; track p.name) {
-              <td class="text-center py-3" [class.current-plan-col]="p.name === subscription?.plan">
+              <td class="text-center py-3.5" [class.current-plan-col]="p.name === subscription?.plan">
                 @if (p.name === subscription?.plan) {
-                <span class="text-success fw-bold small"><i class="bi bi-check-circle-fill me-1"></i>Active</span>
+                <span class="badge bg-emerald-subtle text-emerald border border-emerald-subtle px-3 py-1.5 rounded-pill fw-bold small"><i class="bi bi-check-circle-fill me-1"></i>Active</span>
                 } @else if (p.name === 'ENTERPRISE') {
                 <a href="mailto:sales@pranexia-connect.com"
-                  class="btn btn-sm btn-outline-dark fw-semibold rounded-pill px-3">
+                  class="btn btn-sm btn-outline-dark fw-semibold rounded-pill px-3.5 py-1.5 shadow-2xs">
                   Contact
                 </a>
                 } @else {
                 <button (click)="openPlanChangeModal(p.name)"
-                  class="btn btn-sm btn-outline-primary fw-semibold rounded-pill px-3">
+                  class="btn btn-sm btn-primary fw-semibold rounded-pill px-3.5 py-1.5 shadow-2xs">
                   Select
                 </button>
                 }
@@ -672,7 +683,7 @@
             }
           </div>
 
-          <!-- Resource Quotas & Limits (4x2 / 3x3 Grid of Clean Styled Cards) -->
+          <!-- Resource Quotas & Limits (4x2 Grid of Clean Centered Cards) -->
           <h6 class="fw-bold text-navy mb-3 d-flex align-items-center gap-2">
             <i class="bi bi-shield-check text-primary"></i>
             <span>Resource Quotas &amp; Capacities</span>
@@ -681,16 +692,19 @@
             @for (item of getFormattedPlanLimits(selectedPlanDetailsTier); track item.key) {
             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
               <div
-                class="modal-quota-card p-3 rounded-3 bg-white border h-100 d-flex flex-column justify-content-between shadow-2xs">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <div
-                    class="quota-mini-icon rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                    [ngClass]="item.iconBgClass">
-                    <i class="bi {{ item.icon }}"></i>
-                  </div>
-                  <small class="text-muted fw-semibold text-truncate" [title]="item.label">{{ item.label }}</small>
+                class="modal-quota-card p-3.5 rounded-3 bg-white border h-100 d-flex flex-column align-items-center justify-content-center text-center shadow-2xs">
+                <!-- TOP: ICON -->
+                <div
+                  class="quota-mini-icon rounded-circle d-flex align-items-center justify-content-center mb-2 flex-shrink-0"
+                  [ngClass]="item.iconBgClass">
+                  <i class="bi {{ item.icon }} fs-5"></i>
                 </div>
-                <div class="fs-5 fw-extrabold text-navy mt-1">
+                <!-- BELOW: TEXT -->
+                <div class="quota-card-label text-muted fw-semibold small text-center mb-1.5 px-1" [title]="item.label">
+                  {{ item.label }}
+                </div>
+                <!-- BELOW: NUMBER -->
+                <div class="quota-card-value fs-4 fw-extrabold text-navy text-center">
                   {{ item.valueFormatted }}
                 </div>
               </div>

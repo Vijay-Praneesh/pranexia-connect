@@ -5,7 +5,17 @@ type BadgeTone = 'primary' | 'success' | 'warning' | 'danger' | 'secondary' | 'i
 @Component({
   selector: 'app-status-badge',
   standalone: true,
-  template: `<span class="badge rounded-pill text-bg-{{ tone }}">{{ label }}</span>`,
+  template: `<span class="badge rounded-pill status-pill-badge text-bg-{{ tone }}">{{ label }}</span>`,
+  styles: [`
+    .status-pill-badge {
+      font-family: 'Outfit', Inter, sans-serif;
+      font-weight: 700;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      padding: 0.35rem 0.7rem;
+      text-transform: uppercase;
+    }
+  `],
 })
 export class StatusBadgeComponent {
   @Input({ required: true }) status = '';

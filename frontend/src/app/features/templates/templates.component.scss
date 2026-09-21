@@ -25,17 +25,20 @@
 // ---------------------------------------------------
 // 1. BRAND PALETTE & TOKENS
 // ---------------------------------------------------
-$navy-dark: #0f1b3d;
-$navy-surface: #172033;
-$blue-primary: #2563eb;
-$blue-hover: #1d4ed8;
-$indigo: #4338ca;
-$gold-accent: #f4b728;
-$text-dark: #0f172a;
+$primary: #f96614;
+$primary-hover: #f68749;
+$primary-subtle: #fff4ee;
+$navy-dark: #111111;
+$navy-surface: #1a1a1a;
+$blue-primary: #f96614;
+$blue-hover: #f68749;
+$indigo: #f96614;
+$gold-accent: #f96614;
+$text-dark: #111111;
 $text-muted: #64748b;
-$border-color: #e2e8f0;
+$border-color: #eaeaea;
 $surface-light: #f8fafc;
-$surface-subtle: #f1f5f9;
+$surface-subtle: #f8fafc;
 $wa-bg: #efeae2;
 $wa-bubble: #d9fdd3;
 $wa-bubble-in: #ffffff;
@@ -54,19 +57,22 @@ $wa-teal: #075e54;
 // 2. PAGE HEADER
 // ---------------------------------------------------
 .page-header {
+  font-family: 'Outfit', Inter, sans-serif;
+
   .badge-eyebrow {
     display: inline-flex;
     align-items: center;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: $indigo;
-    background: #eef2ff;
+    letter-spacing: 0.08em;
+    color: $primary;
+    background: $primary-subtle;
     padding: 0.25rem 0.65rem;
     border-radius: 9999px;
-    border: 1px solid #e0e7ff;
+    border: 1px solid rgba(249, 102, 20, 0.2);
   }
+
 
   .badge-status-pill {
     display: inline-flex;

@@ -1,34 +1,27 @@
 // =============================================================================
 // SEYYON CONNECT — ACCOUNT & COMPANY SETTINGS
-// Super Premium SaaS Visual Design System
+// Super-Clean Modern SaaS Visual Design System (Seyyon Orange Theme)
 // =============================================================================
 
 // Design Tokens
-$navy: #0f1b3d;
-$navy-deep: #080e1e;
-$navy-soft: #1e293b;
-$blue: #2563eb;
-$blue-hover: #1d4ed8;
-$blue-subtle: #eff6ff;
-$indigo: #4338ca;
-$indigo-subtle: #eef2ff;
-$purple: #7c3aed;
-$purple-subtle: #f5f3ff;
-$gold: #d97706;
-$gold-accent: #f4b728;
-$gold-bg: #fffbeb;
-$gold-border: rgba(245, 158, 11, 0.35);
+$primary: #f96614;
+$primary-hover: #f68749;
+$primary-light: #ff9d67;
+$primary-subtle: #fff4ee;
+$primary-gradient: linear-gradient(135deg, #f96614 0%, #f68749 100%);
+$navy: #111111;
+$surface: #ffffff;
+$surface-subtle: #fafafa;
+$page-bg: #f8fafc;
+$border: #eaeaea;
+$border-strong: #e2e8f0;
+$border-light: #f8fafc;
+$text-dark: #111111;
+$text-muted: #64748b;
 $green: #10b981;
 $green-subtle: #ecfdf5;
 $red: #ef4444;
 $red-subtle: #fef2f2;
-$surface: #ffffff;
-$page-bg: #f8fafc;
-$border: #e2e8f0;
-$border-strong: #cbd5e1;
-$border-light: #f1f5f9;
-$text-dark: #172033;
-$text-muted: #64748b;
 $radius-sm: 8px;
 $radius-md: 12px;
 $radius-lg: 16px;
@@ -38,6 +31,7 @@ $radius-xl: 20px;
   max-width: 1040px;
   margin-inline: auto;
   padding-bottom: 3rem;
+  font-family: 'Outfit', Inter, sans-serif;
 }
 
 // -----------------------------------------------------------------------------
@@ -57,7 +51,7 @@ $radius-xl: 20px;
       gap: 0.5rem;
       font-size: 0.6875rem;
       font-weight: 700;
-      color: $gold;
+      color: $primary;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       margin-bottom: 0.35rem;
@@ -65,7 +59,7 @@ $radius-xl: 20px;
       .eyebrow-accent-bar {
         width: 16px;
         height: 3px;
-        background-color: $gold-accent;
+        background: $primary-gradient;
         border-radius: 2px;
       }
     }
@@ -102,7 +96,7 @@ $radius-xl: 20px;
       font-size: 0.875rem;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04);
+      box-shadow: 0 1px 3px rgba(17, 17, 17, 0.04);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
       .refresh-icon {
@@ -115,10 +109,10 @@ $radius-xl: 20px;
       }
 
       &:hover:not(:disabled) {
-        background-color: #f8fafc;
-        border-color: $blue;
-        color: $blue;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        background-color: $primary-subtle;
+        border-color: $primary;
+        color: $primary;
+        box-shadow: 0 4px 12px rgba(249, 102, 20, 0.18);
         transform: translateY(-1px);
       }
 
@@ -165,13 +159,13 @@ $radius-xl: 20px;
   }
 
   &.alert-info {
-    background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
-    border: 1px solid #bfdbfe;
-    color: #1e40af;
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border: 1px solid #fed7aa;
+    color: #c2410c;
   }
 
   &.alert-info-soft {
-    background-color: #f8fafc;
+    background-color: #ffffff;
     border: 1px solid $border-strong;
     color: $text-dark;
   }
@@ -212,20 +206,21 @@ $radius-xl: 20px;
   border-radius: $radius-lg;
   padding: 4rem 2rem;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(15, 27, 61, 0.04);
+  box-shadow: 0 4px 20px rgba(17, 17, 17, 0.04);
 }
 
 // -----------------------------------------------------------------------------
-// 03: SETTINGS NAVIGATION TABS
+// 03: SETTINGS NAVIGATION TABS (SUPER COOL CLEAN PILLS)
 // -----------------------------------------------------------------------------
 .settings-nav {
   display: flex;
-  gap: 0.625rem;
+  gap: 0.5rem;
   overflow-x: auto;
-  padding: 0.35rem;
-  background-color: #f1f5f9;
+  padding: 0.4rem;
+  background-color: #ffffff;
   border-radius: 999px;
   border: 1px solid $border;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -236,7 +231,7 @@ $radius-xl: 20px;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.55rem 1.25rem;
+    padding: 0.6rem 1.35rem;
     border: none;
     border-radius: 999px;
     color: $text-muted;
@@ -253,40 +248,40 @@ $radius-xl: 20px;
     }
 
     &:hover:not(.active) {
-      color: $navy;
-      background-color: rgba(255, 255, 255, 0.75);
+      color: $primary;
+      background-color: $primary-subtle;
     }
 
     &.active {
       color: #ffffff;
-      background: linear-gradient(135deg, $navy 0%, $indigo 100%);
-      box-shadow: 0 4px 14px rgba(15, 27, 61, 0.25);
+      background: $primary-gradient;
+      box-shadow: 0 4px 14px rgba(249, 102, 20, 0.32);
 
       .tab-icon {
-        color: $gold-accent;
+        color: #ffffff;
       }
     }
 
     &:focus-visible {
-      outline: 2px solid $blue;
+      outline: 2px solid $primary;
       outline-offset: 2px;
     }
   }
 }
 
 // -----------------------------------------------------------------------------
-// 04: SETTINGS PANEL SURFACES & HERO BANNER
+// 04: SETTINGS PANEL SURFACES & HERO BANNER (SUPER COOL SEYYON ORANGE THEME)
 // -----------------------------------------------------------------------------
 .settings-panel-surface {
   background-color: $surface;
   border-radius: $radius-xl;
   border: 1px solid $border;
-  box-shadow: 0 8px 30px rgba(15, 27, 61, 0.05);
+  box-shadow: 0 8px 30px rgba(17, 17, 17, 0.04);
   overflow: hidden;
 
   .panel-header-block {
-    padding: 2rem 2.25rem;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 2.25rem 2.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #fffbf8 100%);
     border-bottom: 1px solid $border;
     position: relative;
 
@@ -303,16 +298,16 @@ $radius-xl: 20px;
 
         .user-hero-avatar,
         .company-hero-avatar {
-          width: 68px;
-          height: 68px;
+          width: 72px;
+          height: 72px;
           border-radius: 20px;
-          background: linear-gradient(135deg, $navy 0%, #1e3a8a 100%);
+          background: $primary-gradient;
           color: #ffffff;
-          border: 2px solid #ffffff;
-          box-shadow: 0 6px 18px rgba(15, 27, 61, 0.18);
+          border: 3px solid #ffffff;
+          box-shadow: 0 8px 24px rgba(249, 102, 20, 0.32);
           display: grid;
           place-items: center;
-          font-size: 1.5rem;
+          font-size: 1.6rem;
           font-weight: 800;
           letter-spacing: 0.02em;
         }
@@ -321,15 +316,15 @@ $radius-xl: 20px;
           position: absolute;
           bottom: -2px;
           right: -2px;
-          width: 16px;
-          height: 16px;
+          width: 18px;
+          height: 18px;
           border-radius: 50%;
-          border: 2.5px solid #ffffff;
+          border: 3px solid #ffffff;
           background-color: #94a3b8;
 
           &.dot-active {
             background-color: $green;
-            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
           }
         }
       }
@@ -341,12 +336,12 @@ $radius-xl: 20px;
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          margin-bottom: 0.4rem;
+          margin-bottom: 0.45rem;
           flex-wrap: wrap;
 
           .user-hero-name,
           .company-hero-name {
-            font-size: 1.45rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: $navy;
             margin: 0;
@@ -363,14 +358,14 @@ $radius-xl: 20px;
             font-weight: 700;
             letter-spacing: 0.04em;
             text-transform: uppercase;
-            background-color: $indigo-subtle;
-            color: $indigo;
-            border: 1px solid rgba(67, 56, 202, 0.2);
+            background-color: $primary-subtle;
+            color: $primary;
+            border: 1px solid rgba(249, 102, 20, 0.25);
 
             &.role-super-admin {
-              background-color: $gold-bg;
-              color: $gold;
-              border-color: $gold-border;
+              background-color: $primary-subtle;
+              color: $primary;
+              border-color: rgba(249, 102, 20, 0.3);
             }
           }
         }
@@ -406,7 +401,7 @@ $radius-xl: 20px;
   }
 
   .panel-body-content {
-    padding: 2rem 2.25rem;
+    padding: 2.25rem 2.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
@@ -425,12 +420,12 @@ $radius-xl: 20px;
 
   &:hover {
     border-color: $border-strong;
-    box-shadow: 0 4px 16px rgba(15, 27, 61, 0.04);
+    box-shadow: 0 6px 20px rgba(17, 17, 17, 0.04);
   }
 
   .subcard-header {
     padding: 1.15rem 1.5rem;
-    background-color: #f8fafc;
+    background-color: $surface-subtle;
     border-bottom: 1px solid $border;
     display: flex;
     align-items: center;
@@ -443,18 +438,19 @@ $radius-xl: 20px;
       gap: 0.85rem;
 
       .subcard-icon-wrap {
-        width: 38px;
-        height: 38px;
+        width: 40px;
+        height: 40px;
         border-radius: 10px;
         display: grid;
         place-items: center;
         font-size: 1.15rem;
         flex-shrink: 0;
 
-        &.icon-blue {
-          background-color: $blue-subtle;
-          color: $blue;
-          border: 1px solid rgba(37, 99, 235, 0.2);
+        &.icon-orange {
+          background-color: $primary-subtle;
+          color: $primary;
+          border: 1px solid rgba(249, 102, 20, 0.2);
+          box-shadow: 0 2px 8px rgba(249, 102, 20, 0.12);
         }
 
         &.icon-google {
@@ -462,12 +458,6 @@ $radius-xl: 20px;
           color: #ea4335;
           border: 1px solid $border;
           box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-        }
-
-        &.icon-navy {
-          background-color: #eff6ff;
-          color: $navy;
-          border: 1px solid rgba(15, 27, 61, 0.15);
         }
 
         &.icon-danger {
@@ -533,12 +523,13 @@ $radius-xl: 20px;
 
       .val-role-tag {
         display: inline-block;
-        padding: 0.2rem 0.6rem;
-        background-color: #f1f5f9;
+        padding: 0.2rem 0.65rem;
+        background-color: $primary-subtle;
         border-radius: 6px;
-        color: $navy;
+        color: $primary;
         font-size: 0.8125rem;
         font-weight: 700;
+        border: 1px solid rgba(249, 102, 20, 0.2);
       }
 
       .plan-pill-badge-sm {
@@ -546,11 +537,11 @@ $radius-xl: 20px;
         align-items: center;
         padding: 0.2rem 0.65rem;
         border-radius: 6px;
-        background-color: $indigo-subtle;
-        color: $indigo;
+        background-color: $primary-subtle;
+        color: $primary;
         font-size: 0.75rem;
         font-weight: 700;
-        border: 1px solid rgba(67, 56, 202, 0.2);
+        border: 1px solid rgba(249, 102, 20, 0.2);
       }
 
       .verified-tag {
@@ -661,10 +652,10 @@ $radius-xl: 20px;
       }
 
       &:hover:not(:disabled) {
-        background-color: #f8fafc;
-        border-color: $blue;
-        color: $blue;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        background-color: $primary-subtle;
+        border-color: $primary;
+        color: $primary;
+        box-shadow: 0 4px 12px rgba(249, 102, 20, 0.18);
         transform: translateY(-1px);
       }
 
@@ -773,18 +764,11 @@ $radius-xl: 20px;
     font-size: 1.75rem;
     margin-bottom: 1.5rem;
 
-    &.icon-blue {
-      background: linear-gradient(135deg, $blue-subtle 0%, #dbeafe 100%);
-      color: $blue;
-      border: 1px solid rgba($blue, 0.25);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.1);
-    }
-
-    &.icon-purple {
-      background: linear-gradient(135deg, $purple-subtle 0%, #ede9fe 100%);
-      color: $purple;
-      border: 1px solid rgba(124, 58, 237, 0.25);
-      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.1);
+    &.icon-orange {
+      background: $primary-subtle;
+      color: $primary;
+      border: 1px solid rgba(249, 102, 20, 0.25);
+      box-shadow: 0 6px 16px rgba(249, 102, 20, 0.14);
     }
   }
 
@@ -799,22 +783,23 @@ $radius-xl: 20px;
   .empty-capability-text {
     font-size: 0.9375rem;
     color: $text-muted;
-    max-width: 540px;
-    line-height: 1.55;
+    max-width: 32rem;
     margin: 0 0 1.5rem;
+    line-height: 1.5;
   }
 
   .empty-capability-footer {
     .capability-pill {
       display: inline-flex;
       align-items: center;
-      padding: 0.35rem 0.85rem;
+      padding: 0.35rem 0.95rem;
       border-radius: 999px;
-      background-color: #f1f5f9;
-      color: $text-muted;
+      background-color: $primary-subtle;
+      border: 1px solid rgba(249, 102, 20, 0.25);
+      color: $primary;
       font-size: 0.75rem;
-      font-weight: 600;
-      border: 1px solid $border;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
   }
 }
@@ -826,57 +811,38 @@ $radius-xl: 20px;
   .settings-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 1.25rem;
-
-    .header-actions .btn-header-refresh {
-      width: 100%;
-      justify-content: center;
-    }
   }
 
   .settings-panel-surface {
     .panel-header-block {
-      padding: 1.5rem;
+      padding: 1.5rem 1.25rem;
 
       .user-hero-wrap,
       .company-hero-wrap {
         flex-direction: column;
-        align-items: flex-start !important;
-        gap: 1.25rem !important;
+        align-items: flex-start;
+        gap: 1rem;
       }
     }
 
     .panel-body-content {
-      padding: 1.25rem !important;
+      padding: 1.5rem 1.25rem;
     }
   }
 
-  .google-auth-body {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.25rem;
+  .profile-list {
+    padding: 0.25rem 1rem;
 
-    .google-action-right button {
-      width: 100%;
-      justify-content: center;
+    .profile-item {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
     }
   }
 
+  .google-auth-body,
   .session-actions-row {
     flex-direction: column;
     align-items: stretch;
-    gap: 1.25rem;
-
-    .btn-session-logout {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-}
-
-@media (max-width: 575.98px) {
-  .profile-list .profile-item {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
+    gap: 1rem;
   }
 }

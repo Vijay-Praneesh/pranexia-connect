@@ -1,28 +1,30 @@
-$navy: #0f1b3d;
-$blue: #2563eb;
-$blue-hover: #1d4ed8;
-$indigo: #4338ca;
-$gold: #f4b728;
+$navy: #111111;
+$blue: #f96614;
+$blue-hover: #f68749;
+$indigo: #f96614;
+$gold: #f96614;
 $danger: #dc2626;
 $danger-hover: #b91c1c;
 $warning: #d97706;
 $warning-hover: #b45309;
-$text-dark: #172033;
+$text-dark: #111111;
 $text-muted: #64748b;
-$border-color: #e2e8f0;
+$border-color: #eaeaea;
 
 .modal-backdrop-layer {
   position: fixed;
   inset: 0;
   z-index: 1300;
-  background-color: rgba(15, 27, 61, 0.65);
+  background-color: rgba(17, 17, 17, 0.55);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: grid;
   place-items: center;
   padding: 1rem;
+  font-family: 'Outfit', Inter, sans-serif;
   animation: backdropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
 
 .confirmation-dialog-card {
   width: 100%;

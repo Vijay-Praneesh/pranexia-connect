@@ -8,14 +8,18 @@
 }
 
 // Brand Color Palette & Tokens
-$navy: #0f1b3d;
-$blue: #2563eb;
-$blue-hover: #1d4ed8;
-$blue-subtle: #eff6ff;
-$indigo: #4338ca;
-$indigo-subtle: #eef2ff;
-$gold: #f4b728;
-$gold-subtle: #fffbeb;
+$primary: #f96614;
+$primary-hover: #f68749;
+$primary-subtle: #fff4ee;
+$primary-gradient: linear-gradient(135deg, #f96614 0%, #f68749 100%);
+$navy: #111111;
+$blue: #f96614;
+$blue-hover: #f68749;
+$blue-subtle: #fff4ee;
+$indigo: #ea580c;
+$indigo-subtle: #ffedd5;
+$gold: #f96614;
+$gold-subtle: #fff4ee;
 $green: #059669;
 $green-subtle: #ecfdf5;
 $amber: #d97706;
@@ -27,21 +31,21 @@ $red: #ef4444;
 $red-subtle: #fef2f2;
 
 $surface: #ffffff;
-$page-bg: #f5f5f5;
-$border: #eeeeee;
+$page-bg: #f8fafc;
+$border: #eaeaea;
 $border-strong: #e2e8f0;
-$border-light: #f1f5f9;
+$border-light: #f8fafc;
 
-$text-dark: #172033;
-$text-navy: #0f1b3d;
+$text-dark: #111111;
+$text-navy: #111111;
 $text-muted: #64748b;
 
 $radius-card: 16px;
 $radius-md: 10px;
 $radius-sm: 8px;
 
-$shadow-subtle: 0 1px 3px rgba(15, 27, 61, 0.04), 0 4px 12px rgba(15, 27, 61, 0.02);
-$shadow-hover: 0 6px 20px rgba(15, 27, 61, 0.08);
+$shadow-subtle: 0 1px 3px rgba(17, 17, 17, 0.04), 0 4px 12px rgba(17, 17, 17, 0.02);
+$shadow-hover: 0 6px 20px rgba(249, 102, 20, 0.08);
 
 // Layout Wrapper
 .owner-dashboard-wrapper {
@@ -50,6 +54,7 @@ $shadow-hover: 0 6px 20px rgba(15, 27, 61, 0.08);
   background-color: $page-bg;
   padding: 0 0 3.5rem;
   box-sizing: border-box;
+  font-family: 'Outfit', Inter, sans-serif;
 }
 
 .owner-dashboard-container {
@@ -60,7 +65,7 @@ $shadow-hover: 0 6px 20px rgba(15, 27, 61, 0.08);
   flex-direction: column;
   gap: 1.5rem;
   box-sizing: border-box;
-  background-color: #fff;
+  background-color: transparent;
 }
 
 // -----------------------------------------------------------------------------
@@ -81,8 +86,8 @@ $shadow-hover: 0 6px 20px rgba(15, 27, 61, 0.08);
       align-items: center;
       gap: 0.5rem;
       font-size: 0.75rem;
-      font-weight: 600;
-      color: $blue;
+      font-weight: 700;
+      color: $primary;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       margin-bottom: 0.35rem;
@@ -90,14 +95,14 @@ $shadow-hover: 0 6px 20px rgba(15, 27, 61, 0.08);
       .eyebrow-accent-bar {
         width: 16px;
         height: 3px;
-        background-color: $gold;
+        background: linear-gradient(90deg, #f96614 0%, #f68749 100%);
         border-radius: 2px;
       }
     }
 
     .hero-title {
       font-size: 1.85rem;
-      font-weight: 600;
+      font-weight: 700;
       color: $navy;
       letter-spacing: -0.025em;
       line-height: 1.2;
@@ -128,27 +133,27 @@ $shadow-hover: 0 6px 20px rgba(15, 27, 61, 0.08);
   gap: 0.5rem;
   height: 42px;
   padding: 0 1.25rem;
-  background: linear-gradient(90deg, $blue 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #f96614 0%, #f68749 100%);
   border: none;
   border-radius: $radius-md;
   color: #ffffff;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 14px rgba(249, 102, 20, 0.28);
   transition: all 0.2s ease-in-out;
   text-decoration: none;
   white-space: nowrap;
 
   &:hover {
-    background: linear-gradient(90deg, #1d4ed8 0%, #1e40af 100%);
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    background: linear-gradient(135deg, #f68749 0%, #f96614 100%);
+    box-shadow: 0 6px 18px rgba(249, 102, 20, 0.38);
     color: #ffffff;
     transform: translateY(-1px);
   }
 
   &:focus-visible {
-    outline: 2px solid $blue;
+    outline: 2px solid $primary;
     outline-offset: 2px;
   }
 }

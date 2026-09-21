@@ -220,46 +220,47 @@ import { Component, Input } from '@angular/core';
         }
 
         // =====================================================================
-        // TONE 3: PRIMARY / ROYAL BLUE (e.g. Messages Sent / Messages Read)
+        // TONE 3: PRIMARY / SEYYON ORANGE (e.g. Messages Sent / Messages Read)
         // =====================================================================
         &.tone-primary {
-          background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
-          border: 1px solid #bfdbfe;
+          background: linear-gradient(145deg, #fff8f5 0%, #ffedd5 100%);
+          border: 1px solid rgba(249, 102, 20, 0.25);
 
           .kpi-glow-accent {
-            background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+            background: linear-gradient(90deg, #f96614 0%, #f68749 100%);
           }
 
           .kpi-label {
-            color: #1d4ed8;
+            color: #ea580c;
           }
 
           .kpi-icon-badge {
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            background: linear-gradient(135deg, #f96614 0%, #f68749 100%);
             color: #ffffff;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 4px 10px rgba(249, 102, 20, 0.25);
           }
 
           .kpi-value {
-            color: #0f172a;
+            color: #111111;
           }
 
           .kpi-subtext {
-            color: #475569;
+            color: #64748b;
           }
 
           .badge-primary {
-            background-color: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
+            background-color: #ffedd5;
+            color: #c2410c;
+            border: 1px solid rgba(249, 102, 20, 0.25);
           }
 
           &:hover {
-            background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
-            border-color: #93c5fd;
-            box-shadow: 0 12px 28px -4px rgba(37, 99, 235, 0.18);
+            background: linear-gradient(145deg, #ffedd5 0%, #fed7aa 100%);
+            border-color: #f96614;
+            box-shadow: 0 12px 28px -4px rgba(249, 102, 20, 0.18);
           }
         }
+
 
         // =====================================================================
         // TONE 4: SUCCESS / EMERALD (e.g. Messages Delivered)
