@@ -85,9 +85,10 @@
                 {{ featuredBlog.author.name }}
               </span>
               <span class="meta-dot">•</span>
-              <span class="meta-date">{{ featuredBlog.publishedDate | date: 'mediumDate' }}</span>
-              <span class="meta-dot">•</span>
-              <span class="meta-time">{{ featuredBlog.readTime }}</span>
+              <span class="meta-time">
+                <i class="bi bi-clock"></i>
+                {{ featuredBlog.readTime }}
+              </span>
             </div>
 
             <div class="featured-action">
@@ -147,85 +148,6 @@
           </button>
         </div>
         }
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================================================================= -->
-  <!-- 3. ULTRA-FAST CTA SECTION (MATCHING HOME & ABOUT DARK GLOW THEME)       -->
-  <!-- ======================================================================= -->
-  <section class="cta-section" aria-labelledby="blog-cta-heading">
-    <div class="cta-container">
-      <div class="cta-card-wrapper">
-        <div class="cta-glow-blob top-right" aria-hidden="true"></div>
-        <div class="cta-glow-blob bottom-left" aria-hidden="true"></div>
-
-        <div class="cta-main-grid">
-          <div class="cta-content-col">
-            <div class="cta-live-badge">
-              <span class="pulse-dot"></span>
-              <span>STAY INFORMED & CONNECTED</span>
-            </div>
-
-            <h2 id="blog-cta-heading" class="cta-title">
-              Ready To Upgrade Your<br />
-              <span class="highlight-orange">Customer Engagement?</span>
-            </h2>
-
-            <p class="cta-desc">
-              Experience the power of Meta Cloud API verified WhatsApp campaigns, customer CRM management, and real-time delivery telemetry.
-            </p>
-
-            <div class="cta-features-list">
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>Direct Meta Cloud API Integration</span>
-              </div>
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>High-Speed Asynchronous Campaign Engine</span>
-              </div>
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>24/7 Dedicated Priority Technical Support</span>
-              </div>
-            </div>
-
-            <div class="cta-actions-group">
-              <a routerLink="/pricing" class="btn-cta-primary" aria-label="Get Started with Seyyon Connect">
-                <span>Get Started Now</span>
-                <i class="bi bi-arrow-right" aria-hidden="true"></i>
-              </a>
-              <a routerLink="/contact" class="btn-cta-secondary" aria-label="Contact Platform Sales">
-                <span>Talk to Sales</span>
-              </a>
-            </div>
-          </div>
-
-          <div class="cta-visual-col">
-            <div class="cta-visual-wrapper">
-              <img src="assets/public-website/home/cta-network-hub.jpg" alt="Seyyon Connect Knowledge & Communication Hub" class="cta-hub-img" />
-              <div class="floating-badge badge-top-left" aria-hidden="true">
-                <div class="badge-icon-box bg-orange">
-                  <i class="bi bi-journal-bookmark-fill"></i>
-                </div>
-                <div class="badge-text-box">
-                  <span class="badge-val">Expert Insights</span>
-                  <span class="badge-lbl">Proven Best Practices</span>
-                </div>
-              </div>
-              <div class="floating-badge badge-bottom-right" aria-hidden="true">
-                <div class="badge-icon-box bg-green">
-                  <i class="bi bi-patch-check-fill"></i>
-                </div>
-                <div class="badge-text-box">
-                  <span class="badge-val">Meta Certified</span>
-                  <span class="badge-lbl">Official Cloud API</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>

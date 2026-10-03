@@ -67,11 +67,6 @@
         "text": "By adopting a campaign framework, organizations can segment their customer directory into logical cohorts—such as active subscribers, renewal candidates, or regional customers—ensuring that each communication is tailored and relevant rather than generic broadcast noise."
       },
       {
-        "type": "image",
-        "src": "assets/blog/blog-01-content.jpg",
-        "alt": "Structured WhatsApp Campaign Management and Delivery Workflow"
-      },
-      {
         "type": "heading",
         "level": 2,
         "text": "Leveraging Meta-Approved Templates for Consistency and Rich Media"
@@ -109,6 +104,24 @@
       {
         "type": "paragraph",
         "text": "Seyyon Connect was engineered to unify these operational building blocks into a seamless, high-performance platform. By connecting directly to the official Meta Cloud API, Seyyon Connect enables organizations to maintain a centralized customer directory, design and sync approved templates, dispatch high-throughput broadcast campaigns, and inspect granular delivery telemetry from a single interface."
+      },
+      {
+        "type": "link",
+        "text": "Explore Seyyon Connect WhatsApp campaign and customer management features",
+        "url": "/products",
+        "external": false
+      },
+      {
+        "type": "link",
+        "text": "Understand message lifecycles in Understanding WhatsApp Campaign Performance and Analytics",
+        "url": "/blogs/understanding-whatsapp-campaign-performance-and-analytics",
+        "external": false
+      },
+      {
+        "type": "link",
+        "text": "Official Meta WhatsApp Business Cloud API Documentation",
+        "url": "https://developers.facebook.com/docs/whatsapp/cloud-api",
+        "external": true
       },
       {
         "type": "paragraph",
@@ -196,11 +209,6 @@
         "text": "4. Automated Dispatch and Telemetry: Launch broadcasts with asynchronous queue management and automatically log message outcomes back to individual customer records."
       },
       {
-        "type": "image",
-        "src": "assets/blog/blog-02-content.jpg",
-        "alt": "Unified Customer CRM and Campaign Execution Architecture"
-      },
-      {
         "type": "heading",
         "level": 2,
         "text": "Streamlining Campaign Setup with Dynamic Variable Mapping"
@@ -225,6 +233,24 @@
       {
         "type": "paragraph",
         "text": "Seyyon Connect provides a consolidated environment where customer relationship management, template approvals, media asset storage, and campaign broadcasting live side-by-side. Teams can import thousands of contacts via bulk CSV ingestion, organize records with custom tags, and dispatch certified WhatsApp broadcasts within minutes."
+      },
+      {
+        "type": "link",
+        "text": "Explore customer management and dynamic audience segmentation tools",
+        "url": "/products",
+        "external": false
+      },
+      {
+        "type": "link",
+        "text": "Read our guide on How WhatsApp Campaigns Can Improve Customer Engagement",
+        "url": "/blogs/how-whatsapp-campaigns-improve-customer-engagement",
+        "external": false
+      },
+      {
+        "type": "link",
+        "text": "Compare Seyyon Connect pricing plans and audience tiers",
+        "url": "/pricing",
+        "external": false
       },
       {
         "type": "paragraph",
@@ -300,11 +326,6 @@
         "text": "Common delivery failure reasons include unformatted or disconnected mobile numbers, devices that are powered off or out of cellular coverage for extended periods, and recipients who have opted out of business messaging. A robust analytics engine captures official Meta error codes, parses diagnostic descriptions, and presents actionable guidance directly to administrators."
       },
       {
-        "type": "image",
-        "src": "assets/blog/blog-03-content.jpg",
-        "alt": "Real-time WhatsApp Campaign Telemetry and Error Diagnostic Dashboard"
-      },
-      {
         "type": "heading",
         "level": 2,
         "text": "Key Performance Metrics That Drive Action"
@@ -337,6 +358,30 @@
       {
         "type": "paragraph",
         "text": "Seyyon Connect provides enterprise-grade reporting and telemetry designed for operational clarity. Users can monitor live campaign progress bars, inspect delivery and read ratios in real time, and explore detailed per-recipient message audit logs with exact dispatch timestamps."
+      },
+      {
+        "type": "link",
+        "text": "Explore campaign reporting and delivery analytics in Seyyon Connect",
+        "url": "/products",
+        "external": false
+      },
+      {
+        "type": "link",
+        "text": "Explore broadcast automation in How WhatsApp Campaigns Can Improve Customer Engagement",
+        "url": "/blogs/how-whatsapp-campaigns-improve-customer-engagement",
+        "external": false
+      },
+      {
+        "type": "link",
+        "text": "See how contact management pairs with reporting in Managing Customers and Campaigns in One Platform",
+        "url": "/blogs/managing-customers-and-campaigns-in-one-platform",
+        "external": false
+      },
+      {
+        "type": "link",
+        "text": "Meta Cloud API Status & Webhooks Documentation",
+        "url": "https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components",
+        "external": true
       },
       {
         "type": "paragraph",

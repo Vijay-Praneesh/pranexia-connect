@@ -13,19 +13,6 @@ import { RouterLink } from '@angular/router';
 export class PublicFooterComponent {
   readonly currentYear = new Date().getFullYear();
 
-  newsletterEmail = '';
-  newsletterSubmitted = false;
-
-  onNewsletterSubmit(): void {
-    if (this.newsletterEmail && this.newsletterEmail.includes('@')) {
-      this.newsletterSubmitted = true;
-      setTimeout(() => {
-        this.newsletterSubmitted = false;
-        this.newsletterEmail = '';
-      }, 5000);
-    }
-  }
-
   scrollToTop(): void {
     if (typeof document !== 'undefined') {
       const targets = [

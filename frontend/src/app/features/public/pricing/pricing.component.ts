@@ -491,15 +491,54 @@ export class PricingComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   ngOnInit(): void {
+    const pageTitle = 'WhatsApp Marketing Software Pricing | Seyyon Connect';
+    const metaDescription =
+      'Explore Seyyon Connect pricing plans for customer management, WhatsApp campaigns, templates and customer engagement tools. Choose a plan for your business.';
+    const canonicalUrl = 'https://seyyonconnect.in/pricing';
+
+    const organizationSchema = this.seo.getOrganizationSchema();
+    const websiteSchema = this.seo.getWebSiteSchema();
+
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://seyyonconnect.in/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Pricing',
+          item: canonicalUrl,
+        },
+      ],
+    };
+
+    const faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: this.faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: f.answer,
+        },
+      })),
+    };
+
     this.seo.updateSeo({
-      title: 'Seyyon Connect Pricing | Plans & Transparent Pricing',
-      description:
-        'Choose the Seyyon Connect plan that fits your customer engagement needs. Transparent pricing for WhatsApp broadcast campaigns, customer CRM, and Meta Cloud API messaging.',
-      keywords:
-        'Seyyon Connect Pricing, WhatsApp Marketing Plans, Meta Cloud API Pricing, Campaign Automation Pricing, SaaS Messaging Plans',
-      ogTitle: 'Seyyon Connect Pricing | Plans that Grow with Your Business',
-      ogDescription:
-        'Choose the Seyyon Connect plan that fits your customer engagement needs. Transparent pricing with no hidden fees.',
+      title: pageTitle,
+      description: metaDescription,
+      canonicalUrl,
+      ogTitle: pageTitle,
+      ogDescription: metaDescription,
+      ogUrl: canonicalUrl,
+      schema: [organizationSchema, websiteSchema, breadcrumbSchema, faqSchema],
     });
   }
 

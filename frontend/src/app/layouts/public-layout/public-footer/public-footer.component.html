@@ -5,52 +5,6 @@
   <div class="footer-ambient-glow glow-top-right" aria-hidden="true"></div>
 
   <div class="footer-container">
-    <!-- TOP: SLEEK NEWSLETTER / ENGAGEMENT BANNER -->
-    <div class="footer-newsletter-banner">
-      <div class="newsletter-glow" aria-hidden="true"></div>
-      <div class="newsletter-content-grid">
-        <div class="newsletter-text-col">
-          <div class="newsletter-badge">
-            <span class="live-dot"></span>
-            <span>WHATSAPP INTELLIGENCE</span>
-          </div>
-          <h3 class="newsletter-title">Stay Ahead With Enterprise Marketing Insights</h3>
-          <p class="newsletter-desc">
-            Get platform feature releases, Meta Cloud API updates, and proven campaign deliverability playbooks.
-          </p>
-        </div>
-
-        <div class="newsletter-form-col">
-          @if (newsletterSubmitted) {
-          <div class="newsletter-success-box" role="status">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>Thank you for subscribing! You're now on our priority list.</span>
-          </div>
-          } @else {
-          <form (ngSubmit)="onNewsletterSubmit()" class="newsletter-form-wrapper" novalidate>
-            <div class="newsletter-input-group">
-              <i class="bi bi-envelope newsletter-icon" aria-hidden="true"></i>
-              <input
-                type="email"
-                [(ngModel)]="newsletterEmail"
-                name="newsletterEmail"
-                class="newsletter-input"
-                placeholder="Enter your work email..."
-                required
-                aria-label="Email address for newsletter subscription"
-              />
-              <button type="submit" class="btn-newsletter-submit" aria-label="Subscribe to newsletter">
-                <span>Subscribe</span>
-                <i class="bi bi-arrow-right"></i>
-              </button>
-            </div>
-            <span class="newsletter-micro-note">No spam. Unsubscribe anytime with one click.</span>
-          </form>
-          }
-        </div>
-      </div>
-    </div>
-
     <!-- MAIN 4-COLUMN FOOTER GRID -->
     <div class="footer-main-grid">
       <!-- 1. BRAND & MISSION COLUMN -->
@@ -193,7 +147,7 @@
             </div>
             <div class="contact-info">
               <span class="contact-label">Direct Inbox</span>
-              <a routerLink="/contact" class="contact-value">support&#64;seyyon.com</a>
+              <a routerLink="/contact" class="contact-value">pranexia.studio&#64;gmail.com</a>
             </div>
           </li>
           <li>

@@ -1,556 +1,575 @@
 <div class="public-products-page">
   <!-- ======================================================================= -->
-  <!-- 1. HERO BANNER SECTION (MATCHING HOME & ABOUT THEME)                   -->
+  <!-- 1. TEXT-FIRST HERO SECTION                                             -->
   <!-- ======================================================================= -->
-  <section class="hero-section" aria-labelledby="products-hero-heading">
-    <div class="hero-container">
-      <!-- LEFT COLUMN: COPY & ACTIONS -->
-      <div class="hero-content-col">
-        <!-- Eyebrow -->
-        <span class="hero-eyebrow">SEYYON CONNECT PLATFORM & PRODUCTS</span>
+  <section class="products-hero-section" aria-labelledby="products-hero-heading">
+    <div class="editorial-container">
+      <!-- Breadcrumb Navigation -->
+      <nav class="products-breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumb-list">
+          <li class="breadcrumb-item">
+            <a routerLink="/" class="breadcrumb-link">Home</a>
+          </li>
+          <li class="breadcrumb-separator" aria-hidden="true">/</li>
+          <li class="breadcrumb-item active" aria-current="page">Our Products</li>
+        </ol>
+      </nav>
 
-        <!-- Main H1 Headline -->
-        <h1 id="products-hero-heading" class="hero-title">
-          Intelligent Tools Built For<br />
-          <span class="highlight-orange">Enterprise Scale</span>
+      <!-- Hero Header Content -->
+      <div class="hero-header-block">
+        <span class="editorial-eyebrow">OUR PRODUCTS</span>
+
+        <h1 id="products-hero-heading" class="editorial-hero-title">
+          Everything You Need to Manage <span class="highlight-orange">Customer Engagement</span>
         </h1>
 
-        <!-- Subtitle / Description -->
-        <p class="hero-desc">
-          Accelerate business growth with our full-stack customer engagement platform. Direct Meta Cloud API integration,
-          instant template synchronization, automated bulk campaign dispatches, and granular telemetry designed for
-          high-velocity teams.
+        <p class="editorial-hero-lead">
+          Seyyon Connect brings customer management, WhatsApp campaigns, templates, media and campaign insights together in one platform, giving businesses a practical way to organize customer communication and engagement.
         </p>
 
-        <!-- CTA Action Buttons -->
-        <div class="hero-actions">
-          <a routerLink="/pricing" class="btn-primary-orange" aria-label="Explore Pricing and Plans">
-            Explore Pricing
+        <div class="hero-actions-row">
+          <a routerLink="/pricing" class="btn-primary-orange" aria-label="Get Started with Seyyon Connect Plans">
+            <span>Get Started</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </a>
-          <a routerLink="/contact" class="btn-outline-dark" aria-label="Request Platform Demo">
-            Schedule a Demo
+          <a routerLink="/pricing" class="btn-outline-dark" aria-label="View Pricing and Plans">
+            <span>View Pricing</span>
           </a>
-        </div>
-
-        <!-- Bottom Row: Consult Our Experts + Scroll Down -->
-        <div class="hero-bottom-row">
-          <!-- Consult Experts Widget -->
-          <a routerLink="/contact" class="expert-widget" aria-label="Questions? Consult Our Product Engineers">
-            <div class="expert-avatar-box">
-              <img src="assets/public-website/home/expert-avatar.jpg" alt="Platform Architect" class="expert-avatar-img" />
-            </div>
-            <div class="expert-text-box">
-              <span class="expert-sub">Need Guidance?</span>
-              <span class="expert-title">Talk to a Product Specialist</span>
-            </div>
+          <a routerLink="/contact" class="btn-text-link" aria-label="Contact the Seyyon Connect Team">
+            <span>Contact Our Team</span>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
           </a>
-
-          <!-- Scroll Down Indicator -->
-          <div class="scroll-down-widget" (click)="scrollToSection('product-suite')" role="button" tabindex="0"
-            aria-label="Scroll down to Product Suite" (keydown.enter)="scrollToSection('product-suite')">
-            <div class="scroll-arrow-box">
-              <i class="bi bi-arrow-down" aria-hidden="true"></i>
-            </div>
-            <span class="scroll-label">EXPLORE SUITE</span>
-          </div>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: PHOTO COMPOSITION GRID & LIVE STATUS BADGES -->
-      <div class="hero-visual-col" aria-hidden="false">
-        <div class="hero-composition-grid">
-          <!-- Top Row (Left Sub-column with Meta Badge & Studio Card + Right Sub-column with High Speed Card) -->
-          <div class="composition-top-row">
-            <!-- Top Left: Meta Cloud Badge + Campaign Studio Card -->
-            <div class="composition-top-left">
-              <!-- Floating Meta Cloud Badge -->
-              <div class="clients-badge-card" aria-label="Official Meta Cloud API Connection">
-                <div class="verified-badge-content">
-                  <div class="badge-icon-pill">
-                    <i class="bi bi-whatsapp"></i>
-                  </div>
-                  <div class="badge-copy">
-                    <span class="badge-title">Meta Cloud API</span>
-                    <span class="badge-meta">Direct Global Tier 1 Gateway</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Card 2: Campaign Studio Image -->
-              <div class="banner-card card-work">
-                <img src="assets/public-website/home/banner-2.jpg" alt="Campaign Studio in Action" class="card-photo" />
-                <div class="card-gradient-overlay">
-                  <span class="overlay-tag">High-Throughput Queue</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Top Right: Tall Workspace Collaboration Image -->
-            <div class="banner-card card-home">
-              <img src="assets/public-website/home/banner-1.jpg" alt="Enterprise Communication Hub" class="card-photo" />
-              <div class="card-gradient-overlay">
-                <span class="overlay-tag">Multi-Tenant CRM</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom Row: Real-time Telemetry Card -->
-          <div class="banner-card card-entertainment">
-            <img src="assets/public-website/home/banner-3.jpg" alt="Real-time Telemetry Dashboard" class="card-photo" />
-            <div class="card-gradient-overlay">
-              <span class="overlay-tag">Live Read Receipts & Analytics</span>
-            </div>
-          </div>
+      <!-- Quick Platform Pillars Strip -->
+      <div class="hero-pillars-strip" aria-label="Product Highlights">
+        <div class="pillar-pill">
+          <i class="bi bi-people-fill text-orange" aria-hidden="true"></i>
+          <span>Customer Directory & Segmentation</span>
+        </div>
+        <div class="pillar-pill">
+          <i class="bi bi-broadcast text-orange" aria-hidden="true"></i>
+          <span>WhatsApp Broadcast Studio</span>
+        </div>
+        <div class="pillar-pill">
+          <i class="bi bi-chat-left-text-fill text-orange" aria-hidden="true"></i>
+          <span>Meta-Approved Template Sync</span>
+        </div>
+        <div class="pillar-pill">
+          <i class="bi bi-graph-up-arrow text-orange" aria-hidden="true"></i>
+          <span>Delivery Telemetry & Reports</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ======================================================================= -->
-  <!-- 2. INTERACTIVE PRODUCT SUITE & FILTERABLE MODULES                      -->
+  <!-- 2. INTRODUCTION — ONE PLATFORM FOR CUSTOMER COMMUNICATION              -->
   <!-- ======================================================================= -->
-  <section id="product-suite" class="suite-section" aria-labelledby="suite-heading">
-    <!-- Subtle Background Network Graphic Watermark -->
-    <div class="section-bg-watermark" aria-hidden="true">
-      <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M200 40 L200 360 M120 360 L280 360 M140 280 L260 280 M160 200 L240 200 M180 120 L220 120"
-          stroke="#F96614" stroke-width="1.5" stroke-opacity="0.12" stroke-linecap="round" />
-        <path d="M120 360 L200 120 L280 360" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.12" />
-        <circle cx="200" cy="40" r="10" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.15" />
-        <circle cx="200" cy="40" r="30" stroke="#F96614" stroke-width="1.5" stroke-opacity="0.08"
-          stroke-dasharray="4 4" />
-      </svg>
-    </div>
-
-    <div class="suite-container">
-      <!-- Section Header -->
-      <div class="suite-header">
-        <span class="section-eyebrow">CORE MODULES</span>
-        <h2 id="suite-heading" class="suite-title">
-          Explore The Full <span class="highlight-orange">Seyyon Platform</span>
+  <section id="platform-overview" class="editorial-section section-intro" aria-labelledby="intro-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">UNIFIED ARCHITECTURE</span>
+        <h2 id="intro-heading" class="section-main-heading">
+          One Platform for Customer Communication
         </h2>
-        <p class="suite-subtitle">
-          Engineered as a unified modular suite, enabling businesses to manage contacts, craft Meta-compliant templates,
-          dispatch broadcasts, and measure performance from a single interface.
+        <p class="section-lead-paragraph">
+          Managing customer engagement across separate tools, devices, and spreadsheets creates operational friction. Seyyon Connect brings these related workflows together into a single, cohesive software workspace.
         </p>
-
-        <!-- Category Filter Tabs -->
-        <div class="filter-tabs-wrapper" role="tablist" aria-label="Product categories">
-          @for (tab of categories; track tab.id) {
-          <button type="button" class="filter-tab-btn" [class.active]="activeCategory === tab.id"
-            (click)="setCategory(tab.id)" role="tab" [attr.aria-selected]="activeCategory === tab.id">
-            <i class="bi {{ tab.icon }}"></i>
-            <span>{{ tab.label }}</span>
-          </button>
-          }
-        </div>
       </div>
 
-      <!-- 6-Card Filtered Product Grid -->
-      <div class="products-grid">
-        @for (prod of filteredProducts; track prod.id) {
-        <div class="product-card" tabindex="0">
-          <!-- Background Network Graphic Overlay -->
-          <div class="card-bg-mesh" aria-hidden="true">
-            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="155" cy="45" r="3.5" fill="currentColor" />
-              <circle cx="185" cy="85" r="2.5" fill="currentColor" />
-              <circle cx="125" cy="115" r="2" fill="currentColor" />
-              <circle cx="170" cy="140" r="3" fill="currentColor" />
-              <line x1="155" y1="45" x2="185" y2="85" stroke="currentColor" stroke-width="0.8" />
-              <line x1="185" y1="85" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
-              <line x1="155" y1="45" x2="125" y2="115" stroke="currentColor" stroke-width="0.8" />
-              <line x1="125" y1="115" x2="170" y2="140" stroke="currentColor" stroke-width="0.8" />
-            </svg>
-          </div>
+      <div class="editorial-content-grid">
+        <div class="editorial-column">
+          <h3 class="editorial-subheading">Why Centralized Product Modules Matter</h3>
+          <p class="editorial-paragraph">
+            In typical business operations, customer contact details sit in spreadsheets, message templates are drafted manually on personal devices, promotional flyers are scattered across local folders, and message delivery status remains untracked.
+          </p>
+          <p class="editorial-paragraph">
+            Seyyon Connect unifies these functions into dedicated, interconnected modules. When your customer directory, message templates, media library, and broadcast engine exist in one platform, launching campaigns and tracking customer communication becomes structured and dependable.
+          </p>
+        </div>
 
-          <!-- Big Watermark Number -->
-          <div class="prod-number" aria-hidden="true">{{ prod.number }}</div>
-
-          <!-- Top Badge & Icon Row -->
-          <div class="prod-top-row">
-            <div class="prod-icon-box">
-              <i class="bi {{ prod.icon }}" aria-hidden="true"></i>
-            </div>
-            <span class="prod-badge">{{ prod.badge }}</span>
-          </div>
-
-          <!-- Title with Orange Bar Accent -->
-          <h3 class="prod-card-title">
-            <span class="title-bar" aria-hidden="true">|</span> {{ prod.title }}
-          </h3>
-
-          <!-- Description -->
-          <p class="prod-card-desc">{{ prod.description }}</p>
-
-          <!-- Highlights Checklist -->
-          <ul class="prod-highlights-list">
-            @for (hl of prod.highlights; track hl) {
+        <div class="editorial-column">
+          <h3 class="editorial-subheading">What Businesses Can Manage in One Place</h3>
+          <ul class="intro-modules-list">
             <li>
-              <i class="bi bi-check-circle-fill check-icon" aria-hidden="true"></i>
-              <span>{{ hl }}</span>
+              <i class="bi bi-check2-circle text-orange" aria-hidden="true"></i>
+              <span><strong>Customer Information:</strong> Centralized contact records, tags, and audience lists.</span>
             </li>
-            }
+            <li>
+              <i class="bi bi-check2-circle text-orange" aria-hidden="true"></i>
+              <span><strong>Campaign Preparation:</strong> Template selection, dynamic variable mapping, and media attachments.</span>
+            </li>
+            <li>
+              <i class="bi bi-check2-circle text-orange" aria-hidden="true"></i>
+              <span><strong>WhatsApp Templates & Media:</strong> Meta-approved template catalog and organized asset storage.</span>
+            </li>
+            <li>
+              <i class="bi bi-check2-circle text-orange" aria-hidden="true"></i>
+              <span><strong>Campaign Activity & Telemetry:</strong> Real-time dispatch queues, delivery logs, and read receipts.</span>
+            </li>
+            <li>
+              <i class="bi bi-check2-circle text-orange" aria-hidden="true"></i>
+              <span><strong>Usage & Subscription:</strong> Transparent message credit counters and tier management.</span>
+            </li>
           </ul>
+        </div>
+      </div>
+    </div>
+  </section>
 
-          <!-- Card Bottom Action Link -->
-          <div class="prod-link-box">
-            <a routerLink="/pricing" class="prod-action-link" [attr.aria-label]="'Get started with ' + prod.title">
-              <span class="link-label">Get Started</span>
-              <i class="bi bi-arrow-right link-arrow" aria-hidden="true"></i>
+  <!-- ======================================================================= -->
+  <!-- 3. PRODUCT OVERVIEW & DETAILED PRODUCT MODULES                          -->
+  <!-- ======================================================================= -->
+  <section id="explore-products" class="editorial-section section-modules bg-surface" aria-labelledby="explore-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">DETAILED MODULE BREAKDOWN</span>
+        <h2 id="explore-heading" class="section-main-heading">
+          Explore Seyyon Connect
+        </h2>
+        <p class="section-lead-paragraph">
+          Examine each core module available in Seyyon Connect, understand what actions you can perform, and see how each capability supports your business communication.
+        </p>
+      </div>
+
+      <!-- 7 Structured Product Module Cards -->
+      <div class="modules-stack-list">
+        @for (mod of productModules; track mod.id) {
+        <article class="module-detail-card" [id]="mod.id" [attr.aria-labelledby]="'title-' + mod.id">
+          <div class="module-card-header">
+            <div class="module-title-group">
+              <div class="module-icon-pill" aria-hidden="true">
+                <i class="bi {{ mod.icon }}"></i>
+              </div>
+              <div>
+                <span class="module-badge">{{ mod.badge }}</span>
+                <h3 [id]="'title-' + mod.id" class="module-card-title">
+                  {{ mod.title }}
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          <p class="module-summary-text">
+            {{ mod.summary }}
+          </p>
+
+          <div class="module-features-block">
+            <h4 class="block-label">What You Can Do:</h4>
+            <ul class="features-checklist">
+              @for (item of mod.whatUsersCanDo; track item) {
+              <li>
+                <i class="bi bi-check2 text-orange" aria-hidden="true"></i>
+                <span>{{ item }}</span>
+              </li>
+              }
+            </ul>
+          </div>
+
+          <div class="module-why-it-matters-box">
+            <span class="why-label">Why It Matters:</span>
+            <p class="why-text">{{ mod.whyItMatters }}</p>
+          </div>
+
+          <div class="module-card-footer">
+            <a [routerLink]="mod.linkRoute" class="card-contextual-link" [attr.aria-label]="mod.linkText">
+              <span>{{ mod.linkText }}</span>
+              <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
           </div>
-        </div>
+        </article>
         }
       </div>
     </div>
   </section>
 
   <!-- ======================================================================= -->
-  <!-- 3. FEATURED SOLUTION SPOTLIGHTS (ALTERNATING 2-COLUMN DEEP DIVES)      -->
+  <!-- 4. HOW SEYYON CONNECT WORKS TOGETHER (5-STEP WORKFLOW)                  -->
   <!-- ======================================================================= -->
-  <section class="spotlights-section" aria-label="Platform Highlights">
-    <div class="spotlights-container">
-      <!-- Spotlight 1: Meta Cloud Certified Template Studio -->
-      <div class="spotlight-row">
-        <!-- Left: Image with Orange Frame Accent -->
-        <div class="spotlight-visual-col">
-          <div class="testimonial-frame-wrapper">
-            <div class="orange-frame-accent" aria-hidden="true"></div>
-            <div class="spotlight-image-card">
-              <img src="assets/public-website/home/banner-1.jpg" alt="WhatsApp Template Studio" class="spotlight-img" />
-              <div class="spotlight-img-overlay">
-                <div class="overlay-badge-strip">
-                  <i class="bi bi-whatsapp"></i>
-                  <span>Meta Cloud Synchronized</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Copy & Features -->
-        <div class="spotlight-content-col">
-          <span class="section-eyebrow">TEMPLATE STUDIO</span>
-          <h2 class="section-title">
-            Craft Meta-Approved <span class="highlight-orange">Interactive Templates</span>
-          </h2>
-          <p class="section-desc">
-            Build dynamic WhatsApp message templates supporting rich media header attachments (images, PDFs, video clips),
-            variable injection placeholders (e.g., customer names, invoice numbers), and interactive Call-To-Action (CTA)
-            buttons for instant user responses.
-          </p>
-
-          <div class="spotlight-checklist">
-            <div class="check-item">
-              <div class="check-icon-circle"><i class="bi bi-check-lg"></i></div>
-              <div class="check-info">
-                <strong>Real-Time Meta Approval Status</strong>
-                <span>Automatic status polling reflects APPROVED, REJECTED, or PENDING instantly.</span>
-              </div>
-            </div>
-            <div class="check-item">
-              <div class="check-icon-circle"><i class="bi bi-check-lg"></i></div>
-              <div class="check-info">
-                <strong>Rich Media & Custom Quick Replies</strong>
-                <span>Include one-tap website links, phone dialers, and fast predefined response buttons.</span>
-              </div>
-            </div>
-            <div class="check-item">
-              <div class="check-icon-circle"><i class="bi bi-check-lg"></i></div>
-              <div class="check-info">
-                <strong>Dynamic Parameter Mapping</strong>
-                <span>Personalize thousands of messages uniquely by mapping CSV columns to template variables.</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="spotlight-action">
-            <a routerLink="/pricing" class="btn-primary-orange" aria-label="Start Building WhatsApp Templates">
-              Start Building Templates
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Spotlight 2: Asynchronous Bulk Campaign Dispatch Engine -->
-      <div class="spotlight-row reverse">
-        <!-- Left: Image with Orange Frame Accent -->
-        <div class="spotlight-visual-col">
-          <div class="testimonial-frame-wrapper">
-            <div class="orange-frame-accent" aria-hidden="true"></div>
-            <div class="spotlight-image-card">
-              <img src="assets/public-website/home/banner-2.jpg" alt="High-Speed Campaign Queue" class="spotlight-img" />
-              <div class="spotlight-img-overlay">
-                <div class="overlay-badge-strip">
-                  <i class="bi bi-lightning-charge-fill"></i>
-                  <span>Zero-Lag Asynchronous Dispatch</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Copy & Features -->
-        <div class="spotlight-content-col">
-          <span class="section-eyebrow">CAMPAIGN AUTOMATION</span>
-          <h2 class="section-title">
-            Dispatch High-Volume Broadcasts <span class="highlight-orange">With Zero Throttling</span>
-          </h2>
-          <p class="section-desc">
-            Broadcast messages to 10,000+ contacts simultaneously. Our high-throughput queue manager ensures your
-            campaigns comply with Meta Cloud API rate limits while maximizing delivery speed and receipt telemetry.
-          </p>
-
-          <div class="spotlight-checklist">
-            <div class="check-item">
-              <div class="check-icon-circle"><i class="bi bi-check-lg"></i></div>
-              <div class="check-info">
-                <strong>Live Progress Telemetry</strong>
-                <span>Monitor real-time progress bars showing queued, sent, delivered, and read counts.</span>
-              </div>
-            </div>
-            <div class="check-item">
-              <div class="check-icon-circle"><i class="bi bi-check-lg"></i></div>
-              <div class="check-info">
-                <strong>Audience Tag Filtering & VIP Exclusions</strong>
-                <span>Filter contacts dynamically by tags, company groups, or opt-in status before launching.</span>
-              </div>
-            </div>
-            <div class="check-item">
-              <div class="check-icon-circle"><i class="bi bi-check-lg"></i></div>
-              <div class="check-info">
-                <strong>Schedule or Dispatch Instantly</strong>
-                <span>Execute time-sensitive promotional drops or schedule campaigns for optimal engagement hours.</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="spotlight-action">
-            <a routerLink="/pricing" class="btn-primary-orange" aria-label="Launch High Speed Campaigns">
-              Launch High-Speed Campaigns
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================================================================= -->
-  <!-- 4. 4-STEP WORKFLOW PIPELINE                                             -->
-  <!-- ======================================================================= -->
-  <section class="workflow-section" aria-labelledby="workflow-heading">
-    <div class="workflow-container">
-      <div class="workflow-header">
-        <span class="section-eyebrow">HOW IT WORKS</span>
-        <h2 id="workflow-heading" class="section-title">
-          From Onboarding To Broadcast <span class="highlight-orange">In 4 Easy Steps</span>
+  <section id="product-workflow" class="editorial-section section-workflow" aria-labelledby="workflow-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">STEP-BY-STEP PROCESS</span>
+        <h2 id="workflow-heading" class="section-main-heading">
+          How Seyyon Connect Works Together
         </h2>
-        <p class="section-desc">
-          Get your WhatsApp business communication running within minutes using our streamlined workflow.
+        <p class="section-lead-paragraph">
+          A clear, text-based overview showing how customer data, templates, media, and broadcast infrastructure connect into an end-to-end operational workflow.
         </p>
       </div>
 
-      <div class="workflow-steps-grid">
-        @for (step of workflowSteps; track step.stepNumber; let last = $last) {
-        <div class="workflow-card" tabindex="0">
-          <div class="step-badge-row">
-            <span class="step-num">{{ step.stepNumber }}</span>
-            <div class="step-icon-box">
-              <i class="bi {{ step.icon }}"></i>
-            </div>
-          </div>
-          <h3 class="step-title">{{ step.title }}</h3>
-          <p class="step-desc">{{ step.description }}</p>
-        </div>
-        }
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================================================================= -->
-  <!-- 5. FEATURE COMPARISON MATRIX (CLOUD API VS LEGACY BULK SMS)             -->
-  <!-- ======================================================================= -->
-  <section class="comparison-section" aria-labelledby="comparison-heading">
-    <div class="comparison-container">
-      <div class="comparison-header">
-        <span class="section-eyebrow">THE COMPETITIVE EDGE</span>
-        <h2 id="comparison-heading" class="section-title">
-          Why Seyyon Connect Beats <span class="highlight-orange">Legacy Messaging</span>
-        </h2>
-        <p class="section-desc">
-          Experience the monumental leap from outdated SMS aggregators to verified Meta Cloud API conversational marketing.
-        </p>
-      </div>
-
-      <div class="comparison-table-wrapper">
-        <table class="comparison-table" role="table" aria-label="Feature Comparison Matrix">
-          <thead>
-            <tr>
-              <th scope="col" class="th-feature">Platform Capability</th>
-              <th scope="col" class="th-seyyon">
-                <div class="th-brand-box">
-                  <span class="brand-tag">SEYYON CONNECT</span>
-                  <span class="brand-sub">Meta Cloud API</span>
-                </div>
-              </th>
-              <th scope="col" class="th-others">Legacy SMS / Unofficial Bots</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of comparisonRows; track row.feature) {
-            <tr>
-              <td class="td-feature">
-                <span class="feature-title-bold">{{ row.feature }}</span>
-                <span class="feature-subtitle-dim">{{ row.detail }}</span>
-              </td>
-              <td class="td-seyyon">
-                <div class="cell-status success">
-                  <i class="bi bi-check-circle-fill"></i>
-                  <span>{{ row.seyyon }}</span>
-                </div>
-              </td>
-              <td class="td-others">
-                <div class="cell-status dim">
-                  <i class="bi bi-x-circle-fill"></i>
-                  <span>{{ row.others }}</span>
-                </div>
-              </td>
-            </tr>
+      <!-- 5-Step Numbered Workflow Sequence -->
+      <div class="workflow-steps-list" role="list">
+        @for (step of workflowSteps; track step.number; let last = $last) {
+        <div class="workflow-step-item" role="listitem">
+          <div class="step-indicator-col" aria-hidden="true">
+            <div class="step-circle">{{ step.number }}</div>
+            @if (!last) {
+            <div class="step-connector-line"></div>
             }
-          </tbody>
-        </table>
+          </div>
+
+          <div class="step-content-col">
+            <div class="step-header-row">
+              <span class="step-sub-badge">Step {{ step.number }}</span>
+              <h3 class="step-title">{{ step.title }}</h3>
+            </div>
+            <p class="step-description">{{ step.description }}</p>
+            <div class="step-keypoint">
+              <i class="bi bi-arrow-right-short text-orange" aria-hidden="true"></i>
+              <span>{{ step.practicalTask }}</span>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="workflow-cta-strip">
+        <p>Ready to organize your business messaging workflows?</p>
+        <a routerLink="/pricing" class="btn-primary-orange" aria-label="View pricing plans to get started">
+          <span>Get Started with Seyyon Connect</span>
+          <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
       </div>
     </div>
   </section>
 
   <!-- ======================================================================= -->
-  <!-- 6. IMPACT STATS & LIVE METRIC STRIP                                    -->
+  <!-- 5. BUSINESS VALUE                                                       -->
   <!-- ======================================================================= -->
-  <section class="stats-section" aria-label="Platform Performance Stats">
-    <div class="stats-container">
-      <div class="stats-strip-card">
-        @for (stat of productStats; track stat.label; let last = $last) {
-        <div class="stat-item">
-          <span class="stat-number">{{ stat.value }}<span class="stat-unit">{{ stat.unit }}</span></span>
-          <span class="stat-label">{{ stat.label }}</span>
+  <section class="editorial-section section-value bg-surface" aria-labelledby="value-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">PRACTICAL BUSINESS VALUE</span>
+        <h2 id="value-heading" class="section-main-heading">
+          Built Around Practical Customer Engagement
+        </h2>
+        <p class="section-lead-paragraph">
+          Seyyon Connect is engineered to solve everyday operational communication bottlenecks with straightforward, reliable software tools.
+        </p>
+      </div>
+
+      <div class="value-grid">
+        @for (item of businessValueItems; track item.title) {
+        <div class="value-card">
+          <div class="value-icon-box" aria-hidden="true">
+            <i class="bi {{ item.icon }}"></i>
+          </div>
+          <h3 class="value-card-title">{{ item.title }}</h3>
+          <p class="value-card-desc">{{ item.description }}</p>
         </div>
-        @if (!last) {
-        <div class="stat-divider" aria-hidden="true"></div>
-        }
         }
       </div>
     </div>
   </section>
 
   <!-- ======================================================================= -->
-  <!-- 7. ULTRA-FAST CTA SECTION (DARK AMBIENT GLOW THEME)                     -->
+  <!-- 6. WHO CAN USE SEYYON CONNECT?                                          -->
   <!-- ======================================================================= -->
-  <section class="cta-section" aria-labelledby="products-cta-heading">
-    <div class="cta-container">
-      <div class="cta-card-wrapper">
-        <!-- Ambient Glowing Background Radial Blobs -->
-        <div class="cta-glow-blob top-right" aria-hidden="true"></div>
-        <div class="cta-glow-blob bottom-left" aria-hidden="true"></div>
+  <section class="editorial-section section-audiences" aria-labelledby="who-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">SUITABLE AUDIENCES</span>
+        <h2 id="who-heading" class="section-main-heading">
+          Who Can Use Seyyon Connect?
+        </h2>
+        <p class="section-lead-paragraph">
+          Designed for teams and organizations that manage ongoing customer communication, promotional campaigns, or recurring operational updates.
+        </p>
+      </div>
 
-        <!-- Main Top Row: Left Copy + Right 3D Visual -->
-        <div class="cta-main-grid">
-          <!-- Left Column: Copy & Actions -->
-          <div class="cta-content-col">
-            <div class="cta-live-badge">
-              <span class="pulse-dot"></span>
-              <span>ENTERPRISE-GRADE CLOUD API</span>
-            </div>
-
-            <h2 id="products-cta-heading" class="cta-title">
-              Ready To Upgrade Your<br />
-              <span class="highlight-orange">Broadcast Communication?</span>
-            </h2>
-
-            <p class="cta-desc">
-              Get immediate access to verified WhatsApp Cloud API templates, high-speed automated broadcast queues, and
-              deep audience insights tailored for your organization.
-            </p>
-
-            <!-- Feature Checkpoints -->
-            <div class="cta-features-list">
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>Direct Meta Cloud API Native Routing</span>
-              </div>
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>Instant Dynamic Variable Mapping & Media Headers</span>
-              </div>
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>24/7 Dedicated Priority Technical Support</span>
-              </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="cta-actions-group">
-              <a routerLink="/pricing" class="btn-cta-primary" aria-label="View Pricing and Get Started">
-                <span>View Pricing & Plans</span>
-                <i class="bi bi-arrow-right" aria-hidden="true"></i>
-              </a>
-              <a routerLink="/contact" class="btn-cta-secondary" aria-label="Contact Platform Sales">
-                <span>Contact Sales</span>
-              </a>
-            </div>
+      <div class="audiences-grid">
+        @for (aud of audienceProfiles; track aud.title) {
+        <div class="audience-card">
+          <div class="audience-icon-wrapper" aria-hidden="true">
+            <i class="bi {{ aud.icon }}"></i>
           </div>
+          <h3 class="audience-card-title">{{ aud.title }}</h3>
+          <p class="audience-card-desc">{{ aud.description }}</p>
+          <div class="audience-key-capability">
+            <span class="capability-label">Primary Application:</span>
+            <span class="capability-text">{{ aud.keyCapability }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
 
-          <!-- Right Column: Visual Hub with Floating Live Metrics -->
-          <div class="cta-visual-col">
-            <div class="cta-visual-wrapper">
-              <img src="assets/public-website/home/cta-network-hub.jpg" alt="Seyyon Connect High Speed Platform Hub"
-                class="cta-hub-img" />
+  <!-- ======================================================================= -->
+  <!-- 7. COIMBATORE LOCAL SEO SECTION                                         -->
+  <!-- ======================================================================= -->
+  <section id="coimbatore-business" class="editorial-section section-coimbatore bg-surface" aria-labelledby="coimbatore-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">LOCAL BUSINESS RELEVANCE</span>
+        <h2 id="coimbatore-heading" class="section-main-heading">
+          Customer Engagement Software for Businesses in Coimbatore
+        </h2>
+        <p class="section-lead-paragraph">
+          Supporting the communication requirements of manufacturing enterprises, industrial machinery suppliers, textile traders, and commercial firms in Coimbatore.
+        </p>
+      </div>
 
-              <!-- Floating Live Metric Badge 1 -->
-              <div class="floating-badge badge-top-left" aria-hidden="true">
-                <div class="badge-icon-box bg-orange">
-                  <i class="bi bi-lightning-charge-fill"></i>
-                </div>
-                <div class="badge-text-box">
-                  <span class="badge-val">10x Speed</span>
-                  <span class="badge-lbl">Cloud API Dispatches</span>
-                </div>
-              </div>
+      <div class="editorial-content-grid">
+        <div class="editorial-column">
+          <h3 class="editorial-subheading">Practical Communication for Coimbatore Enterprises</h3>
+          <p class="editorial-paragraph">
+            Coimbatore is known for its extensive manufacturing clusters, foundry units, pump and motor producers, engineering fabrication shops, and dynamic commercial businesses. For these organizations, regular customer communication—such as sharing quotations, sending product catalogs, dispatching shipment alerts, and confirming payment receipts—is an essential part of daily operations.
+          </p>
+          <p class="editorial-paragraph">
+            Seyyon Connect provides businesses in Coimbatore with a structured platform to maintain organized customer directories, attach PDF spec sheets and product brochures to official WhatsApp message templates, and monitor broadcast dispatches in real time.
+          </p>
+        </div>
 
-              <!-- Floating Live Metric Badge 2 -->
-              <div class="floating-badge badge-bottom-right" aria-hidden="true">
-                <div class="badge-icon-box bg-green">
-                  <i class="bi bi-shield-check"></i>
-                </div>
-                <div class="badge-text-box">
-                  <span class="badge-val">99.99%</span>
-                  <span class="badge-lbl">Delivery SLA Guaranteed</span>
-                </div>
-              </div>
+        <div class="editorial-column">
+          <h3 class="editorial-subheading">Key Applications for Coimbatore Businesses</h3>
+          <div class="local-use-cases-box">
+            <div class="use-case-item">
+              <strong>B2B Quotations & Product Brochures:</strong>
+              <span>Attach spec sheets, pricing catalogs, and engineering drawings directly to WhatsApp broadcast messages.</span>
+            </div>
+            <div class="use-case-item">
+              <strong>Order & Dispatch Notifications:</strong>
+              <span>Send standardized order status updates and delivery tracking numbers using approved WhatsApp templates.</span>
+            </div>
+            <div class="use-case-item">
+              <strong>Dealer & Distributor Coordination:</strong>
+              <span>Group distributors and retail partners with custom tags to share seasonal inventory updates efficiently.</span>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- Bottom Row: 4 Metric Highlights Strip Inside Card -->
-        <div class="cta-metrics-strip">
-          <div class="metric-item">
-            <span class="metric-number">10<span class="metric-unit">x</span></span>
-            <span class="metric-label">Faster Broadcast Speed</span>
+  <!-- ======================================================================= -->
+  <!-- 8. TIRUPPUR + KONGU REGION SECTION                                      -->
+  <!-- ======================================================================= -->
+  <section id="regional-focus" class="editorial-section section-regional" aria-labelledby="regional-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">REGIONAL COMMERCIAL HUBS</span>
+        <h2 id="regional-heading" class="section-main-heading">
+          Supporting Businesses Across Tiruppur and the Kongu Region
+        </h2>
+        <p class="section-lead-paragraph">
+          Tailored for textile clusters, apparel exporters, retail networks, and service businesses throughout Western Tamil Nadu.
+        </p>
+      </div>
+
+      <!-- 3 Regional Cards -->
+      <div class="regional-cards-grid">
+        @for (reg of regionalFocusItems; track reg.badge) {
+        <div class="regional-card">
+          <div class="regional-badge">{{ reg.badge }}</div>
+          <h3 class="regional-card-title">{{ reg.title }}</h3>
+          <p class="regional-card-desc">{{ reg.description }}</p>
+          <div class="regional-application-box">
+            <span class="app-label">Key Platform Application:</span>
+            <p class="app-text">{{ reg.businessApplication }}</p>
           </div>
-          <div class="metric-divider" aria-hidden="true"></div>
-          <div class="metric-item">
-            <span class="metric-number">99.9<span class="metric-unit">%</span></span>
-            <span class="metric-label">Verified Meta Delivery</span>
+        </div>
+        }
+      </div>
+
+      <div class="regional-support-note">
+        <div class="support-icon" aria-hidden="true">
+          <i class="bi bi-geo-alt-fill text-orange"></i>
+        </div>
+        <div class="support-text">
+          <strong>Direct Regional Relevance:</strong> Whether you operate in Coimbatore, Tiruppur, Erode, Salem, or across Tamil Nadu, Seyyon Connect offers reliable customer engagement tools and responsive support to help your team stay connected with customers.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 9. WHY BRING CUSTOMER ENGAGEMENT INTO ONE PLATFORM?                     -->
+  <!-- ======================================================================= -->
+  <section class="editorial-section section-centralized bg-surface" aria-labelledby="centralized-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">OPERATIONAL COMPARISON</span>
+        <h2 id="centralized-heading" class="section-main-heading">
+          Why Bring Customer Engagement Into One Platform?
+        </h2>
+        <p class="section-lead-paragraph">
+          Compare how a unified customer engagement workflow streamlines communication versus managing disconnected tools and informal messaging channels.
+        </p>
+      </div>
+
+      <!-- Comparison Table -->
+      <div class="comparison-grid" role="table" aria-label="Disconnected Tools vs Seyyon Connect Unified Platform">
+        <div class="comparison-header-row" role="row">
+          <div class="col-head aspect-head" role="columnheader">Communication Workflow Aspect</div>
+          <div class="col-head disconnected-head" role="columnheader">The Disconnected Approach</div>
+          <div class="col-head seyyon-head" role="columnheader">The Seyyon Connect Unified Platform</div>
+        </div>
+
+        @for (row of centralizedAdvantages; track row.aspect) {
+        <div class="comparison-row" role="row">
+          <div class="comparison-cell aspect-cell" role="cell">
+            <span class="aspect-title">{{ row.aspect }}</span>
           </div>
-          <div class="metric-divider" aria-hidden="true"></div>
-          <div class="metric-item">
-            <span class="metric-number">&lt;100<span class="metric-unit">ms</span></span>
-            <span class="metric-label">Gateway Cloud Latency</span>
+
+          <div class="comparison-cell disconnected-cell" role="cell">
+            <div class="status-marker disconnected-marker" aria-hidden="true">
+              <i class="bi bi-x-circle-fill"></i>
+            </div>
+            <div class="cell-content">
+              <span class="cell-label">Disconnected Tools:</span>
+              <p>{{ row.disconnectedApproach }}</p>
+            </div>
           </div>
-          <div class="metric-divider" aria-hidden="true"></div>
-          <div class="metric-item">
-            <span class="metric-number">24/7</span>
-            <span class="metric-label">Live NOC Engineering</span>
+
+          <div class="comparison-cell seyyon-cell" role="cell">
+            <div class="status-marker seyyon-marker" aria-hidden="true">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="cell-content">
+              <span class="cell-label">Seyyon Connect:</span>
+              <p>{{ row.seyyonUnifiedApproach }}</p>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="section-footer-note">
+        <p>
+          Consolidating customer directory management, WhatsApp templates, media assets, and delivery reporting into one platform simplifies day-to-day operations and improves communication accountability.
+        </p>
+        <a routerLink="/pricing" class="editorial-inline-link">
+          <span>View Seyyon Connect pricing and subscription plans</span>
+          <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 10. CONTEXTUAL INTERNAL NAVIGATION HUB                                  -->
+  <!-- ======================================================================= -->
+  <section class="editorial-section section-nav-hub" aria-labelledby="resources-hub-heading">
+    <div class="editorial-container">
+      <div class="section-heading-block">
+        <span class="editorial-eyebrow">EXPLORE SEYYON CONNECT</span>
+        <h2 id="resources-hub-heading" class="section-main-heading">
+          Explore Our Platform & Resources
+        </h2>
+        <p class="section-lead-paragraph">
+          Discover our platform mission, transparent pricing tiers, messaging deliverability guides, or speak directly with our support team.
+        </p>
+      </div>
+
+      <div class="nav-hub-grid">
+        <div class="nav-hub-card">
+          <div class="hub-icon-box" aria-hidden="true">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <h3 class="hub-card-title">About Seyyon Connect</h3>
+          <p class="hub-card-desc">
+            Learn about our company mission, product engineering philosophy, and customer engagement standards.
+          </p>
+          <a routerLink="/about" class="hub-action-link" aria-label="Learn more about Seyyon Connect">
+            <span>Learn more about Seyyon Connect</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        <div class="nav-hub-card">
+          <div class="hub-icon-box" aria-hidden="true">
+            <i class="bi bi-tags-fill"></i>
+          </div>
+          <h3 class="hub-card-title">Pricing & Plans</h3>
+          <p class="hub-card-desc">
+            Review transparent monthly message quotas, broadcast limits, and feature inclusions for growing teams.
+          </p>
+          <a routerLink="/pricing" class="hub-action-link" aria-label="View our pricing and plans">
+            <span>View our pricing</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        <div class="nav-hub-card">
+          <div class="hub-icon-box" aria-hidden="true">
+            <i class="bi bi-journal-text"></i>
+          </div>
+          <h3 class="hub-card-title">Guides & Insights</h3>
+          <p class="hub-card-desc">
+            Read practical guides on WhatsApp Cloud API compliance, template optimization, and messaging workflows.
+          </p>
+          <a routerLink="/blogs" class="hub-action-link" aria-label="Read our customer engagement guides">
+            <span>Read our customer engagement guides</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        <div class="nav-hub-card">
+          <div class="hub-icon-box" aria-hidden="true">
+            <i class="bi bi-envelope-at-fill"></i>
+          </div>
+          <h3 class="hub-card-title">Contact Our Team</h3>
+          <p class="hub-card-desc">
+            Have questions about account setup, broadcast quotas, or WhatsApp template approvals? Contact our team.
+          </p>
+          <a routerLink="/contact" class="hub-action-link" aria-label="Contact the Seyyon Connect team">
+            <span>Contact the Seyyon Connect team</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- 11. TEXT-FIRST CALL TO ACTION (CTA)                                     -->
+  <!-- ======================================================================= -->
+  <section class="editorial-cta-section" aria-labelledby="products-cta-heading">
+    <div class="editorial-container">
+      <div class="editorial-cta-card">
+        <div class="cta-badge">
+          <span class="cta-pulse-dot" aria-hidden="true"></span>
+          <span>GET STARTED WITH SEYYON CONNECT</span>
+        </div>
+
+        <h2 id="products-cta-heading" class="cta-main-title">
+          Ready to Simplify <span class="highlight-orange">Customer Engagement?</span>
+        </h2>
+
+        <p class="cta-main-lead">
+          Explore Seyyon Connect and see how customer management, WhatsApp campaigns and campaign insights can fit into one practical workflow.
+        </p>
+
+        <div class="cta-buttons-row">
+          <a routerLink="/pricing" class="btn-primary-orange" aria-label="Get Started with Seyyon Connect Plans">
+            <span>Get Started</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </a>
+          <a routerLink="/pricing" class="btn-outline-dark" aria-label="View Seyyon Connect Pricing">
+            <span>View Pricing</span>
+          </a>
+          <a routerLink="/contact" class="btn-text-link" aria-label="Speak with Seyyon Connect Team">
+            <span>Contact Our Team</span>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          </a>
+        </div>
+
+        <div class="cta-reassurance-row">
+          <div class="reassurance-item">
+            <i class="bi bi-shield-check text-orange" aria-hidden="true"></i>
+            <span>Official Meta Cloud API Standards</span>
+          </div>
+          <div class="reassurance-item">
+            <i class="bi bi-check-circle-fill text-orange" aria-hidden="true"></i>
+            <span>Transparent Message Quotas</span>
+          </div>
+          <div class="reassurance-item">
+            <i class="bi bi-clock-history text-orange" aria-hidden="true"></i>
+            <span>Dedicated Support in Tamil Nadu</span>
           </div>
         </div>
       </div>

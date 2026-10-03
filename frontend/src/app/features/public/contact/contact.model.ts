@@ -3,7 +3,7 @@
  *
  * All Gmail and Outlook drafts use this configurable recipient constant.
  */
-export const CONTACT_EMAIL = 'REPLACE_WITH_SEYYON_CONTACT_EMAIL';
+export const CONTACT_EMAIL = 'pranexia.studio@gmail.com';
 
 /**
  * UI State Model for the Seyyon Connect Contact Form card.
@@ -22,6 +22,7 @@ export interface ContactFormData {
   fullName: string;
   email: string;
   phone: string;
+  subject: string;
   message: string;
   website: string;
 }
@@ -33,25 +34,8 @@ export interface ContactFormErrors {
   fullName?: string;
   email?: string;
   phone?: string;
+  subject?: string;
   message?: string;
-}
-
-export type EnquiryType =
-  | 'General Enquiry'
-  | 'Product Information'
-  | 'Sales'
-  | 'Technical Question'
-  | 'Partnership'
-  | 'Other';
-
-export interface ContactFormModel {
-  name: string;
-  email: string;
-  company: string;
-  phone: string;
-  enquiryType: EnquiryType;
-  subject: string;
-  message: string;
 }
 
 export interface ContactInfoBlock {

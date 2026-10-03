@@ -28,15 +28,41 @@ export class BlogListComponent implements OnInit {
   isLoading: boolean = true;
 
   ngOnInit(): void {
+    const pageTitle = 'Seyyon Connect Blog | WhatsApp Marketing & Customer Engagement';
+    const metaDescription =
+      'Explore practical guides on WhatsApp marketing, customer engagement, campaign management, templates, analytics and business communication.';
+    const canonicalUrl = 'https://seyyonconnect.in/blogs';
+
+    const organizationSchema = this.seo.getOrganizationSchema();
+    const websiteSchema = this.seo.getWebSiteSchema();
+
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://seyyonconnect.in/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Blogs',
+          item: canonicalUrl,
+        },
+      ],
+    };
+
     this.seo.updateSeo({
-      title: 'Insights & Ideas | Seyyon Connect Official Blog',
-      description:
-        'Explore practical guides, best practices, and insights into WhatsApp campaigns, customer CRM management, and campaign telemetry analytics.',
-      keywords:
-        'WhatsApp Blog, Customer Engagement, SaaS Marketing, Campaign Management, WhatsApp Templates, Telemetry Analytics',
-      ogTitle: 'Insights & Ideas | Seyyon Connect Blog',
-      ogDescription:
-        'Practical insights into customer engagement, WhatsApp communication, campaigns, analytics and smarter business communication.',
+      title: pageTitle,
+      description: metaDescription,
+      canonicalUrl,
+      ogTitle: pageTitle,
+      ogDescription: metaDescription,
+      ogUrl: canonicalUrl,
+      schema: [organizationSchema, websiteSchema, breadcrumbSchema],
     });
 
     this.loadData();

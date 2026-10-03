@@ -15,11 +15,20 @@ export function isValidEmail(email: string): boolean {
 }
 
 /**
- * Generates the standardized email subject.
- * Format: New website enquiry from ${fullName}
+ * Generates the email subject.
+ * Uses the user-provided subject if present; falls back to full name or default.
  */
-export function buildEmailSubject(fullName: string): string {
-  return `New website enquiry from ${(fullName || '').trim()}`;
+export function buildEmailSubject(subject?: string, fullName?: string): string {
+  const trimmedSubject = (subject || '').trim();
+  const trimmedName = (fullName || '').trim();
+
+  if (trimmedSubject) {
+    return trimmedSubject;
+  }
+  if (trimmedName) {
+    return `New website enquiry from ${trimmedName}`;
+  }
+  return 'New website enquiry';
 }
 
 /**
@@ -33,6 +42,7 @@ export function buildEmailSubject(fullName: string): string {
  * Name: ${fullName}
  * Email: ${email}
  * Phone: ${phone || "Not provided"}
+ * Subject: ${subject}
  *
  * Message:
  * ${message}
@@ -44,14 +54,16 @@ export function buildEmailBody(data: {
   fullName: string;
   email: string;
   phone?: string;
+  subject?: string;
   message: string;
 }): string {
   const trimmedName = (data.fullName || '').trim();
   const trimmedEmail = (data.email || '').trim();
   const trimmedPhone = (data.phone || '').trim();
+  const trimmedSubject = (data.subject || '').trim();
   const trimmedMessage = (data.message || '').trim();
 
-  return [
+  const lines = [
     'Hello Seyyon Connect Team,',
     '',
     'You have received a new website enquiry.',
@@ -59,13 +71,22 @@ export function buildEmailBody(data: {
     `Name: ${trimmedName}`,
     `Email: ${trimmedEmail}`,
     `Phone: ${trimmedPhone || 'Not provided'}`,
+  ];
+
+  if (trimmedSubject) {
+    lines.push(`Subject: ${trimmedSubject}`);
+  }
+
+  lines.push(
     '',
     'Message:',
     trimmedMessage,
     '',
     'Regards,',
-    trimmedName,
-  ].join('\n');
+    trimmedName || 'Website Visitor'
+  );
+
+  return lines.join('\n');
 }
 
 /**
@@ -77,12 +98,11 @@ export function buildGmailComposeUrl(
   body: string
 ): string {
   const params = new URLSearchParams();
-  params.set('to', recipient);
   params.set('su', subject);
   params.set('body', body);
 
   const encodedQuery = params.toString().replace(/\+/g, '%20');
-  return `https://mail.google.com/mail/?view=cm&fs=1&${encodedQuery}`;
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${recipient}&${encodedQuery}`;
 }
 
 /**
@@ -110,12 +130,11 @@ export function buildOutlookUrl(
   body: string
 ): string {
   const params = new URLSearchParams();
-  params.set('to', recipient);
   params.set('subject', subject);
   params.set('body', body);
 
   const encodedQuery = params.toString().replace(/\+/g, '%20');
-  return `https://outlook.office.com/mail/deeplink/compose?${encodedQuery}`;
+  return `https://outlook.office.com/mail/deeplink/compose?to=${recipient}&${encodedQuery}`;
 }
 
 /**
@@ -123,6 +142,7 @@ export function buildOutlookUrl(
  * - Full Name: required, max 100 chars
  * - Email Address: required, valid email format, max 254 chars
  * - Phone Number: optional, max 30 chars
+ * - Subject: required, max 200 chars
  * - Message: required, max 2000 chars
  */
 export function validateContactForm(
@@ -133,6 +153,7 @@ export function validateContactForm(
   const fullName = (data.fullName || '').trim();
   const email = (data.email || '').trim();
   const phone = (data.phone || '').trim();
+  const subject = (data.subject || '').trim();
   const message = (data.message || '').trim();
 
   // Full Name validation
@@ -154,6 +175,13 @@ export function validateContactForm(
   // Phone Number validation (optional)
   if (phone && phone.length > 30) {
     errors.phone = 'Phone number must not exceed 30 characters.';
+  }
+
+  // Subject validation
+  if (!subject) {
+    errors.subject = 'Please enter a subject.';
+  } else if (subject.length > 200) {
+    errors.subject = 'Subject must not exceed 200 characters.';
   }
 
   // Message validation

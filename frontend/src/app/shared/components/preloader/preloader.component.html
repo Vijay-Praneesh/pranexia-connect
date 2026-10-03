@@ -1,0 +1,26 @@
+@if (preloaderService.isLoading()) {
+  <div
+    class="preloader-overlay"
+    [class.fading-out]="preloaderService.isFadingOut()"
+    role="status"
+    aria-live="polite"
+    aria-label="Loading page content"
+  >
+    <div class="preloader-container">
+      <div class="spinner-wrapper">
+        <div class="spinner-pulse-glow"></div>
+        <div class="spinner-ring"></div>
+        <div class="favicon-wrapper">
+          <img
+            src="assets/seyyon-favicon.png"
+            alt="Seyyon Connect"
+            class="preloader-favicon"
+          />
+        </div>
+      </div>
+      @if (preloaderService.message()) {
+        <p class="preloader-message">{{ preloaderService.message() }}</p>
+      }
+    </div>
+  </div>
+}

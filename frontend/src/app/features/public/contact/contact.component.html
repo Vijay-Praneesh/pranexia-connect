@@ -94,14 +94,14 @@
             <form (ngSubmit)="onSubmitInquiry($event)" class="contact-reactive-form" novalidate>
               
               <!-- Honeypot Bot Protection: Completely hidden, non-focusable, unannounced -->
-              <div class="contact-hp-field" aria-hidden="true" style="position: absolute; left: -9999px; top: -9999px; width: 0; height: 0; opacity: 0; overflow: hidden; pointer-events: none; z-index: -1;">
+              <div class="contact-hp-field" aria-hidden="true" style="display: none !important; visibility: hidden !important;">
                 <label for="contact-website" tabindex="-1">Website</label>
                 <input
                   type="text"
                   id="contact-website"
                   name="website"
                   tabindex="-1"
-                  autocomplete="off"
+                  autocomplete="new-password"
                   [(ngModel)]="formData.website"
                 />
               </div>
@@ -167,8 +167,9 @@
                 </div>
               </div>
 
-              <!-- Row 2: Phone Number (Optional, max 30) -->
+              <!-- Row 2: Phone Number & Subject -->
               <div class="form-grid-row">
+                <!-- Phone Number (Optional, max 30) -->
                 <div class="form-field-group" [class.has-error]="!!errors.phone">
                   <label for="contact-phone" class="field-label">Phone Number</label>
                   <div class="field-input-wrapper">
@@ -191,6 +192,35 @@
                   <div id="phone-error" class="field-error-msg" role="alert">
                     <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
                     <span>{{ errors.phone }}</span>
+                  </div>
+                  }
+                </div>
+
+                <!-- Subject (Required, max 200) -->
+                <div class="form-field-group" [class.has-error]="!!errors.subject">
+                  <label for="contact-subject" class="field-label">
+                    Subject <span class="required-star">*</span>
+                  </label>
+                  <div class="field-input-wrapper">
+                    <i class="bi bi-chat-left-text field-icon" aria-hidden="true"></i>
+                    <input
+                      type="text"
+                      id="contact-subject"
+                      name="subject"
+                      class="field-input"
+                      placeholder="e.g. Broadcast Plan Inquiry"
+                      autocomplete="off"
+                      maxlength="200"
+                      [(ngModel)]="formData.subject"
+                      (input)="onFieldInput('subject')"
+                      [attr.aria-invalid]="!!errors.subject"
+                      [attr.aria-describedby]="errors.subject ? 'subject-error' : null"
+                    />
+                  </div>
+                  @if (errors.subject) {
+                  <div id="subject-error" class="field-error-msg" role="alert">
+                    <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                    <span>{{ errors.subject }}</span>
                   </div>
                   }
                 </div>
@@ -231,6 +261,7 @@
                 <button
                   type="submit"
                   class="btn-send-message"
+                  (click)="onSubmitInquiry($event)"
                   [disabled]="isSubmitting"
                   aria-label="Submit Inquiry"
                 >
@@ -260,7 +291,7 @@
                 <button
                   type="button"
                   class="provider-card-btn provider-gmail"
-                  (click)="selectProvider('gmail')"
+                  (click)="openGmail()"
                   [disabled]="isSubmitting"
                   aria-label="Open with Gmail in a new tab"
                 >
@@ -288,7 +319,7 @@
                 <button
                   type="button"
                   class="provider-card-btn provider-outlook"
-                  (click)="selectProvider('outlook')"
+                  (click)="openOutlook()"
                   [disabled]="isSubmitting"
                   aria-label="Open with Outlook in a new tab"
                 >
@@ -391,85 +422,6 @@
           </div>
         </a>
         }
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================================================================= -->
-  <!-- 4. DARK AMBIENT GLOW CTA SECTION                                        -->
-  <!-- ======================================================================= -->
-  <section class="cta-section" aria-labelledby="contact-cta-heading">
-    <div class="cta-container">
-      <div class="cta-card-wrapper">
-        <div class="cta-glow-blob top-right" aria-hidden="true"></div>
-        <div class="cta-glow-blob bottom-left" aria-hidden="true"></div>
-
-        <div class="cta-main-grid">
-          <div class="cta-content-col">
-            <div class="cta-live-badge">
-              <span class="pulse-dot"></span>
-              <span>GET CONNECTED TODAY</span>
-            </div>
-
-            <h2 id="contact-cta-heading" class="cta-title">
-              Ready To Connect With Your<br />
-              <span class="highlight-orange">Customers More Effectively?</span>
-            </h2>
-
-            <p class="cta-desc">
-              Explore Seyyon Connect and discover a simpler way to manage customer engagement.
-            </p>
-
-            <div class="cta-features-list">
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>Direct Meta Cloud API Integration</span>
-              </div>
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>Transparent Usage & Quota Safeguards</span>
-              </div>
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>24/7 Dedicated Priority Technical Support</span>
-              </div>
-            </div>
-
-            <div class="cta-actions-group">
-              <a routerLink="/login" class="btn-cta-primary" aria-label="Get Started with Seyyon Connect">
-                <span>Get Started</span>
-                <i class="bi bi-arrow-right" aria-hidden="true"></i>
-              </a>
-              <a routerLink="/products" class="btn-cta-secondary" aria-label="Explore Seyyon Connect Products">
-                <span>Explore Seyyon Connect</span>
-              </a>
-            </div>
-          </div>
-
-          <div class="cta-visual-col">
-            <div class="cta-visual-wrapper">
-              <img src="assets/public-website/home/cta-network-hub.jpg" alt="Seyyon Connect Unified Platform Hub" class="cta-hub-img" />
-              <div class="floating-badge badge-top-left" aria-hidden="true">
-                <div class="badge-icon-box bg-orange">
-                  <i class="bi bi-chat-dots-fill"></i>
-                </div>
-                <div class="badge-text-box">
-                  <span class="badge-val">24/7 Support</span>
-                  <span class="badge-lbl">Fast Turnaround</span>
-                </div>
-              </div>
-              <div class="floating-badge badge-bottom-right" aria-hidden="true">
-                <div class="badge-icon-box bg-green">
-                  <i class="bi bi-patch-check-fill"></i>
-                </div>
-                <div class="badge-text-box">
-                  <span class="badge-val">Meta Native</span>
-                  <span class="badge-lbl">Official Cloud Gateway</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>

@@ -333,7 +333,8 @@ $card-border: #edf0f5;
   margin-bottom: 2rem;
   flex-wrap: wrap;
 
-  .meta-author {
+  .meta-author,
+  .meta-time {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;

@@ -29,28 +29,7 @@
           </a>
         </div>
 
-        <!-- Bottom Row: Consult Our Experts + Scroll Down -->
-        <div class="hero-bottom-row">
-          <!-- Consult Experts Widget -->
-          <a routerLink="/contact" class="expert-widget" aria-label="Questions? Consult Our Experts">
-            <div class="expert-avatar-box">
-              <img src="assets/public-website/home/expert-avatar.jpg" alt="Support Expert" class="expert-avatar-img" />
-            </div>
-            <div class="expert-text-box">
-              <span class="expert-sub">Questions?</span>
-              <span class="expert-title">Consult Our Experts</span>
-            </div>
-          </a>
 
-          <!-- Scroll Down Indicator -->
-          <div class="scroll-down-widget" (click)="scrollToSection('what-we-do')" role="button" tabindex="0"
-            aria-label="Scroll down to features" (keydown.enter)="scrollToSection('what-we-do')">
-            <div class="scroll-arrow-box">
-              <i class="bi bi-arrow-down" aria-hidden="true"></i>
-            </div>
-            <span class="scroll-label">SCROLL DOWN</span>
-          </div>
-        </div>
       </div>
 
       <!-- RIGHT COLUMN: PHOTO COMPOSITION & USER METRIC BADGE -->
@@ -62,7 +41,7 @@
             <div class="composition-top-left">
               <!-- Floating Happy Users Badge -->
               <div class="clients-badge-card" aria-label="8M+ Happy Users">
-                <img src="assets/public-website/home/clients.jpg" alt="8M+ Happy Users" class="clients-img" />
+                <img src="assets/public-website/home/clients.png" alt="8M+ Happy Users" class="clients-img" />
               </div>
 
               <!-- Card 2: Work Image -->
@@ -424,120 +403,6 @@
           </div>
         </article>
         }
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================================================================= -->
-  <!-- 5. ULTRA-FAST CONNECTIVITY CTA & NETWORK HUB SECTION                    -->
-  <!-- ======================================================================= -->
-  <section class="cta-section" aria-labelledby="cta-heading">
-    <div class="cta-container">
-      <div class="cta-card-wrapper">
-        <!-- Ambient Glowing Background Radial Blobs -->
-        <div class="cta-glow-blob top-right" aria-hidden="true"></div>
-        <div class="cta-glow-blob bottom-left" aria-hidden="true"></div>
-
-        <!-- Main Top Row: Left Content + Right 3D Visual -->
-        <div class="cta-main-grid">
-          <!-- Left Column: Copy & Actions -->
-          <div class="cta-content-col">
-            <div class="cta-live-badge">
-              <span class="pulse-dot"></span>
-              <span>ULTRA-FAST BROADBAND & FIBER</span>
-            </div>
-
-            <h2 id="cta-heading" class="cta-title">
-              Ready For Ultra-Fast,<br />
-              <span class="highlight-orange">Uninterrupted</span> Connectivity?
-            </h2>
-
-            <p class="cta-desc">
-              Join over 8,000+ businesses and homes experiencing blazing 10Gbps fiber-optic speeds, 99.99% guaranteed
-              uptime, and 24/7 dedicated engineering support.
-            </p>
-
-            <!-- Feature Checkpoints -->
-            <div class="cta-features-list">
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>Free Installation & Dual-Band Router</span>
-              </div>
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>Zero Latency Meta Cloud API</span>
-              </div>
-              <div class="cta-feature-item">
-                <i class="bi bi-check-circle-fill text-primary" aria-hidden="true"></i>
-                <span>24/7 Dedicated NOC Support</span>
-              </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="cta-actions-group">
-              <a routerLink="/contact" class="btn-cta-primary" aria-label="Get Connected Now">
-                <span>Get Connected Now</span>
-                <i class="bi bi-arrow-right" aria-hidden="true"></i>
-              </a>
-              <a routerLink="/pricing" class="btn-cta-secondary" aria-label="Explore Plans and Pricing">
-                <span>Explore Plans</span>
-              </a>
-            </div>
-          </div>
-
-          <!-- Right Column: 3D Holographic Network Hub Graphic & Floating Metric Cards -->
-          <div class="cta-visual-col">
-            <div class="cta-visual-wrapper">
-              <img src="assets/public-website/home/cta-network-hub.jpg" alt="Seyyon Connect High Speed Network Hub"
-                class="cta-hub-img" />
-
-              <!-- Floating Live Metric Badge 1 -->
-              <div class="floating-badge badge-top-left" aria-hidden="true">
-                <div class="badge-icon-box bg-orange">
-                  <i class="bi bi-lightning-charge-fill"></i>
-                </div>
-                <div class="badge-text-box">
-                  <span class="badge-val">10 Gbps</span>
-                  <span class="badge-lbl">Ultra Backbone</span>
-                </div>
-              </div>
-
-              <!-- Floating Live Metric Badge 2 -->
-              <div class="floating-badge badge-bottom-right" aria-hidden="true">
-                <div class="badge-icon-box bg-green">
-                  <i class="bi bi-shield-check"></i>
-                </div>
-                <div class="badge-text-box">
-                  <span class="badge-val">99.99%</span>
-                  <span class="badge-lbl">Uptime SLA</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom Row: 4 Metric Highlights Strip -->
-        <div class="cta-metrics-strip">
-          <div class="metric-item">
-            <span class="metric-number">10<span class="metric-unit">Gbps</span></span>
-            <span class="metric-label">High-Throughput Backbone</span>
-          </div>
-          <div class="metric-divider" aria-hidden="true"></div>
-          <div class="metric-item">
-            <span class="metric-number">99.99<span class="metric-unit">%</span></span>
-            <span class="metric-label">Guaranteed SLA Uptime</span>
-          </div>
-          <div class="metric-divider" aria-hidden="true"></div>
-          <div class="metric-item">
-            <span class="metric-number">100<span class="metric-unit">+</span></span>
-            <span class="metric-label">Cities & Connected Hubs</span>
-          </div>
-          <div class="metric-divider" aria-hidden="true"></div>
-          <div class="metric-item">
-            <span class="metric-number">24/7</span>
-            <span class="metric-label">Live NOC Engineering</span>
-          </div>
-        </div>
       </div>
     </div>
   </section>

@@ -18,3 +18,14 @@ body {
   padding: 0;
   overflow-x: hidden;
 }
+
+::selection {
+  background-color: var(--pc-primary, #f96614);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: var(--pc-primary, #f96614);
+  color: #ffffff;
+}
+

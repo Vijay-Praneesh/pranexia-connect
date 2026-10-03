@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /products
+Allow: /pricing
+Allow: /blogs
+Allow: /blogs/
+Allow: /contact
+Allow: /assets/
+
+# Protected Application Routes
+Disallow: /dashboard
+Disallow: /owner-dashboard
+Disallow: /companies
+Disallow: /customers
+Disallow: /templates
+Disallow: /campaigns
+Disallow: /media
+Disallow: /settings
+Disallow: /reports
+Disallow: /usage
+Disallow: /subscription
+Disallow: /notifications
+Disallow: /login
+Disallow: /404
+
+Sitemap: https://seyyonconnect.in/sitemap.xml

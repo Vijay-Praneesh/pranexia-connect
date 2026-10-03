@@ -21,8 +21,8 @@ import {
 } from './contact.utils';
 
 /**
- * Public Contact Us Component with Client-Side Email Provider Flow.
- * Preserves the exact visual design while providing seamless Gmail & Outlook draft generation.
+ * Public Contact Us Component with Free Client-Side Email Provider Flow.
+ * Preserves the exact visual design while generating pre-filled Gmail & Outlook compose drafts.
  */
 @Component({
   selector: 'app-public-contact',
@@ -58,6 +58,7 @@ export class ContactComponent implements OnInit {
     fullName: '',
     email: '',
     phone: '',
+    subject: '',
     message: '',
     website: '', // Honeypot field
   };
@@ -124,14 +125,34 @@ export class ContactComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.updateSeo({
-      title: 'Contact Seyyon Connect | Get in Touch',
+      title: 'Contact Seyyon Connect | Customer Engagement Software',
       description:
-        'Get in touch with Seyyon Connect to learn more about customer engagement, WhatsApp campaigns, templates, analytics, and business communication.',
-      keywords:
-        'Contact Seyyon Connect, WhatsApp Marketing Support, Meta Cloud API Help, Seyyon Connect Inquiries, Business Messaging Support',
-      ogTitle: 'Contact Seyyon Connect | Let’s Build Better Customer Connections',
+        'Contact Seyyon Connect to learn more about WhatsApp business software, customer management and customer engagement solutions for your business.',
+      canonical: 'https://seyyonconnect.in/contact',
+      ogType: 'website',
+      ogTitle: 'Contact Seyyon Connect | Customer Engagement Software',
       ogDescription:
-        'Have a question about Seyyon Connect, our features, or how it can fit your business? Send us a message and our team will get back to you.',
+        'Contact Seyyon Connect to learn more about WhatsApp business software, customer management and customer engagement solutions for your business.',
+      schema: [
+        this.seo.getOrganizationSchema(),
+        this.seo.getWebSiteSchema(),
+        this.seo.getBreadcrumbSchema([
+          { name: 'Home', url: 'https://seyyonconnect.in/' },
+          { name: 'Contact', url: 'https://seyyonconnect.in/contact' },
+        ]),
+        {
+          '@context': 'https://schema.org',
+          '@type': 'ContactPage',
+          '@id': 'https://seyyonconnect.in/contact#webpage',
+          url: 'https://seyyonconnect.in/contact',
+          name: 'Contact Seyyon Connect | Customer Engagement Software',
+          description:
+            'Contact Seyyon Connect to learn more about WhatsApp business software, customer management and customer engagement solutions for your business.',
+          mainEntity: {
+            '@id': 'https://seyyonconnect.in/#organization',
+          },
+        },
+      ],
     });
   }
 
@@ -175,6 +196,7 @@ export class ContactComponent implements OnInit {
     this.formData.fullName = this.formData.fullName.trim();
     this.formData.email = this.formData.email.trim();
     this.formData.phone = this.formData.phone.trim();
+    this.formData.subject = this.formData.subject.trim();
     this.formData.message = this.formData.message.trim();
 
     // Run custom validation
@@ -193,6 +215,8 @@ export class ContactComponent implements OnInit {
             document.getElementById('contact-email')?.focus();
           } else if (validationErrors.phone) {
             document.getElementById('contact-phone')?.focus();
+          } else if (validationErrors.subject) {
+            document.getElementById('contact-subject')?.focus();
           } else if (validationErrors.message) {
             document.getElementById('contact-message')?.focus();
           }
@@ -216,6 +240,20 @@ export class ContactComponent implements OnInit {
   }
 
   /**
+   * Opens Gmail compose tab with pre-filled content.
+   */
+  openGmail(): void {
+    this.selectProvider('gmail');
+  }
+
+  /**
+   * Opens Outlook compose tab with pre-filled content.
+   */
+  openOutlook(): void {
+    this.selectProvider('outlook');
+  }
+
+  /**
    * Opens the selected provider (Gmail or Outlook) compose tab with pre-filled content.
    * Then transitions form card content to confirmation state.
    */
@@ -226,7 +264,7 @@ export class ContactComponent implements OnInit {
 
     this.isSubmitting = true;
 
-    const subject = buildEmailSubject(this.formData.fullName);
+    const subject = buildEmailSubject(this.formData.subject, this.formData.fullName);
     const body = buildEmailBody(this.formData);
 
     let composeUrl = '';
@@ -249,11 +287,20 @@ export class ContactComponent implements OnInit {
    * Resets all form fields and validation errors, returns to form state,
    * and focuses the Full Name input field.
    */
+  resetContactForm(): void {
+    this.prepareAnotherEnquiry();
+  }
+
+  /**
+   * Resets all form fields and validation errors, returns to form state,
+   * and focuses the Full Name input field.
+   */
   prepareAnotherEnquiry(): void {
     this.formData = {
       fullName: '',
       email: '',
       phone: '',
+      subject: '',
       message: '',
       website: '',
     };

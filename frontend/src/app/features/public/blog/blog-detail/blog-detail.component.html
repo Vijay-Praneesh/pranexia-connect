@@ -42,7 +42,7 @@
       <!-- Excerpt -->
       <p class="article-excerpt">{{ blog.excerpt }}</p>
 
-      <!-- Meta Bar: Author, Date, Read Time & Share -->
+      <!-- Meta Bar: Author, Read Time & Share -->
       <div class="article-meta-bar">
         <div class="author-meta-box">
           <div class="author-avatar">
@@ -57,11 +57,6 @@
         <div class="meta-divider-vertical" aria-hidden="true"></div>
 
         <div class="date-time-box">
-          <span class="meta-item">
-            <i class="bi bi-calendar3"></i>
-            {{ blog.publishedDate | date: 'longDate' }}
-          </span>
-          <span class="meta-dot">•</span>
           <span class="meta-item">
             <i class="bi bi-clock"></i>
             {{ blog.readTime }}
@@ -137,10 +132,17 @@
               </div>
             } @else if (block.type === 'link') {
               <div class="block-link-box">
-                <a [href]="block.url" [target]="block.external ? '_blank' : '_self'" class="block-link">
-                  <span>{{ block.text }}</span>
-                  <i class="bi bi-arrow-right"></i>
-                </a>
+                @if (block.external) {
+                  <a [href]="block.url" target="_blank" rel="noopener noreferrer" class="block-link">
+                    <span>{{ block.text }}</span>
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </a>
+                } @else {
+                  <a [routerLink]="block.url" class="block-link">
+                    <span>{{ block.text }}</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                }
               </div>
             }
           }

@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
-import { Title, Meta } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { BlogService } from '../blog.service';
 import { Blog, AdjacentBlogs } from '../blog.model';
+import { SeoService } from '../../../../core/services/seo.service';
 
 @Component({
   selector: 'app-blog-detail',
@@ -17,8 +17,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly blogService = inject(BlogService);
-  private readonly titleService = inject(Title);
-  private readonly metaService = inject(Meta);
+  private readonly seoService = inject(SeoService);
 
   private routeSub?: Subscription;
 
@@ -52,7 +51,11 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       if (!blog) {
         this.notFound = true;
-        this.titleService.setTitle('Article Not Found | Seyyon Connect');
+        this.seoService.updateSeo({
+          title: 'Article Not Found | Seyyon Connect',
+          description: "We couldn't find the article you're looking for.",
+          robots: 'noindex, nofollow',
+        });
         return;
       }
 
@@ -77,24 +80,74 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
   }
 
   private updateSeo(blog: Blog): void {
-    const fullTitle = `${blog.title} | Seyyon Connect`;
-    this.titleService.setTitle(fullTitle);
+    const pageTitle = `${blog.title} | Seyyon Connect`;
+    const canonicalUrl = `https://seyyonconnect.in/blogs/${blog.slug}`;
+    const imageUrl = blog.image
+      ? (blog.image.startsWith('http') ? blog.image : `https://seyyonconnect.in/${blog.image}`)
+      : 'https://seyyonconnect.in/assets/meta-tag.png';
 
-    this.metaService.updateTag({ name: 'description', content: blog.excerpt });
-    if (blog.tags?.length) {
-      this.metaService.updateTag({ name: 'keywords', content: blog.tags.join(', ') });
-    }
+    const organizationSchema = this.seoService.getOrganizationSchema();
+    const websiteSchema = this.seoService.getWebSiteSchema();
 
-    // OpenGraph Tags
-    this.metaService.updateTag({ property: 'og:title', content: fullTitle });
-    this.metaService.updateTag({ property: 'og:description', content: blog.excerpt });
-    this.metaService.updateTag({ property: 'og:type', content: 'article' });
-    this.metaService.updateTag({ property: 'og:url', content: typeof window !== 'undefined' ? window.location.href : '' });
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://seyyonconnect.in/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Blogs',
+          item: 'https://seyyonconnect.in/blogs',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: blog.title,
+          item: canonicalUrl,
+        },
+      ],
+    };
 
-    if (blog.image) {
-      this.metaService.updateTag({ property: 'og:image', content: blog.image });
-    }
+    const blogPostingSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: blog.title,
+      description: blog.excerpt,
+      image: imageUrl,
+      url: canonicalUrl,
+      author: {
+        '@type': 'Organization',
+        name: blog.author?.name || 'Seyyon Connect Team',
+      },
+      publisher: {
+        '@id': 'https://seyyonconnect.in/#organization',
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': canonicalUrl,
+      },
+    };
+
+    this.seoService.updateSeo({
+      title: pageTitle,
+      description: blog.excerpt,
+      canonicalUrl,
+      ogTitle: pageTitle,
+      ogDescription: blog.excerpt,
+      ogUrl: canonicalUrl,
+      ogType: 'article',
+      ogImage: imageUrl,
+      ogImageAlt: blog.title,
+      schema: [organizationSchema, websiteSchema, breadcrumbSchema, blogPostingSchema],
+    });
   }
+
 
   copyShareLink(): void {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {

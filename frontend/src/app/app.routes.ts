@@ -63,6 +63,13 @@ export const routes: Routes = [
             (c) => c.BlogDetailComponent,
           ),
       },
+      {
+        path: '404',
+        loadComponent: () =>
+          import('./features/public/not-found/not-found.component').then(
+            (c) => c.NotFoundComponent,
+          ),
+      },
     ],
   },
 
@@ -194,6 +201,24 @@ export const routes: Routes = [
     ],
   },
 
-  // Fallback Route
-  { path: '**', redirectTo: '' },
+  // ===========================================================================
+  // 4. WILDCARD / 404 NOT FOUND FALLBACK ROUTE
+  // ===========================================================================
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./layouts/public-layout/public-layout.component').then(
+        (c) => c.PublicLayoutComponent,
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/public/not-found/not-found.component').then(
+            (c) => c.NotFoundComponent,
+          ),
+      },
+    ],
+  },
 ];
+

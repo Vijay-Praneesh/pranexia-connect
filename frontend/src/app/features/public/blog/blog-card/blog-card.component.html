@@ -14,13 +14,8 @@
 
   <!-- Card Body -->
   <div class="blog-card-body">
-    <!-- Meta: Date & Read Time -->
+    <!-- Meta: Read Time -->
     <div class="card-meta-bar">
-      <span class="meta-date">
-        <i class="bi bi-calendar3"></i>
-        {{ blog.publishedDate | date: 'mediumDate' }}
-      </span>
-      <span class="meta-dot" aria-hidden="true">•</span>
       <span class="meta-time">
         <i class="bi bi-clock"></i>
         {{ blog.readTime }}

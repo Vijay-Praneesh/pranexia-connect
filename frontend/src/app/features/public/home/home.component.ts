@@ -132,15 +132,22 @@ export class HomeComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    const pageTitle = 'WhatsApp Business & Customer Engagement Software | Seyyon Connect';
+    const metaDescription =
+      'Seyyon Connect helps businesses manage customers, WhatsApp campaigns, templates and campaign insights in one platform. Built for businesses in Coimbatore, Tiruppur and across Tamil Nadu.';
+    const canonicalUrl = 'https://seyyonconnect.in/';
+
+    const organizationSchema = this.seo.getOrganizationSchema();
+    const websiteSchema = this.seo.getWebSiteSchema();
+
     this.seo.updateSeo({
-      title: 'Seyyon Connect | Connect. Engage. Grow.',
-      description:
-        'A smarter way to manage customers, campaigns, and WhatsApp engagement from one powerful enterprise platform.',
-      keywords:
-        'WhatsApp API, Customer Engagement, SaaS Campaign Management, WhatsApp Templates, Enterprise Communication',
-      ogTitle: 'Seyyon Connect | Connect. Engage. Grow.',
-      ogDescription:
-        'A smarter way to manage customers, campaigns, and WhatsApp engagement from one powerful platform.',
+      title: pageTitle,
+      description: metaDescription,
+      canonicalUrl,
+      ogTitle: pageTitle,
+      ogDescription: metaDescription,
+      ogUrl: canonicalUrl,
+      schema: [organizationSchema, websiteSchema],
     });
   }
 

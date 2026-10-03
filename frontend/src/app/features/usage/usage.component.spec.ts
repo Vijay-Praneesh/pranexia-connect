@@ -205,10 +205,10 @@ describe('UsageComponent', () => {
   });
 
   it('should return correct metric icons and route links', () => {
-    expect(component.getMetricIcon('MONTHLY_MESSAGES')).toBe('bi-chat-dots');
+    expect(component.getMetricIcon('MONTHLY_MESSAGES')).toBe('bi-whatsapp');
     expect(component.getMetricIcon('CUSTOMERS')).toBe('bi-people');
     expect(component.getMetricIcon('TEMPLATES')).toBe('bi-file-earmark-text');
-    expect(component.getMetricIcon('MEDIA_STORAGE_BYTES')).toBe('bi-hdd-network');
+    expect(component.getMetricIcon('MEDIA_STORAGE_BYTES')).toBe('bi-database');
 
     expect(component.getMetricRoute('MONTHLY_MESSAGES')).toBe('/campaigns');
     expect(component.getMetricRoute('CUSTOMERS')).toBe('/customers');

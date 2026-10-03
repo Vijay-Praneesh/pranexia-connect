@@ -134,7 +134,7 @@
         </div>
 
         <!-- Sign In Submit Button -->
-        <button class="btn btn-primary-gradient w-100 mb-2" type="submit" [disabled]="submitting || googleSubmitting">
+        <button class="btn btn-primary-gradient w-100 mb-2" type="submit" (click)="submit()" [disabled]="submitting || googleSubmitting">
           @if (submitting) {
           <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
           <span>Signing in…</span>
@@ -241,7 +241,7 @@
         </div>
 
         <div class="d-grid gap-2">
-          <button class="btn btn-primary-gradient py-3" type="submit" [disabled]="submitting">
+          <button class="btn btn-primary-gradient py-3" type="submit" (click)="submitOnboard()" [disabled]="submitting">
             @if (submitting) {
             <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
             <span>Setting up workspace…</span>
