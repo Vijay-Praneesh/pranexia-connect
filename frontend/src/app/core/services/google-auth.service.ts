@@ -58,6 +58,11 @@ export class GoogleAuthService {
    * Dynamically loads the official Google Identity Services script
    */
   loadGoogleScript(): Promise<boolean> {
+    if (typeof window !== 'undefined' && window.google?.accounts?.id) {
+      this.scriptLoaded = true;
+      return Promise.resolve(true);
+    }
+
     if (this.scriptLoaded && window.google?.accounts?.id) {
       return Promise.resolve(true);
     }
@@ -72,11 +77,22 @@ export class GoogleAuthService {
         return;
       }
 
-      // Check if already injected
+      // Check if already injected in DOM
       const existingScript = document.getElementById('google-jssdk');
       if (existingScript) {
-        this.scriptLoaded = true;
-        resolve(true);
+        if (window.google?.accounts?.id) {
+          this.scriptLoaded = true;
+          resolve(true);
+        } else {
+          existingScript.addEventListener('load', () => {
+            this.scriptLoaded = true;
+            resolve(true);
+          });
+          existingScript.addEventListener('error', () => {
+            this.scriptLoaded = false;
+            resolve(false);
+          });
+        }
         return;
       }
 
@@ -140,6 +156,32 @@ export class GoogleAuthService {
       this.errorSubject.next(errorMsg);
       return false;
     }
+  }
+
+  /**
+   * Prompt Google One-Tap or Account Chooser dialog
+   */
+  prompt(momentListener?: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean; isDismissedMoment: () => boolean; getDismissedReason: () => string }) => void): void {
+    if (typeof window !== 'undefined' && window.google?.accounts?.id) {
+      try {
+        window.google.accounts.id.prompt(momentListener);
+      } catch {
+        // Ignored if prompt already displayed or moment cancelled
+      }
+    }
+  }
+
+  /**
+   * Triggers the rendered GIS button if present
+   */
+  triggerRenderedButtonClick(container?: HTMLElement | null): boolean {
+    if (!container) return false;
+    const btn = container.querySelector<HTMLElement>('[role="button"], button, div[tabindex="0"]');
+    if (btn) {
+      btn.click();
+      return true;
+    }
+    return false;
   }
 
   /**

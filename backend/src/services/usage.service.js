@@ -265,20 +265,8 @@ class UsageService {
       metaUsageRepository.findByCompanyAndPeriod(companyId, period),
     ]);
 
-    let mediaUploadedCount = usageRecord?.mediaUploadedCount || 0;
-    let mediaUploadedBytes = Number(usageRecord?.mediaUploadedBytes || 0);
-
-    // Auto-align media upload counts if persisted record is higher than actual active files
-    if (typeof mediaStats?.activeFileCount === "number" && mediaUploadedCount > mediaStats.activeFileCount) {
-      mediaUploadedCount = mediaStats.activeFileCount;
-      mediaUploadedBytes = mediaStats.activeStorageBytes;
-      if (usageRecord) {
-        void usageRecord.update({
-          mediaUploadedCount: mediaStats.activeFileCount,
-          mediaUploadedBytes: mediaStats.activeStorageBytes,
-        }).catch(() => {});
-      }
-    }
+    const mediaUploadedCount = usageRecord?.mediaUploadedCount || 0;
+    const mediaUploadedBytes = Number(usageRecord?.mediaUploadedBytes || 0);
 
     const saasUsage = {
       messagesSent: usageRecord?.messagesSent || 0,

@@ -92,7 +92,8 @@
             <!-- CTA Action Button -->
             <div class="card-cta-box">
               <a
-                [routerLink]="plan.cta.route"
+                [routerLink]="getPlanCtaRoute(plan)"
+                [queryParams]="getPlanQueryParams(plan)"
                 class="btn-plan-cta"
                 [class.btn-primary-cta]="plan.isPopular || plan.cta.isPrimary"
                 [class.btn-secondary-cta]="!plan.isPopular && !plan.cta.isPrimary"

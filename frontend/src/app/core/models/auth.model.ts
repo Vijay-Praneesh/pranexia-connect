@@ -35,6 +35,16 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  companyName: string;
+  firstName: string;
+  lastName?: string;
+  email: string;
+  mobile: string;
+  password: string;
+  plan?: CompanyPlan;
+}
+
 export interface LoginResponse {
   token: string;
   user: AuthenticatedUser;

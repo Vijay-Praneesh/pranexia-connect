@@ -14,6 +14,7 @@ import {
   GoogleOnboardRequest,
   LoginRequest,
   LoginResponse,
+  RegisterRequest,
 } from '../models/auth.model';
 import { AuthStorageService } from './auth-storage.service';
 
@@ -28,6 +29,17 @@ export class AuthService {
 
   readonly session$ = this.sessionSubject.asObservable();
   readonly currentUser$ = this.session$.pipe(map((session) => session?.user ?? null));
+
+  register(data: RegisterRequest): Observable<AuthSession> {
+    return this.http.post<ApiResponse<AuthSession>>(`${this.apiBaseUrl}/auth/register`, data).pipe(
+      map((response) => response.data),
+      tap((session) => {
+        if (session && session.token) {
+          this.setSession(session);
+        }
+      }),
+    );
+  }
 
   login(credentials: LoginRequest): Observable<AuthSession> {
     return this.http.post<ApiResponse<LoginResponse>>(`${this.apiBaseUrl}/auth/login`, credentials).pipe(

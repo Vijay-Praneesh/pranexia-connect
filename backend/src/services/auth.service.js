@@ -8,6 +8,7 @@ const jwtHelper = require("../helpers/jwt.helper");
 const googleAuthHelper = require("../helpers/googleAuth.helper");
 const { AuditLogger, AUDIT_EVENTS } = require("../utils/audit.logger");
 const { PLAN_NAMES } = require("../config/plans.config");
+const { SUBSCRIPTION_STATUSES } = require("../config/subscriptions.config");
 const AppError = require("../utils/appError");
 
 class AuthService {
@@ -63,7 +64,7 @@ class AuthService {
           companyName,
           email,
           mobile,
-          plan: "STARTER",
+          plan: data.plan || "STARTER",
           status: "ACTIVE",
         },
         transaction
@@ -94,16 +95,29 @@ class AuthService {
 
       await transaction.commit();
 
-      // Initialize default subscription
-      await subscriptionService.ensureCompanySubscription(company.id, company.plan);
+      // Initialize pending subscription for paid plan onboarding
+      await subscriptionService.ensureCompanySubscription(
+        company.id,
+        company.plan,
+        SUBSCRIPTION_STATUSES.PAST_DUE
+      );
+
+      // Generate JWT token for immediate authenticated session
+      const token = jwtHelper.generateToken({
+        id: user.id,
+        companyId: user.companyId,
+        role: user.role,
+      });
 
       const companyData = company.toJSON();
       const userData = user.toJSON();
 
       // Never return password
       delete userData.password;
+      userData.company = companyData;
 
       return {
+        token,
         company: companyData,
         user: userData,
       };
@@ -413,8 +427,12 @@ class AuthService {
 
       await transaction.commit();
 
-      // 3. Initialize Subscription & Plan
-      await subscriptionService.ensureCompanySubscription(company.id, company.plan);
+      // 3. Initialize Subscription & Plan (Pending payment)
+      await subscriptionService.ensureCompanySubscription(
+        company.id,
+        company.plan,
+        SUBSCRIPTION_STATUSES.PAST_DUE
+      );
 
       // 4. Generate Application JWT Token
       const token = jwtHelper.generateToken({

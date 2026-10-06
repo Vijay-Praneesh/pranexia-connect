@@ -37,7 +37,11 @@ class SubscriptionService {
    * Idempotently ensure a company has a valid subscription record.
    * Backfills older companies seamlessly from their Company.plan field.
    */
-  async ensureCompanySubscription(companyId, fallbackPlan = null) {
+  async ensureCompanySubscription(
+    companyId,
+    fallbackPlan = null,
+    initialStatus = SUBSCRIPTION_STATUSES.ACTIVE
+  ) {
     if (!companyId) return null;
 
     let current = await subscriptionRepository.findCurrentByCompanyId(companyId);
@@ -49,12 +53,13 @@ class SubscriptionService {
     const plan = fallbackPlan || company.plan || PLAN_NAMES.STARTER;
     const now = new Date();
     const periodEnd = this.addDays(now, SUBSCRIPTION_DEFAULTS.PERIOD_DAYS);
+    const status = initialStatus || SUBSCRIPTION_STATUSES.ACTIVE;
 
     try {
       const subscription = await subscriptionRepository.createSubscription({
         companyId: company.id,
         plan,
-        status: SUBSCRIPTION_STATUSES.ACTIVE,
+        status,
         startDate: company.createdAt || now,
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
@@ -67,10 +72,13 @@ class SubscriptionService {
         previousPlan: null,
         newPlan: plan,
         previousStatus: null,
-        newStatus: SUBSCRIPTION_STATUSES.ACTIVE,
+        newStatus: status,
         action: SUBSCRIPTION_ACTIONS.CREATED,
         source: SUBSCRIPTION_SOURCES.SYSTEM,
-        reason: "Initial subscription backfill for company",
+        reason:
+          status === SUBSCRIPTION_STATUSES.PAST_DUE
+            ? "Account created - pending initial subscription payment"
+            : "Initial subscription backfill for company",
       });
 
       return subscription;
@@ -80,7 +88,7 @@ class SubscriptionService {
         id: "transient-" + company.id,
         companyId: company.id,
         plan,
-        status: SUBSCRIPTION_STATUSES.ACTIVE,
+        status,
         startDate: company.createdAt || now,
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,

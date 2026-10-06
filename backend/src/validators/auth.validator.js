@@ -7,7 +7,7 @@ class AuthValidator {
 
       firstName: Joi.string().trim().min(2).max(100).required(),
 
-      lastName: Joi.string().trim().min(2).max(100).required(),
+      lastName: Joi.string().trim().min(1).max(100).allow("", null).optional(),
 
       email: Joi.string().email().required(),
 
@@ -19,6 +19,10 @@ class AuthValidator {
         }),
 
       password: Joi.string().min(8).max(30).required(),
+
+      plan: Joi.string()
+        .valid("STARTER", "BUSINESS", "PROFESSIONAL", "ENTERPRISE")
+        .optional(),
     });
 
     return schema.validate(data, {

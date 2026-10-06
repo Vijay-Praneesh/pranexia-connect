@@ -1,0 +1,757 @@
+<div class="signup-page-wrapper">
+  <!-- Minimal Onboarding Top Navigation -->
+  <header class="signup-header">
+    <div class="header-container">
+      <a routerLink="/" class="brand-logo-link" aria-label="Seyyon Connect Home">
+        <img src="assets/seyyon-logo.png" alt="Seyyon Connect" class="brand-logo" />
+      </a>
+      <div class="header-actions">
+        <span class="text-muted d-none d-sm-inline">Already have an account?</span>
+        <a routerLink="/signin" class="btn-signin-link">Sign In</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Onboarding Content Grid -->
+  <main class="signup-main-container">
+    <div class="signup-grid">
+      
+      <!-- ============================================================= -->
+      <!-- LEFT COLUMN: BRANDING & SELECTED PLAN SUMMARY                -->
+      <!-- ============================================================= -->
+      <aside class="signup-sidebar-card">
+        <div class="sidebar-ambient-glow" aria-hidden="true"></div>
+
+        <div class="sidebar-brand-badge">
+          <span class="status-pulse-orange"></span>
+          <span>Customer Onboarding</span>
+        </div>
+
+        <h1 class="sidebar-title">
+          Scale WhatsApp Broadcasts with <span class="highlight-orange">Seyyon Connect</span>
+        </h1>
+        <p class="sidebar-subtitle">
+          Activate your verified Meta Cloud API command center in 3 simple steps.
+        </p>
+
+        <!-- Selected Plan Summary Card -->
+        <div class="plan-summary-box">
+          <div class="plan-summary-header">
+            <div>
+              <span class="plan-eyebrow">SELECTED PLAN</span>
+              <h2 class="plan-name">{{ selectedPlan.displayName }}</h2>
+            </div>
+            @if (selectedPlan.badge) {
+              <span class="badge-popular">{{ selectedPlan.badge }}</span>
+            }
+          </div>
+
+          <div class="plan-price-display">
+            <span class="price-value">
+              {{ selectedBilling === 'MONTHLY' ? selectedPlan.formattedMonthly : selectedPlan.formattedYearly }}
+            </span>
+            <span class="price-cycle">
+              ({{ selectedBilling === 'MONTHLY' ? 'Billed Monthly' : 'Billed Annually' }})
+            </span>
+          </div>
+
+          <p class="plan-tagline">{{ selectedPlan.tagline }}</p>
+
+          <!-- Key Limits Badges -->
+          <div class="plan-limits-strip">
+            <div class="limit-badge" title="Monthly Messages">
+              <i class="bi bi-chat-dots-fill"></i>
+              <span>{{ selectedPlan.keyLimits.messages }}</span>
+            </div>
+            <div class="limit-badge" title="Saved Contacts">
+              <i class="bi bi-people-fill"></i>
+              <span>{{ selectedPlan.keyLimits.contacts }}</span>
+            </div>
+            <div class="limit-badge" title="Campaigns / Month">
+              <i class="bi bi-megaphone-fill"></i>
+              <span>{{ selectedPlan.keyLimits.campaigns }}</span>
+            </div>
+            <div class="limit-badge" title="Media Storage">
+              <i class="bi bi-hdd-fill"></i>
+              <span>{{ selectedPlan.keyLimits.storage }}</span>
+            </div>
+          </div>
+
+          <!-- Included Features Checklist -->
+          <div class="sidebar-features-list">
+            <span class="features-label">WHAT'S INCLUDED</span>
+            <ul>
+              @for (feat of selectedPlan.features; track feat) {
+                <li>
+                  <i class="bi bi-check-circle-fill icon-check"></i>
+                  <span>{{ feat }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+
+          <!-- Change Plan Action -->
+          <div class="sidebar-change-plan">
+            <a routerLink="/pricing" class="link-change-plan">
+              <i class="bi bi-arrow-left-right me-1"></i> Change Plan / Billing
+            </a>
+          </div>
+        </div>
+
+        <!-- Trust & Security Pill -->
+        <div class="sidebar-trust-pill">
+          <i class="bi bi-shield-lock-fill text-orange me-2"></i>
+          <span>Official Meta Cloud API & 256-bit Secure Checkout</span>
+        </div>
+      </aside>
+
+      <!-- ============================================================= -->
+      <!-- RIGHT COLUMN: STEPPER & MAIN ONBOARDING CARD                 -->
+      <!-- ============================================================= -->
+      <section class="signup-content-card">
+        
+        <!-- Progress Stepper Indicator -->
+        <div class="stepper-wrapper" role="tablist" aria-label="Onboarding Progress">
+          
+          <!-- Step 1 Indicator -->
+          <button
+            type="button"
+            class="step-item"
+            [class.active]="currentStep === 1"
+            [class.completed]="isStep1Complete"
+            (click)="goToStep(1)"
+            [disabled]="isSubmittingAccount || isProcessingPayment"
+            aria-label="Step 1: Plan Selected"
+          >
+            <div class="step-circle">
+              @if (isStep1Complete) {
+                <i class="bi bi-check-lg"></i>
+              } @else {
+                <span>1</span>
+              }
+            </div>
+            <div class="step-label-group">
+              <span class="step-num">STEP 1</span>
+              <span class="step-name">Plan Selected</span>
+            </div>
+          </button>
+
+          <div class="step-divider" [class.completed]="isStep1Complete"></div>
+
+          <!-- Step 2 Indicator -->
+          <button
+            type="button"
+            class="step-item"
+            [class.active]="currentStep === 2"
+            [class.completed]="isStep2Complete"
+            (click)="goToStep(2)"
+            [disabled]="!isStep1Complete || isSubmittingAccount || isProcessingPayment"
+            aria-label="Step 2: Create Account"
+          >
+            <div class="step-circle">
+              @if (isStep2Complete) {
+                <i class="bi bi-check-lg"></i>
+              } @else {
+                <span>2</span>
+              }
+            </div>
+            <div class="step-label-group">
+              <span class="step-num">STEP 2</span>
+              <span class="step-name">Create Account</span>
+            </div>
+          </button>
+
+          <div class="step-divider" [class.completed]="isStep2Complete"></div>
+
+          <!-- Step 3 Indicator -->
+          <button
+            type="button"
+            class="step-item"
+            [class.active]="currentStep === 3"
+            [class.completed]="isStep3Complete"
+            (click)="goToStep(3)"
+            [disabled]="!isStep2Complete || isSubmittingAccount || isProcessingPayment"
+            aria-label="Step 3: Payment"
+          >
+            <div class="step-circle">
+              @if (isStep3Complete) {
+                <i class="bi bi-check-lg"></i>
+              } @else {
+                <span>3</span>
+              }
+            </div>
+            <div class="step-label-group">
+              <span class="step-num">STEP 3</span>
+              <span class="step-name">Payment</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- =========================================================== -->
+        <!-- STEP 1 VIEW: PLAN CONFIRMATION                              -->
+        <!-- =========================================================== -->
+        @if (currentStep === 1) {
+          <div class="step-content-box animate-fade-in">
+            <div class="step-header">
+              <h2 class="step-title">1. Review Your Selected Plan</h2>
+              <p class="step-desc">
+                You have selected the <strong>{{ selectedPlan.displayName }} Plan</strong>. Choose your billing interval and confirm to create your account.
+              </p>
+            </div>
+
+            <!-- Billing Cycle Switcher -->
+            <div class="billing-switcher-container">
+              <span class="switcher-label">Billing Cycle:</span>
+              <div class="billing-pill-group" role="group" aria-label="Billing interval">
+                <button
+                  type="button"
+                  class="btn-billing-pill"
+                  [class.active]="selectedBilling === 'MONTHLY'"
+                  (click)="setBillingInterval('MONTHLY')"
+                >
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  class="btn-billing-pill"
+                  [class.active]="selectedBilling === 'YEARLY'"
+                  (click)="setBillingInterval('YEARLY')"
+                >
+                  Yearly <span class="badge-save">Save ~17%</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Detailed Selected Plan Overview Card -->
+            <div class="selected-plan-detail-card">
+              <div class="detail-card-header">
+                <div>
+                  <h3 class="detail-plan-title">{{ selectedPlan.displayName }}</h3>
+                  <p class="detail-plan-tagline">{{ selectedPlan.tagline }}</p>
+                </div>
+                <div class="detail-price-box">
+                  <span class="detail-price">
+                    {{ selectedBilling === 'MONTHLY' ? selectedPlan.formattedMonthly : selectedPlan.formattedYearly }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Quota Breakdown Grid -->
+              <div class="detail-quotas-grid">
+                <div class="quota-cell">
+                  <span class="quota-title">Monthly Messages</span>
+                  <span class="quota-val">{{ selectedPlan.keyLimits.messages }}</span>
+                </div>
+                <div class="quota-cell">
+                  <span class="quota-title">Contacts Storage</span>
+                  <span class="quota-val">{{ selectedPlan.keyLimits.contacts }}</span>
+                </div>
+                <div class="quota-cell">
+                  <span class="quota-title">Monthly Campaigns</span>
+                  <span class="quota-val">{{ selectedPlan.keyLimits.campaigns }}</span>
+                </div>
+                <div class="quota-cell">
+                  <span class="quota-title">WhatsApp Templates</span>
+                  <span class="quota-val">{{ selectedPlan.keyLimits.templates }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-action-footer">
+              <button
+                type="button"
+                id="btn-confirm-step1"
+                class="btn-primary-orange w-100"
+                (click)="confirmPlanSelection()"
+              >
+                <span>Continue to Create Account</span>
+                <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- =========================================================== -->
+        <!-- STEP 2 VIEW: CREATE ACCOUNT                                 -->
+        <!-- =========================================================== -->
+        @if (currentStep === 2) {
+          <div class="step-content-box animate-fade-in">
+            <div class="step-header">
+              <h2 class="step-title">2. Create Your Workspace Account</h2>
+              <p class="step-desc">
+                Set up your company profile and administrator credentials for <strong>{{ selectedPlan.displayName }} Plan</strong>.
+              </p>
+            </div>
+
+            <!-- Email Already Exists Alert Box -->
+            @if (emailAlreadyExists) {
+              <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center w-100 gap-2">
+                  <span>An account with this email already exists. Please sign in.</span>
+                  <a routerLink="/signin" class="btn btn-sm btn-dark text-nowrap">Sign In</a>
+                </div>
+              </div>
+            }
+
+            <!-- Account Linking Required Alert -->
+            @if (linkingRequiredMessage) {
+              <div class="alert alert-warning d-flex align-items-start gap-2 mb-4" role="alert">
+                <i class="bi bi-shield-lock-fill text-warning fs-5 flex-shrink-0 mt-0" aria-hidden="true"></i>
+                <div class="w-100">
+                  <div class="fw-semibold">Account Linking Required</div>
+                  <div class="small mt-1">{{ linkingRequiredMessage }}</div>
+                  <div class="mt-2">
+                    <a routerLink="/signin" class="btn btn-sm btn-dark text-nowrap">Sign In to Link Account</a>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- General Error Alert -->
+            @if (errors.general) {
+              <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-x-circle-fill flex-shrink-0 me-2"></i>
+                <div>{{ errors.general }}</div>
+              </div>
+            }
+
+            <!-- Google One-Click Auth Section -->
+            @if (!isGoogleOnboardMode) {
+              <div class="google-auth-section mb-4">
+                <div #googleBtnContainer class="google-gis-host d-none"></div>
+                <button
+                  type="button"
+                  id="google-signup-btn"
+                  class="btn btn-google-auth w-100"
+                  (click)="signInWithGoogle()"
+                  [disabled]="isGoogleSubmitting || isSubmittingAccount"
+                  aria-label="Continue with Google"
+                >
+                  @if (isGoogleSubmitting) {
+                    <span class="spinner-border spinner-border-sm text-primary me-2" aria-hidden="true"></span>
+                    <span>Connecting to Google…</span>
+                  } @else {
+                    <svg class="google-icon me-2" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                      <path fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span>Continue with Google</span>
+                  }
+                </button>
+
+                <div class="auth-divider my-3">
+                  <span>OR REGISTER WITH WORK EMAIL</span>
+                </div>
+              </div>
+            }
+
+            <!-- Google Onboarding Sub-View -->
+            @if (isGoogleOnboardMode) {
+              <div class="google-onboard-subview animate-fade-in mb-4">
+                <div class="alert alert-info d-flex align-items-center mb-3">
+                  <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                  <div>
+                    Signed in with Google as <strong>{{ googleProfile?.email }}</strong>. Please complete your company details for <strong>{{ selectedPlan.displayName }} Plan</strong>.
+                  </div>
+                </div>
+
+                <!-- Google User Profile Badge -->
+                <div class="google-profile-card d-flex align-items-center gap-3 p-3 mb-3 rounded-3">
+                  <div class="google-avatar-badge rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold">
+                    {{ googleProfile?.firstName?.charAt(0) || 'U' }}
+                  </div>
+                  <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-semibold text-truncate">{{ googleProfile?.firstName }} {{ googleProfile?.lastName || '' }}</div>
+                    <div class="text-muted small text-truncate">{{ googleProfile?.email }}</div>
+                  </div>
+                  <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                    <i class="bi bi-patch-check-fill me-1" aria-hidden="true"></i>Verified
+                  </span>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="google-companyName" class="form-label">Business / Company Name <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    id="google-companyName"
+                    class="form-control form-control-lg"
+                    [(ngModel)]="googleCompanyName"
+                    placeholder="e.g. Acme Retail Pvt Ltd"
+                    [class.is-invalid]="errors.companyName"
+                    (input)="onFieldInput('companyName')"
+                    maxlength="150"
+                  />
+                  @if (errors.companyName) {
+                    <div class="invalid-feedback">{{ errors.companyName }}</div>
+                  }
+                </div>
+
+                <div class="form-group mb-4">
+                  <label for="google-mobile" class="form-label">10-Digit Mobile Number <span class="text-danger">*</span></label>
+                  <input
+                    type="tel"
+                    id="google-mobile"
+                    class="form-control form-control-lg"
+                    [(ngModel)]="googleMobile"
+                    placeholder="e.g. 9876543210"
+                    maxlength="10"
+                    [class.is-invalid]="errors.mobile"
+                    (input)="onFieldInput('mobile')"
+                  />
+                  @if (errors.mobile) {
+                    <div class="invalid-feedback">{{ errors.mobile }}</div>
+                  }
+                </div>
+
+                <div class="d-flex flex-column gap-2">
+                  <button
+                    type="button"
+                    id="btn-submit-google-onboard"
+                    class="btn-primary-orange w-100"
+                    (click)="submitGoogleOnboard()"
+                    [disabled]="isSubmittingAccount"
+                  >
+                    @if (isSubmittingAccount) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                      <span>Creating Workspace...</span>
+                    } @else {
+                      <span>Create Account & Continue</span>
+                      <i class="bi bi-arrow-right ms-2"></i>
+                    }
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary py-2"
+                    (click)="cancelGoogleOnboard()"
+                    [disabled]="isSubmittingAccount"
+                  >
+                    Cancel & Register with Work Email
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Standard Email / Password Form -->
+            @if (!isGoogleOnboardMode) {
+              <form (ngSubmit)="submitAccountCreation()" novalidate class="signup-form">
+                
+                <!-- Full Name Field -->
+                <div class="form-group mb-3">
+                  <label for="signup-fullName" class="form-label">
+                    Full Name <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="signup-fullName"
+                    name="fullName"
+                    class="form-control form-control-lg"
+                    [(ngModel)]="formData.fullName"
+                    (input)="onFieldInput('fullName')"
+                    placeholder="e.g. Vijay Praneesh"
+                    maxlength="100"
+                    [class.is-invalid]="errors.fullName"
+                    [attr.aria-invalid]="errors.fullName ? 'true' : 'false'"
+                    aria-describedby="error-fullName"
+                    required
+                  />
+                  @if (errors.fullName) {
+                    <div id="error-fullName" class="invalid-feedback">{{ errors.fullName }}</div>
+                  }
+                </div>
+
+                <!-- Company Name Field -->
+                <div class="form-group mb-3">
+                  <label for="signup-companyName" class="form-label">
+                    Business / Company Name <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="signup-companyName"
+                    name="companyName"
+                    class="form-control form-control-lg"
+                    [(ngModel)]="formData.companyName"
+                    (input)="onFieldInput('companyName')"
+                    placeholder="e.g. Acme Tech Solutions"
+                    maxlength="150"
+                    [class.is-invalid]="errors.companyName"
+                    [attr.aria-invalid]="errors.companyName ? 'true' : 'false'"
+                    aria-describedby="error-companyName"
+                    required
+                  />
+                  @if (errors.companyName) {
+                    <div id="error-companyName" class="invalid-feedback">{{ errors.companyName }}</div>
+                  }
+                </div>
+
+                <!-- Email & Mobile Row -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="signup-email" class="form-label">
+                      Work Email <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="signup-email"
+                      name="email"
+                      class="form-control form-control-lg"
+                      [(ngModel)]="formData.email"
+                      (input)="onFieldInput('email')"
+                      placeholder="e.g. admin@acme.com"
+                      maxlength="254"
+                      [class.is-invalid]="errors.email"
+                      [attr.aria-invalid]="errors.email ? 'true' : 'false'"
+                      aria-describedby="error-email"
+                      required
+                    />
+                    @if (errors.email) {
+                      <div id="error-email" class="invalid-feedback">{{ errors.email }}</div>
+                    }
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="signup-mobile" class="form-label">
+                      Mobile Number <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="signup-mobile"
+                      name="mobile"
+                      class="form-control form-control-lg"
+                      [(ngModel)]="formData.mobile"
+                      (input)="onFieldInput('mobile')"
+                      placeholder="e.g. 9876543210"
+                      maxlength="10"
+                      [class.is-invalid]="errors.mobile"
+                      [attr.aria-invalid]="errors.mobile ? 'true' : 'false'"
+                      aria-describedby="error-mobile"
+                      required
+                    />
+                    @if (errors.mobile) {
+                      <div id="error-mobile" class="invalid-feedback">{{ errors.mobile }}</div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Password & Confirm Password Row -->
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                    <label for="signup-password" class="form-label">
+                      Password <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-password-wrapper">
+                      <input
+                        [type]="showPassword ? 'text' : 'password'"
+                        id="signup-password"
+                        name="password"
+                        class="form-control form-control-lg pe-5"
+                        [(ngModel)]="formData.password"
+                        (input)="onFieldInput('password')"
+                        placeholder="Min 8 characters"
+                        minlength="8"
+                        maxlength="30"
+                        [class.is-invalid]="errors.password"
+                        [attr.aria-invalid]="errors.password ? 'true' : 'false'"
+                        aria-describedby="error-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="btn-toggle-pwd"
+                        (click)="showPassword = !showPassword"
+                        [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                      >
+                        <i class="bi" [class.bi-eye-slash]="showPassword" [class.bi-eye]="!showPassword"></i>
+                      </button>
+                    </div>
+                    @if (errors.password) {
+                      <div id="error-password" class="invalid-feedback d-block">{{ errors.password }}</div>
+                    }
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="signup-confirmPassword" class="form-label">
+                      Confirm Password <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-password-wrapper">
+                      <input
+                        [type]="showConfirmPassword ? 'text' : 'password'"
+                        id="signup-confirmPassword"
+                        name="confirmPassword"
+                        class="form-control form-control-lg pe-5"
+                        [(ngModel)]="formData.confirmPassword"
+                        (input)="onFieldInput('confirmPassword')"
+                        placeholder="Re-enter password"
+                        maxlength="30"
+                        [class.is-invalid]="errors.confirmPassword"
+                        [attr.aria-invalid]="errors.confirmPassword ? 'true' : 'false'"
+                        aria-describedby="error-confirmPassword"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="btn-toggle-pwd"
+                        (click)="showConfirmPassword = !showConfirmPassword"
+                        [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                      >
+                        <i class="bi" [class.bi-eye-slash]="showConfirmPassword" [class.bi-eye]="!showConfirmPassword"></i>
+                      </button>
+                    </div>
+                    @if (errors.confirmPassword) {
+                      <div id="error-confirmPassword" class="invalid-feedback d-block">{{ errors.confirmPassword }}</div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                  type="submit"
+                  id="btn-create-account"
+                  class="btn-primary-orange w-100"
+                  [disabled]="isSubmittingAccount"
+                >
+                  @if (isSubmittingAccount) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    <span>Creating Workspace Account...</span>
+                  } @else {
+                    <span>Create Account & Continue</span>
+                    <i class="bi bi-arrow-right ms-2"></i>
+                  }
+                </button>
+              </form>
+            }
+
+            <div class="step-footer-links">
+              <span>Already have an account?</span>
+              <a routerLink="/signin" class="fw-semibold ms-1">Sign in here</a>
+            </div>
+          </div>
+        }
+
+        <!-- =========================================================== -->
+        <!-- STEP 3 VIEW: PAYMENT ACTIVATION                            -->
+        <!-- =========================================================== -->
+        @if (currentStep === 3) {
+          <div class="step-content-box animate-fade-in">
+            <div class="step-header">
+              <div class="payment-status-badge mb-2">
+                <span class="status-pulse-orange"></span>
+                <span>Payment Pending</span>
+              </div>
+              <h2 class="step-title">3. Complete Payment to Activate</h2>
+              <p class="step-desc">
+                Your account is ready! Complete your payment to immediately activate your <strong>{{ selectedPlan.displayName }} Plan</strong>.
+              </p>
+            </div>
+
+            <!-- Success Notification -->
+            @if (paymentSuccessMessage) {
+              <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-check-circle-fill flex-shrink-0 me-2 fs-5"></i>
+                <div>
+                  <strong>{{ paymentSuccessMessage }}</strong>
+                  <div class="small">Redirecting you to your dashboard command center...</div>
+                </div>
+              </div>
+            }
+
+            <!-- Error Notification -->
+            @if (paymentErrorMessage) {
+              <div class="alert alert-danger d-flex align-items-start mb-4" role="alert">
+                <i class="bi bi-exclamation-octagon-fill flex-shrink-0 me-2 fs-5 mt-0.5"></i>
+                <div class="w-100">
+                  <div class="fw-semibold">{{ paymentErrorMessage }}</div>
+                  <div class="mt-2 d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="proceedToPayment()">
+                      <i class="bi bi-arrow-clockwise me-1"></i> Try Payment Again
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="changePlan()">
+                      Change Plan
+                    </button>
+                    <button type="button" class="btn btn-sm btn-link text-decoration-none" (click)="goToDashboard()">
+                      Go to Dashboard
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Authoritative Order Invoice Card -->
+            <div class="payment-order-card">
+              <div class="order-card-header">
+                <span class="order-label">ORDER SUMMARY</span>
+                <span class="order-id" *ngIf="activeOrderId">#{{ activeOrderId }}</span>
+              </div>
+
+              <div class="order-line-item">
+                <div class="order-item-desc">
+                  <span class="item-name">{{ selectedPlan.displayName }} Plan</span>
+                  <span class="item-cycle">{{ selectedBilling === 'MONTHLY' ? '1 Month Subscription' : '1 Year Subscription' }}</span>
+                </div>
+                <div class="order-item-price">
+                  {{ selectedBilling === 'MONTHLY' ? selectedPlan.formattedMonthly : selectedPlan.formattedYearly }}
+                </div>
+              </div>
+
+              <div class="order-divider"></div>
+
+              <div class="order-total-row">
+                <span class="total-label">Total Amount Due</span>
+                <span class="total-amount">
+                  {{ selectedBilling === 'MONTHLY' ? selectedPlan.formattedMonthly : selectedPlan.formattedYearly }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Razorpay Gateway Integration Info -->
+            <div class="payment-gateway-info">
+              <i class="bi bi-shield-check text-success fs-5 me-2"></i>
+              <div class="small text-muted">
+                Transactions are encrypted with bank-grade 256-bit SSL via <strong>Razorpay</strong>. UPI, Credit/Debit Cards, Net Banking, and Wallets accepted.
+              </div>
+            </div>
+
+            <!-- Primary Proceed to Payment Action Button -->
+            <div class="step-action-footer">
+              <button
+                type="button"
+                id="btn-proceed-payment"
+                class="btn-primary-orange w-100"
+                (click)="proceedToPayment()"
+                [disabled]="isProcessingPayment || isStep3Complete"
+              >
+                @if (isProcessingPayment) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  <span>Connecting to Razorpay...</span>
+                } @else if (isStep3Complete) {
+                  <i class="bi bi-check2-circle me-2"></i>
+                  <span>Activated! Redirecting...</span>
+                } @else {
+                  <span>Proceed to Payment</span>
+                  <i class="bi bi-arrow-right ms-2"></i>
+                }
+              </button>
+            </div>
+
+            <div class="payment-secondary-actions">
+              <button type="button" class="btn-link-action" (click)="changePlan()">
+                <i class="bi bi-arrow-left me-1"></i> Change Plan
+              </button>
+              <button type="button" class="btn-link-action text-muted" (click)="goToDashboard()">
+                Continue to Dashboard Unpaid
+              </button>
+            </div>
+          </div>
+        }
+
+      </section>
+    </div>
+  </main>
+</div>

@@ -352,7 +352,7 @@ export class SubscriptionComponent implements OnInit {
     this.closePlanDetailsModal();
     if (targetPlan === 'ENTERPRISE') {
       window.location.href =
-        'mailto:sales@pranexia-connect.com?subject=Seyyon%20Connect%20Enterprise%20Plan%20Inquiry';
+        'mailto:pranexia.studio@gmail.com?subject=Seyyon%20Connect%20Enterprise%20Plan%20Inquiry';
     } else {
       this.openPlanChangeModal(targetPlan);
     }
@@ -531,6 +531,18 @@ export class SubscriptionComponent implements OnInit {
       };
 
       const rzpInstance = new rzpWindow.Razorpay(options);
+
+      if (typeof rzpInstance.on === 'function') {
+        rzpInstance.on('payment.failed', (response: any) => {
+          this.isProcessingPayment = false;
+          const msg =
+            response?.error?.description ||
+            response?.error?.reason ||
+            'Payment failed at gateway. Please try again.';
+          this.toast.error(msg);
+        });
+      }
+
       rzpInstance.open();
     } else {
       this.isProcessingPayment = false;
@@ -613,9 +625,7 @@ export class SubscriptionComponent implements OnInit {
 
   private openRazorpayRenewalModal(order: PaymentOrderResponse): void {
     const user = this.auth.getCurrentUser();
-    const rzpWindow = window as unknown as {
-      Razorpay: new (options: unknown) => { open: () => void };
-    };
+    const rzpWindow = window as any;
 
     if (typeof rzpWindow.Razorpay === 'function') {
       const options = {
@@ -652,6 +662,18 @@ export class SubscriptionComponent implements OnInit {
       };
 
       const rzpInstance = new rzpWindow.Razorpay(options);
+
+      if (typeof rzpInstance.on === 'function') {
+        rzpInstance.on('payment.failed', (response: any) => {
+          this.isProcessingRenewalPayment = false;
+          const msg =
+            response?.error?.description ||
+            response?.error?.reason ||
+            'Renewal payment failed at gateway. Please try again.';
+          this.toast.error(msg);
+        });
+      }
+
       rzpInstance.open();
     } else {
       this.isProcessingRenewalPayment = false;

@@ -573,6 +573,23 @@ export class PricingComponent implements OnInit, AfterViewInit, OnDestroy {
     return val === true;
   }
 
+  getPlanCtaRoute(plan: PricingPlan): string {
+    if (plan.id === 'ENTERPRISE') {
+      return '/contact';
+    }
+    return '/signup';
+  }
+
+  getPlanQueryParams(plan: PricingPlan): Record<string, string> | null {
+    if (plan.id === 'ENTERPRISE') {
+      return null;
+    }
+    return {
+      plan: plan.id.toLowerCase(),
+      billing: this.billingInterval,
+    };
+  }
+
   toggleFaq(faqId: string): void {
     const faq = this.faqs.find((f) => f.id === faqId);
     if (faq) {

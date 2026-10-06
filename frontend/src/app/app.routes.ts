@@ -74,8 +74,15 @@ export const routes: Routes = [
   },
 
   // ===========================================================================
-  // 2. AUTHENTICATION (LOGIN)
+  // 2. AUTHENTICATION & ONBOARDING (SIGNUP, LOGIN, SIGNIN)
   // ===========================================================================
+  {
+    path: 'signup',
+    loadComponent: () =>
+      import('./features/auth/signup/signup.component').then(
+        (c) => c.SignupComponent,
+      ),
+  },
   {
     path: '',
     loadComponent: () =>
@@ -85,6 +92,13 @@ export const routes: Routes = [
     children: [
       {
         path: 'login',
+        loadComponent: () =>
+          import('./features/auth/login/login.component').then(
+            (c) => c.LoginComponent,
+          ),
+      },
+      {
+        path: 'signin',
         loadComponent: () =>
           import('./features/auth/login/login.component').then(
             (c) => c.LoginComponent,

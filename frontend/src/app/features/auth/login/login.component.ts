@@ -128,6 +128,16 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       if (!ready) {
         this.googleSubmitting = false;
         this.errorMessage = 'Could not load Google Sign-In. Please check your internet connection.';
+      } else {
+        const clicked = this.googleAuthService.triggerRenderedButtonClick(this.googleBtnContainer?.nativeElement);
+        if (!clicked) {
+          this.googleAuthService.prompt();
+        }
+        setTimeout(() => {
+          if (this.googleSubmitting && this.viewState === 'login') {
+            this.googleSubmitting = false;
+          }
+        }, 2000);
       }
     });
   }
