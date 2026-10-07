@@ -66,6 +66,7 @@ export class WhatsAppSettingsComponent implements OnInit, OnDestroy {
   loading = true;
   actionLoading = false;
   errorMessage = '';
+  loadErrorMessage = '';
   successMessage = '';
   copiedField: string | null = null;
   showDisconnectModal = false;
@@ -75,6 +76,10 @@ export class WhatsAppSettingsComponent implements OnInit, OnDestroy {
   private copyTimeout: any = null;
   private messageListener?: (event: MessageEvent<MetaSignupMessage>) => void;
   private signupCode = '';
+
+  get isMetaConfigured(): boolean {
+    return !!(environment.metaAppId && environment.metaConfigId);
+  }
 
   ngOnInit(): void {
     this.messageListener = (event) => this.handleMetaMessage(event);
@@ -88,7 +93,7 @@ export class WhatsAppSettingsComponent implements OnInit, OnDestroy {
 
   load(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.loadErrorMessage = '';
     this.api
       .getStatus()
       .pipe(
@@ -102,16 +107,16 @@ export class WhatsAppSettingsComponent implements OnInit, OnDestroy {
           this.connection = result.connection;
         },
         error: (error: unknown) => {
-          this.errorMessage = this.errors.map(error).message;
+          this.loadErrorMessage = this.errors.map(error).message;
         },
       });
   }
 
   connect(): void {
     if (this.actionLoading) return;
-    if (!environment.metaAppId || !environment.metaConfigId) {
+    if (!this.isMetaConfigured) {
       this.errorMessage =
-        'Meta Embedded Signup is not configured for this environment.';
+        'Meta Embedded Signup is not configured for this environment. Set metaAppId and metaConfigId in environment configuration (requires Meta Developer App and registered domain).';
       return;
     }
     this.actionLoading = true;

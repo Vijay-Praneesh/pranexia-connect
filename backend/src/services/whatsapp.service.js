@@ -1,44 +1,36 @@
-const axios = require("axios");
+const metaWhatsAppService = require("./meta.whatsapp.service");
+const whatsappRepository = require("../repositories/whatsapp.repository");
+const AppError = require("../utils/appError");
 
 class WhatsAppService {
-    constructor() {
-        this.apiVersion = process.env.WHATSAPP_API_VERSION;
-        this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-        this.accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-
-        this.baseUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+  async sendTemplateMessage({ companyId, connection, to, templateName, languageCode = "en_US", components = [], mediaId, mediaType }) {
+    let conn = connection;
+    if (!conn && companyId) {
+      conn = await whatsappRepository.findByCompanyId(companyId);
     }
-
-    async sendTemplateMessage({ to, templateName, languageCode = "en_US", components = [] }) {
-        try {
-            const payload = {
-                messaging_product: "whatsapp",
-                to,
-                type: "template",
-                template: {
-                    name: templateName,
-                    language: {
-                        code: languageCode,
-                    },
-                    components,
-                },
-            };
-
-            const response = await axios.post(this.baseUrl, payload, {
-                headers: {
-                    Authorization: `Bearer ${this.accessToken}`,
-                    "Content-Type": "application/json",
-                },
-            });
-
-            return response.data;
-        } catch (error) {
-            const message =
-                error.response?.data?.error?.message || error.message;
-
-            throw new Error(`WhatsApp API Error: ${message}`);
-        }
+    if (!conn || conn.status !== "CONNECTED") {
+      throw new AppError("WhatsApp Business account is not connected", 409);
     }
+    return metaWhatsAppService.sendTemplateMessage(conn, {
+      to,
+      templateName,
+      languageCode,
+      components,
+      mediaId,
+      mediaType,
+    });
+  }
+
+  async sendTextMessage({ companyId, connection, to, body }) {
+    let conn = connection;
+    if (!conn && companyId) {
+      conn = await whatsappRepository.findByCompanyId(companyId);
+    }
+    if (!conn || conn.status !== "CONNECTED") {
+      throw new AppError("WhatsApp Business account is not connected", 409);
+    }
+    return metaWhatsAppService.sendTextMessage(conn, { to, body });
+  }
 }
 
-module.exports = new WhatsAppService();
+module.exports = new WhatsAppService();

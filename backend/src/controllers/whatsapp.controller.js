@@ -25,6 +25,21 @@ class WhatsAppController {
       next(error);
     }
   }
+  async sendTestMessage(req, res, next) {
+    try {
+      return ApiResponse.success(
+        res,
+        "Test WhatsApp message sent successfully",
+        await whatsappConnectionService.sendTestMessage(
+          req.user.companyId,
+          req.body,
+        ),
+        200,
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
   async disconnect(req, res, next) {
     try {
       return ApiResponse.success(
@@ -39,3 +54,4 @@ class WhatsAppController {
 }
 
 module.exports = new WhatsAppController();
+

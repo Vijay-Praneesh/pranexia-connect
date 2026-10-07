@@ -35,8 +35,9 @@ const env = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
 };
 
-const validateEnvironment = () => {
-  if (env.NODE_ENV !== "production") return;
+const validateEnvironment = (targetEnv = env) => {
+  const currentEnv = targetEnv.NODE_ENV || process.env.NODE_ENV;
+  if (currentEnv !== "production") return;
 
   const required = [
     "DB_HOST",
@@ -55,7 +56,7 @@ const validateEnvironment = () => {
     "META_API_VERSION",
     "WHATSAPP_TOKEN_ENCRYPTION_KEY",
   ];
-  const missing = required.filter((name) => !env[name]);
+  const missing = required.filter((name) => !targetEnv[name] && !process.env[name]);
 
   if (missing.length) {
     throw new Error(

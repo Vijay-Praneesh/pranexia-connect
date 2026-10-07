@@ -65,7 +65,7 @@
   </div>
   }
 
-  @if (errorMessage && connection) {
+  @if (errorMessage) {
   <div
     class="alert alert-warning alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center gap-3 p-3.5"
     role="alert">
@@ -85,9 +85,9 @@
   <div class="card border-0 shadow-sm rounded-4 p-5 text-center my-4">
     <app-loading-state message="Verifying WhatsApp Cloud API connection status…" />
   </div>
-  } @else if (errorMessage && !connection) {
+  } @else if (loadErrorMessage && !connection) {
   <div class="card border-0 shadow-sm rounded-4 p-4 my-4">
-    <app-error-state title="WhatsApp connection unavailable" [message]="errorMessage" [retryable]="true"
+    <app-error-state title="WhatsApp connection unavailable" [message]="loadErrorMessage" [retryable]="true"
       (retry)="load()" />
   </div>
   } @else {
@@ -342,6 +342,19 @@
             Enjoy seamless Meta Embedded Signup with high delivery rates, verified sender badge, and direct Cloud API
             integration.
           </p>
+
+          @if (!isMetaConfigured) {
+          <div class="alert alert-info border-0 rounded-3 mb-4 text-start mx-auto max-w-lg p-3 small d-flex align-items-start gap-2.5">
+            <i class="bi bi-info-circle-fill text-primary fs-5 mt-0.5"></i>
+            <div>
+              <strong>Embedded Signup Configuration:</strong>
+              <span class="d-block text-body-secondary mt-0.5">
+                Meta App ID &amp; Configuration ID are currently unconfigured in this environment.
+                Interactive popup onboarding will activate once Meta Developer App IDs and a registered domain are provisioned.
+              </span>
+            </div>
+          </div>
+          }
 
           <div class="d-flex flex-column flex-sm-row align-items-center justify-content-center gap-3 mb-4">
             <button

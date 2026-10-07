@@ -4,6 +4,7 @@ const whatsappRepository = require("../repositories/whatsapp.repository");
 const { encryptSecret } = require("../utils/secret.crypto");
 const planService = require("./plan.service");
 const { METRIC_KEYS } = require("../config/plans.config");
+const metaWhatsAppService = require("./meta.whatsapp.service");
 
 class WhatsAppConnectionService {
   get apiVersion() {
@@ -102,6 +103,31 @@ class WhatsAppConnectionService {
         502,
       );
     }
+  }
+
+  async sendTestMessage(companyId, { to, templateName = "hello_world", languageCode = "en_US" } = {}) {
+    if (!to) {
+      throw new AppError("Recipient phone number ('to') is required", 400);
+    }
+    const connection = await whatsappRepository.findByCompanyId(companyId);
+    if (!connection || connection.status !== "CONNECTED") {
+      throw new AppError("WhatsApp Business account is not connected", 409);
+    }
+
+    const response = await metaWhatsAppService.sendTemplateMessage(connection, {
+      to: String(to).replace(/[^\d+]/g, ""),
+      templateName,
+      languageCode,
+      components: [],
+    });
+
+    return {
+      success: true,
+      messageId: response.messages?.[0]?.id,
+      to,
+      templateName,
+      status: "SENT",
+    };
   }
 
   async disconnect(companyId) {

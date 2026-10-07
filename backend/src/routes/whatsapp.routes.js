@@ -8,6 +8,8 @@ router.use(auth);
 router.use(authorize("COMPANY_ADMIN"));
 router.get("/status", controller.getStatus);
 router.post("/connect", controller.connect);
+router.post("/test-message", controller.sendTestMessage);
 router.post("/disconnect", controller.disconnect);
 
 module.exports = router;
+
